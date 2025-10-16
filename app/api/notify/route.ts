@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const { type, name, email, depositAmount } = data;
+    const { type, name, email, phone, depositAmount, file } = data;
 
     if (!type || !name || !email) {
       return NextResponse.json(
@@ -26,6 +26,8 @@ export async function POST(req: Request) {
 
     let subject = "";
     let html = "";
+    let attachments: { filename: string; content: string; encoding: string }[] =
+      [];
 
     if (type === "registration") {
       subject = `🎉 New User Registration: ${name}`;
@@ -38,6 +40,7 @@ export async function POST(req: Request) {
         <div style="margin-top:20px;padding:20px;border:1px solid #d1fae5;border-radius:10px;">
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone Number:</strong> ${phone || "N/A"}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
@@ -48,6 +51,7 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+
       subject = `💰 New Deposit by ${name}`;
       html = `
       <div style="font-family:Arial,sans-serif;color:#333;">
@@ -58,10 +62,20 @@ export async function POST(req: Request) {
         <div style="margin-top:20px;padding:20px;border:1px solid #d1fae5;border-radius:10px;">
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone Number:</strong> ${phone || "N/A"}</p>
           <p><strong>Deposit Amount:</strong> ${depositAmount}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
+
+      // Attach file if provided
+      if (file && file.base64 && file.filename && file.mimetype) {
+        attachments.push({
+          filename: file.filename,
+          content: file.base64,
+          encoding: "base64",
+        });
+      }
     } else {
       return NextResponse.json(
         { message: "Invalid notification type" },
@@ -74,6 +88,7 @@ export async function POST(req: Request) {
       to: process.env.NOTIFY_EMAIL,
       subject,
       html,
+      attachments,
     });
 
     return NextResponse.json({ message: "Email sent successfully" });

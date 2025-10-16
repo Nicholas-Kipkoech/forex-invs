@@ -4,13 +4,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 export default function DepositPage() {
   const [copied, setCopied] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [amount, setAmount] = useState(""); // deposit amount
+  const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState(""); // phone number
   const [user, setUser] = useState<{ email: string; name?: string } | null>(
     null
   );
@@ -18,7 +21,6 @@ export default function DepositPage() {
   const walletAddress = "1CDYEta833Bd4uLNTpPRQhwDtjzb7cvFAa";
   const qrImage = "/btc-qrcode.png";
 
-  // Get current logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       const {
@@ -54,30 +56,42 @@ export default function DepositPage() {
     if (!file) return alert("Please upload proof of payment");
     if (!amount || Number(amount) <= 0)
       return alert("Enter a valid deposit amount");
+    if (!phone) return alert("Please enter your phone number");
     if (!user) return alert("User not logged in");
 
     setLoading(true);
 
-    // TODO: Upload file logic here (Supabase bucket or API)
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+      const base64Data = (reader.result as string).split(",")[1];
 
-    // Send notification email with user info
-    try {
-      await fetch("/api/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "deposit",
-          name: user.name || "User",
-          email: user.email,
-          depositAmount: `$${amount}`,
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to notify admin:", err);
-    }
+      try {
+        await fetch("/api/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "deposit",
+            name: user.name || "User",
+            email: user.email,
+            phone,
+            depositAmount: `$${amount}`,
+            file: {
+              filename: file.name,
+              mimetype: file.type,
+              base64: base64Data,
+            },
+          }),
+        });
 
-    setSubmitted(true);
-    setLoading(false);
+        setSubmitted(true);
+      } catch (err) {
+        console.error("Failed to notify admin:", err);
+        alert("Failed to submit deposit. Please try again.");
+      }
+
+      setLoading(false);
+    };
   };
 
   return (
@@ -88,7 +102,7 @@ export default function DepositPage() {
         upload your proof of payment for verification.
       </p>
 
-      {/* Wallet Card with QR Image */}
+      {/* Wallet Card */}
       <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="bg-white p-3 rounded-lg shadow-sm">
           <img
@@ -97,7 +111,6 @@ export default function DepositPage() {
             className="w-40 h-40 sm:w-48 sm:h-48 object-contain"
           />
         </div>
-
         <div className="flex-1 flex flex-col gap-3">
           <span className="font-mono text-emerald-700 text-sm sm:text-base truncate">
             {walletAddress}
@@ -112,13 +125,12 @@ export default function DepositPage() {
                 : "hover:bg-emerald-100"
             }`}
           >
-            <Copy className="h-4 w-4" />
-            {copied ? "Copied" : "Copy"}
+            <Copy className="h-4 w-4" /> {copied ? "Copied" : "Copy"}
           </Button>
         </div>
       </div>
 
-      {/* Deposit Amount Input */}
+      {/* Deposit Amount */}
       {!submitted && (
         <div className="space-y-4">
           <label className="block text-sm text-slate-600">
@@ -131,6 +143,14 @@ export default function DepositPage() {
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Enter deposit amount"
             className="w-full border border-slate-300 rounded-md px-3 py-2"
+          />
+
+          <label className="block text-sm text-slate-600">Phone Number</label>
+          <PhoneInput
+            country={"us"}
+            value={phone}
+            onChange={setPhone}
+            inputClass="w-full border border-slate-300 rounded-md px-3 py-2"
           />
         </div>
       )}
@@ -146,7 +166,7 @@ export default function DepositPage() {
         </ul>
       </div>
 
-      {/* Upload Proof OR Processing */}
+      {/* Upload Proof */}
       {!submitted ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
