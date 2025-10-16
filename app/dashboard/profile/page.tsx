@@ -55,11 +55,14 @@ export default function ProfilePage() {
     if (authError) return alert(authError.message);
 
     // ✅ 2. Update or insert in investor table
-    const { error: dbError } = await supabase.from("investors").upsert({
-      user_id: user.id,
-      name,
-      phone,
-    });
+    const { error: dbError } = await supabase.from("investors").upsert(
+      {
+        user_id: user.id,
+        name,
+        phone,
+      },
+      { onConflict: "user_id" }
+    ); // 👈 tells Supabase to update instead of insert);
 
     if (dbError) return alert(dbError.message);
 
