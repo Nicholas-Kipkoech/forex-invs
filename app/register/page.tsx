@@ -33,10 +33,22 @@ export default function RegisterPage() {
     }
 
     if (data.user?.id) {
+      // Create investor in your DB
       await fetch("/api/create-investor", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ user_id: data.user.id, name }),
+        body: JSON.stringify({ user_id: data.user.id, name, email }),
+      });
+
+      // Send notification email
+      await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "registration",
+          name,
+          email,
+        }),
       });
     }
 

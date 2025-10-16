@@ -1,16 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DepositPage() {
   const [copied, setCopied] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [submitted, setSubmitted] = useState(false); // track proof submission
+  const [submitted, setSubmitted] = useState(false);
+  const [amount, setAmount] = useState(""); // deposit amount
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<{ email: string; name?: string } | null>(
+    null
+  );
 
   const walletAddress = "1CDYEta833Bd4uLNTpPRQhwDtjzb7cvFAa";
   const qrImage = "/btc-qrcode.png";
+
+  // Get current logged-in user
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Failed to get user:", error.message);
+        return;
+      }
+      if (user) {
+        setUser({
+          email: user.email!,
+          name: (user.user_metadata as any)?.name,
+        });
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(walletAddress);
@@ -22,11 +49,35 @@ export default function DepositPage() {
     if (e.target.files && e.target.files[0]) setFile(e.target.files[0]);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return alert("Please upload proof of payment");
-    // TODO: handle upload logic (send file to backend)
+    if (!amount || Number(amount) <= 0)
+      return alert("Enter a valid deposit amount");
+    if (!user) return alert("User not logged in");
+
+    setLoading(true);
+
+    // TODO: Upload file logic here (Supabase bucket or API)
+
+    // Send notification email with user info
+    try {
+      await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "deposit",
+          name: user.name || "User",
+          email: user.email,
+          depositAmount: `$${amount}`,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to notify admin:", err);
+    }
+
     setSubmitted(true);
+    setLoading(false);
   };
 
   return (
@@ -67,6 +118,23 @@ export default function DepositPage() {
         </div>
       </div>
 
+      {/* Deposit Amount Input */}
+      {!submitted && (
+        <div className="space-y-4">
+          <label className="block text-sm text-slate-600">
+            Deposit Amount (USD)
+          </label>
+          <input
+            type="number"
+            min="1"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Enter deposit amount"
+            className="w-full border border-slate-300 rounded-md px-3 py-2"
+          />
+        </div>
+      )}
+
       {/* Instructions */}
       <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-sm text-slate-700 space-y-2">
         <p>⚠️ Important:</p>
@@ -101,15 +169,16 @@ export default function DepositPage() {
           <Button
             type="submit"
             className="w-full bg-emerald-600 hover:bg-emerald-700"
+            disabled={loading}
           >
-            Submit Proof
+            {loading ? "Submitting..." : "Submit Proof"}
           </Button>
         </form>
       ) : (
         <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center text-emerald-700 font-semibold shadow-md">
           ✅ Payment proof submitted! <br />
-          Your deposit is currently being processed. Please wait for
-          confirmation.
+          Your deposit of ${amount} is currently being processed. Please wait
+          for confirmation.
         </div>
       )}
     </div>
