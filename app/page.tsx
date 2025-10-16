@@ -126,47 +126,29 @@ export default function ForexLandingPage() {
         </div>
       </section>
 
-      {/* Market Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-5xl mx-auto text-center px-6">
           <h2 className="text-3xl font-semibold text-emerald-700 mb-4">
             Live Forex Market
           </h2>
           <p className="text-gray-600 mb-10">
-            View real-time forex charts to stay ahead of the market.
+            Select any forex pair directly in the chart below. Use the tools to
+            analyze and trade effectively.
           </p>
 
-          <Tabs defaultValue="EURUSD" className="w-full">
-            <TabsList className="flex justify-center gap-2 bg-emerald-100 p-2 rounded-full">
-              {tradingPairs.map((pair) => (
-                <TabsTrigger
-                  key={pair.id}
-                  value={pair.id}
-                  className="rounded-full px-4 py-2 data-[state=active]:bg-emerald-600 data-[state=active]:text-white transition"
-                >
-                  {pair.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {tradingPairs.map((pair) => (
-              <TabsContent key={pair.id} value={pair.id}>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-8"
-                >
-                  <iframe
-                    src={`https://s.tradingview.com/widgetembed/?symbol=FX:${pair.id}&interval=30&theme=light&style=1`}
-                    width="100%"
-                    height="400"
-                    className="rounded-2xl border shadow-sm"
-                    allowFullScreen
-                  />
-                </motion.div>
-              </TabsContent>
-            ))}
-          </Tabs>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-8"
+          >
+            <iframe
+              src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=30&theme=light&style=1&toolbarbg=F1F3F6&withdateranges=1&allow_symbol_change=1&hideideas=0&enable_publishing=0&hide_side_toolbar=0&save_image=1&studies=[]&show_popup_button=1"
+              width="100%"
+              height="500"
+              className="rounded-2xl border shadow-sm"
+              allowFullScreen
+            />
+          </motion.div>
         </div>
       </section>
 
