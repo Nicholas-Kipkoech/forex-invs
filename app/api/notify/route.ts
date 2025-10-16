@@ -62,7 +62,6 @@ export async function POST(req: Request) {
         <div style="margin-top:20px;padding:20px;border:1px solid #d1fae5;border-radius:10px;">
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone Number:</strong> ${phone || "N/A"}</p>
           <p><strong>Deposit Amount:</strong> ${depositAmount}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>

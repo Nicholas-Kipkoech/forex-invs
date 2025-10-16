@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
 
 export default function DepositPage() {
   const [copied, setCopied] = useState(false);
@@ -13,7 +11,6 @@ export default function DepositPage() {
   const [submitted, setSubmitted] = useState(false);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
-  const [phone, setPhone] = useState(""); // phone number
   const [user, setUser] = useState<{ email: string; name?: string } | null>(
     null
   );
@@ -56,7 +53,7 @@ export default function DepositPage() {
     if (!file) return alert("Please upload proof of payment");
     if (!amount || Number(amount) <= 0)
       return alert("Enter a valid deposit amount");
-    if (!phone) return alert("Please enter your phone number");
+
     if (!user) return alert("User not logged in");
 
     setLoading(true);
@@ -74,7 +71,6 @@ export default function DepositPage() {
             type: "deposit",
             name: user.name || "User",
             email: user.email,
-            phone,
             depositAmount: `$${amount}`,
             file: {
               filename: file.name,
@@ -143,14 +139,6 @@ export default function DepositPage() {
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Enter deposit amount"
             className="w-full border border-slate-300 rounded-md px-3 py-2"
-          />
-
-          <label className="block text-sm text-slate-600">Phone Number</label>
-          <PhoneInput
-            country={"us"}
-            value={phone}
-            onChange={setPhone}
-            inputClass="w-full border border-slate-300 rounded-md px-3 py-2"
           />
         </div>
       )}

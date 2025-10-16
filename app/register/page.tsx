@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phone, setPhone] = useState(""); // phone number
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -37,7 +40,7 @@ export default function RegisterPage() {
       await fetch("/api/create-investor", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ user_id: data.user.id, name, email }),
+        body: JSON.stringify({ user_id: data.user.id, name, email, phone }),
       });
 
       // Send notification email
@@ -48,6 +51,7 @@ export default function RegisterPage() {
           type: "registration",
           name,
           email,
+          phone,
         }),
       });
     }
@@ -107,6 +111,13 @@ export default function RegisterPage() {
               required
             />
           </div>
+          <label className="block text-sm text-slate-600">Phone Number</label>
+          <PhoneInput
+            country={"us"}
+            value={phone}
+            onChange={setPhone}
+            inputClass="w-full border border-slate-300 rounded-md px-3 py-2"
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">

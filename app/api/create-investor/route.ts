@@ -9,13 +9,13 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { user_id, name } = body;
+  const { user_id, name, phone } = body;
   if (!user_id)
     return NextResponse.json({ error: "user_id required" }, { status: 400 });
 
   const { data, error } = await supabaseAdmin
     .from("investors")
-    .insert([{ user_id, name, balance: 0 }])
+    .insert([{ user_id, name, balance: 0, phone }])
     .select()
     .single();
 
