@@ -1,7 +1,6 @@
-// app/dashboard/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
@@ -53,7 +52,9 @@ export default function DashboardPage() {
   const profit = +(latest - first).toFixed(2);
   const roi = first ? +((profit / first) * 100).toFixed(2) : 0;
 
-  // 🔹 Load Supabase profile
+  const tradesRef = useRef<HTMLDivElement>(null);
+
+  // Load profile
   useEffect(() => {
     async function load() {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -70,7 +71,6 @@ export default function DashboardPage() {
       setProfile(investor || null);
       setBalance(startingBalance);
 
-      // Only populate mock data if balance > 0
       if (startingBalance > 0) {
         setSeries(mockSeries(20, startingBalance));
         setTrades(mockTrades());
@@ -79,7 +79,7 @@ export default function DashboardPage() {
     load();
   }, [router]);
 
-  // 🔹 Mock AI insight
+  // AI Insight
   useEffect(() => {
     const insight = `Your plan is up ${(Math.random() * 3 + 1).toFixed(
       1
@@ -87,76 +87,41 @@ export default function DashboardPage() {
     setTimeout(() => setAiInsight(insight), 1000);
   }, []);
 
-  // 🔹 Auto-update series (mock live feed)
+  // Live bot trade simulation
   useEffect(() => {
-    if (balance === 0) return; // no live feed if no deposit
+    if (balance === 0) return;
     const interval = setInterval(() => {
-      setSeries((prev) => {
-        const last = prev[prev.length - 1];
-        const change = (Math.random() - 0.45) * 18;
-        const next = Math.max(10, +(last.value + change).toFixed(2));
-        if (Math.random() < 0.1) {
-          setNotifications((n) =>
-            [`Tick ${change >= 0 ? "+" : ""}${change.toFixed(2)}`, ...n].slice(
-              0,
-              4
-            )
-          );
-        }
-        return [
-          ...prev.slice(-39),
-          { name: `T${prev.length + 1}`, value: next },
-        ];
-      });
+      const newTrade = generateTrade(latest);
+      setTrades((prev) => [newTrade, ...prev.slice(0, 49)]);
+      setSeries((prev) => [
+        ...prev,
+        { name: `T${prev.length + 1}`, value: newTrade.newBalance },
+      ]);
+      setBalance(newTrade.newBalance);
+
+      if (Math.random() < 0.2) {
+        setNotifications((n) =>
+          [
+            `Bot trade: ${newTrade.side} ${
+              newTrade.pair
+            } +${newTrade.pnl.toFixed(2)}`,
+            ...n,
+          ].slice(0, 4)
+        );
+      }
     }, 3500);
+
     return () => clearInterval(interval);
   }, [balance]);
 
-  // 🔹 Notifications auto-remove
+  // Scroll table to top for new trades
   useEffect(() => {
-    if (notifications.length === 0) return;
-    const id = setTimeout(
-      () => setNotifications((n) => n.slice(0, n.length - 1)),
-      4200
-    );
-    return () => clearTimeout(id);
-  }, [notifications]);
+    if (tradesRef.current) tradesRef.current.scrollTop = 0;
+  }, [trades]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/login");
-  }
-
-  function handleTrade() {
-    if (!takeProfit || !stopLoss) {
-      setNotifications((n) => ["Set TP & SL first", ...n]);
-      return;
-    }
-
-    // Update trade history and series
-    const newTrade = {
-      id: `TR${trades.length + 1}`.padStart(5, "0"),
-      side: Math.random() < 0.5 ? "BUY" : "SELL",
-      pair: ["EUR/USD", "GBP/USD", "USD/JPY"][Math.floor(Math.random() * 3)],
-      size: +(Math.random() * 1).toFixed(2),
-      pnl: +(Math.random() * 50 - 25).toFixed(2),
-      time: new Date().toLocaleTimeString().slice(0, 5),
-    };
-    setTrades((prev) => [newTrade, ...prev.slice(0, 19)]);
-
-    // Update series to reflect new equity
-    setSeries((prev) => [
-      ...prev,
-      {
-        name: `T${prev.length + 1}`,
-        value: +(latest + newTrade.pnl).toFixed(2),
-      },
-    ]);
-
-    setBalance((b) => +(b + newTrade.pnl).toFixed(2));
-    setNotifications((n) =>
-      [`Trade placed TP:${takeProfit}% SL:${stopLoss}%`, ...n].slice(0, 4)
-    );
   }
 
   return (
@@ -251,43 +216,32 @@ export default function DashboardPage() {
           </div>
 
           {/* Trade Controls */}
-          <div className="bg-white rounded-2xl p-4 shadow space-y-4">
-            <div className="text-lg font-semibold text-emerald-700">
-              Trade Control
-            </div>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <input
-                type="number"
-                placeholder="Take Profit %"
-                className="border rounded p-2"
-                value={takeProfit}
-                onChange={(e) => setTakeProfit(Number(e.target.value))}
-              />
-              <input
-                type="number"
-                placeholder="Stop Loss %"
-                className="border rounded p-2"
-                value={stopLoss}
-                onChange={(e) => setStopLoss(Number(e.target.value))}
-              />
-              <Button
-                onClick={handleTrade}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                Place Trade
-              </Button>
-            </div>
-          </div>
+          <TradeControls
+            takeProfit={takeProfit}
+            stopLoss={stopLoss}
+            setTakeProfit={setTakeProfit}
+            setStopLoss={setStopLoss}
+            latest={latest}
+            setSeries={setSeries}
+            setTrades={setTrades}
+            setBalance={setBalance}
+            setNotifications={setNotifications}
+            trades={trades}
+          />
 
           {/* Trade History */}
           <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="text-sm text-slate-500">Recent Trades</div>
-            <div className="overflow-x-auto mt-2">
+            <div className="text-sm text-slate-500 mb-2">Recent Trades</div>
+            <div
+              ref={tradesRef}
+              className="overflow-y-auto max-h-80 border border-slate-100 rounded-lg"
+            >
               <table className="w-full text-sm">
-                <thead className="text-xs text-slate-400 text-left">
+                <thead className="text-xs text-slate-400 text-left sticky top-0 bg-white">
                   <tr>
                     <th>ID</th>
                     <th>Pair</th>
+                    <th>Side</th>
                     <th>Size</th>
                     <th>P/L</th>
                     <th>Time</th>
@@ -296,17 +250,18 @@ export default function DashboardPage() {
                 <tbody>
                   {trades.map((t) => (
                     <tr key={t.id} className="border-t">
-                      <td className="py-2">{t.id}</td>
-                      <td className="py-2">{t.pair}</td>
-                      <td className="py-2">{t.size}</td>
+                      <td className="py-1">{t.id}</td>
+                      <td className="py-1">{t.pair}</td>
+                      <td className="py-1 font-semibold text-xs">{t.side}</td>
+                      <td className="py-1">{t.size}</td>
                       <td
-                        className={`py-2 font-semibold ${
+                        className={`py-1 font-semibold ${
                           t.pnl >= 0 ? "text-emerald-600" : "text-rose-600"
                         }`}
                       >
                         {t.pnl >= 0 ? `+${t.pnl}` : t.pnl}
                       </td>
-                      <td className="py-2 text-xs text-slate-500">{t.time}</td>
+                      <td className="py-1 text-xs text-slate-500">{t.time}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -326,7 +281,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Right sidebar */}
+        {/* Right Sidebar */}
         <aside className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-2xl p-4 shadow">
             <div className="text-sm text-slate-500">Account</div>
@@ -366,7 +321,7 @@ export default function DashboardPage() {
   );
 }
 
-/* StatCard */
+/* -------------------- StatCard -------------------- */
 function StatCard({ label, value, hint, accent }: any) {
   return (
     <div
@@ -383,7 +338,70 @@ function StatCard({ label, value, hint, accent }: any) {
   );
 }
 
-/* Helpers */
+/* -------------------- Trade Controls -------------------- */
+function TradeControls({
+  takeProfit,
+  stopLoss,
+  setTakeProfit,
+  setStopLoss,
+  latest,
+  setSeries,
+  setTrades,
+  setBalance,
+  setNotifications,
+  trades,
+}: any) {
+  const handleTrade = () => {
+    if (!takeProfit || !stopLoss) {
+      setNotifications((n: string[]) => ["Set TP & SL first", ...n]);
+      return;
+    }
+
+    const newTrade = generateTrade(latest);
+    setTrades((prev: any[]) => [newTrade, ...prev.slice(0, 49)]);
+    setSeries((prev: any[]) => [
+      ...prev,
+      { name: `T${prev.length + 1}`, value: newTrade.newBalance },
+    ]);
+    setBalance(newTrade.newBalance);
+
+    setNotifications((n: string[]) =>
+      [`Trade placed TP:${takeProfit}% SL:${stopLoss}%`, ...n].slice(0, 4)
+    );
+  };
+
+  return (
+    <div className="bg-white rounded-2xl p-4 shadow space-y-4">
+      <div className="text-lg font-semibold text-emerald-700">
+        Trade Control
+      </div>
+      <div className="grid sm:grid-cols-3 gap-4">
+        <input
+          type="number"
+          placeholder="Take Profit %"
+          className="border rounded p-2"
+          value={takeProfit}
+          onChange={(e) => setTakeProfit(Number(e.target.value))}
+        />
+        <input
+          type="number"
+          placeholder="Stop Loss %"
+          className="border rounded p-2"
+          value={stopLoss}
+          onChange={(e) => setStopLoss(Number(e.target.value))}
+        />
+        <Button
+          onClick={handleTrade}
+          className="bg-emerald-600 hover:bg-emerald-700"
+        >
+          Place Trade
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------- Helpers -------------------- */
 function mockSeries(len = 20, base = 1000) {
   return Array.from({ length: len }).map((_, i) => ({
     name: `T${i + 1}`,
@@ -392,30 +410,25 @@ function mockSeries(len = 20, base = 1000) {
 }
 
 function mockTrades() {
-  return [
-    {
-      id: "TR001",
-      side: "BUY",
-      pair: "EUR/USD",
-      size: 0.5,
-      pnl: 26.4,
-      time: "10:22",
-    },
-    {
-      id: "TR002",
-      side: "SELL",
-      pair: "GBP/USD",
-      size: 0.2,
-      pnl: -18.2,
-      time: "09:58",
-    },
-    {
-      id: "TR003",
-      side: "BUY",
-      pair: "USD/JPY",
-      size: 1.0,
-      pnl: 12.3,
-      time: "08:41",
-    },
-  ];
+  return Array.from({ length: 10 }).map((_, i) => generateTrade(1000));
+}
+
+function generateTrade(currentBalance: number) {
+  const pairs = ["EUR/USD", "GBP/USD", "USD/JPY"];
+  const side = Math.random() < 0.5 ? "BUY" : "SELL";
+  const pair = pairs[Math.floor(Math.random() * pairs.length)];
+  const size = +(Math.random() * 1).toFixed(2);
+  const pnl = +(Math.random() * 50 - 25).toFixed(2);
+  const newBalance = +(currentBalance + pnl).toFixed(2);
+  return {
+    id: `TR${Math.floor(Math.random() * 99999)
+      .toString()
+      .padStart(5, "0")}`,
+    side,
+    pair,
+    size,
+    pnl,
+    time: new Date().toLocaleTimeString().slice(0, 5),
+    newBalance,
+  };
 }
