@@ -282,7 +282,7 @@ export default function ForexLandingPage() {
             variant="outline"
             className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
           >
-            Telegram
+            <a href="https://t.me/forex_pro_manage">Telegram</a>
           </Button>
           <Button className="bg-emerald-600 hover:bg-emerald-700">
             <a href="mailto:forexpromanage@gmail.com">Send Email</a>
