@@ -180,6 +180,7 @@ export default function DashboardPage() {
               value={`${profit >= 0 ? "+" : ""}$${profit}`}
               hint={`ROI ${roi}%`}
               accent
+              isNegative={profit < 0}
             />
             <StatCard
               label="Plan"
@@ -321,8 +322,7 @@ export default function DashboardPage() {
   );
 }
 
-/* -------------------- StatCard -------------------- */
-function StatCard({ label, value, hint, accent }: any) {
+function StatCard({ label, value, hint, accent, isNegative }: any) {
   return (
     <div
       className={`p-4 rounded-2xl shadow-sm ${
@@ -332,7 +332,13 @@ function StatCard({ label, value, hint, accent }: any) {
       }`}
     >
       <div className="text-sm text-slate-500">{label}</div>
-      <div className="text-xl font-bold text-emerald-700 mt-1">{value}</div>
+      <div
+        className={`text-xl font-bold mt-1 ${
+          isNegative ? "text-rose-600" : "text-emerald-700"
+        }`}
+      >
+        {value}
+      </div>
       {hint && <div className="text-xs text-slate-400 mt-1">{hint}</div>}
     </div>
   );
