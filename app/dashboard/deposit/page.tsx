@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import DepositGuide from "./DepositGuide";
 
 export default function DepositPage() {
   const [copied, setCopied] = useState(false);
@@ -100,16 +101,9 @@ export default function DepositPage() {
 
       {/* Wallet Card */}
       <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="bg-white p-3 rounded-lg shadow-sm">
-          <img
-            src={qrImage}
-            alt="BTC Wallet QR Code"
-            className="w-40 h-40 sm:w-48 sm:h-48 object-contain"
-          />
-        </div>
         <div className="flex-1 flex flex-col gap-3">
           <span className="font-mono text-emerald-700 text-sm sm:text-base truncate">
-            {walletAddress}
+            Your Wallet Address: {walletAddress}
           </span>
           <Button
             variant="outline"
@@ -125,6 +119,7 @@ export default function DepositPage() {
           </Button>
         </div>
       </div>
+      <DepositGuide walletAddress={walletAddress} qrImage={qrImage} />
 
       {/* Deposit Amount */}
       {!submitted && (
