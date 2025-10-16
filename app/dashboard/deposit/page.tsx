@@ -103,7 +103,7 @@ export default function DepositPage() {
       <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex-1 flex flex-col gap-3">
           <span className="font-mono text-emerald-700 text-sm sm:text-base truncate">
-            Your Wallet Address: {walletAddress}
+            {walletAddress}
           </span>
           <Button
             variant="outline"
@@ -119,6 +119,7 @@ export default function DepositPage() {
           </Button>
         </div>
       </div>
+
       <DepositGuide walletAddress={walletAddress} qrImage={qrImage} />
 
       {/* Deposit Amount */}

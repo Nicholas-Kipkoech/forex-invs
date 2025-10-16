@@ -8,7 +8,6 @@ type Props = {
 };
 
 function downloadGuideAsPdf(text: string, filename = "deposit-guide.txt") {
-  // simple fallback: download as .txt. You can change to PDF generation on the server or with a client-side library.
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -25,43 +24,22 @@ How to deposit Bitcoin (BTC) to Forex Pro Manage
 Wallet address:
 ${walletAddress}
 
-General steps (works for most exchanges / wallets)
-1. Open your exchange/wallet app (e.g., Binance, Coinbase, Trust Wallet).
-2. Go to Wallet / Fiat and Spot / Balances.
-3. Choose Withdraw or Send.
-4. Select Bitcoin (BTC) as the asset.
-5. Paste the wallet address exactly (or scan the QR code).
-6. Choose the Bitcoin network (BTC) — do NOT choose networks like BEP20 unless explicitly supported.
-7. (Optional) Send a small test amount first (e.g., $5-$10 worth of BTC).
-8. After confirming the transaction, copy the transaction ID (TXID) and upload a screenshot/receipt here.
-9. Wait for blockchain confirmations — we will credit your deposit after confirmation.
-
-Binance Mobile (quick)
-1. Open Binance app -> Wallet -> Fiat and Spot.
-2. Tap Withdraw -> Crypto.
-3. Pick BTC.
-4. Paste the address and select the Network: BTC (or Bitcoin).
-5. Enter amount and confirm with 2FA.
-6. Copy the TXID and upload proof.
-
-Trust Wallet (quick)
-1. Open Trust Wallet -> Bitcoin.
-2. Tap Receive -> copy the address or scan QR.
-3. From the sending app, choose Send, paste the address, confirm.
-4. Wait for confirmations.
-
-Important!
-- Always confirm the network: choose BTC/Bitcoin.
-- Double-check the address — crypto transactions are irreversible.
-- Start with a small test transfer if unsure.
-- Save the TXID and upload a screenshot as proof.
+Steps:
+1. Open your wallet or exchange (e.g., Binance, Coinbase, Trust Wallet).
+2. Choose Withdraw / Send -> Bitcoin (BTC).
+3. Paste address or scan QR.
+4. Ensure network is BTC.
+5. (Optional) Send a small test first.
+6. Upload TXID proof here.
 `;
 
   const [copied, setCopied] = useState(false);
 
   return (
     <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl space-y-4">
-      <div className="flex items-start gap-4">
+      {/* Top Section */}
+      <div className="flex flex-col md:flex-row md:items-start gap-6">
+        {/* Text Section */}
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-emerald-700">
             How to deposit BTC
@@ -71,7 +49,8 @@ Important!
             need help, download the guide or contact support.
           </p>
 
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-5">
+            {/* General steps */}
             <div>
               <h4 className="text-sm font-medium text-slate-600">
                 General steps
@@ -79,61 +58,53 @@ Important!
               <ol className="list-decimal list-inside text-sm text-slate-700 mt-2 space-y-1">
                 <li>Open your exchange or wallet app.</li>
                 <li>Go to Withdraw / Send and choose Bitcoin (BTC).</li>
-                <li>Paste the address exactly or scan the QR code.</li>
-                <li>
-                  Select the Bitcoin network (BTC) — do not use non-Bitcoin
-                  networks.
-                </li>
-                <li>Send a small test amount first if unsure.</li>
-                <li>Copy the transaction ID (TXID) and upload proof here.</li>
+                <li>Paste the address or scan the QR code.</li>
+                <li>Use the Bitcoin network only.</li>
+                <li>Send a small test if unsure.</li>
+                <li>Copy TXID and upload proof.</li>
               </ol>
             </div>
 
+            {/* Binance */}
             <div>
               <h4 className="text-sm font-medium text-slate-600">
                 Binance (mobile)
               </h4>
               <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
                 <li>Wallet → Fiat and Spot → Withdraw → Crypto → BTC</li>
-                <li>
-                  Paste address, choose network: BTC (Bitcoin), enter amount,
-                  confirm with 2FA
-                </li>
-                <li>Copy the TXID and upload a screenshot as proof</li>
+                <li>Paste address → choose network: BTC → confirm</li>
+                <li>Copy TXID and upload screenshot</li>
               </ul>
             </div>
 
+            {/* Trust Wallet */}
             <div>
               <h4 className="text-sm font-medium text-slate-600">
                 Trust Wallet
               </h4>
               <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
-                <li>
-                  Open Trust Wallet → Bitcoin → Receive → copy the address or
-                  show QR
-                </li>
-                <li>From sending app, choose Send → paste address → confirm</li>
+                <li>Open Trust Wallet → Bitcoin → Receive → copy or show QR</li>
+                <li>From sending app → Send → paste address → confirm</li>
               </ul>
             </div>
 
+            {/* Safety Tips */}
             <div>
               <h4 className="text-sm font-medium text-slate-600">
                 Safety tips
               </h4>
               <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
-                <li>
-                  Always check network — sending via the wrong network can lose
-                  funds.
-                </li>
+                <li>Always confirm the network: BTC only.</li>
                 <li>Send a small test amount first.</li>
-                <li>Keep a screenshot of the transaction & the TXID.</li>
-                <li>Contact support if you’re unsure before sending funds.</li>
+                <li>Keep a screenshot and TXID.</li>
+                <li>Contact support if unsure before sending.</li>
               </ul>
             </div>
           </div>
         </div>
 
-        <div className="w-40 flex-shrink-0">
+        {/* QR Section */}
+        <div className="w-full md:w-40 flex justify-center md:justify-end">
           {qrImage ? (
             <img
               src={qrImage}
@@ -148,26 +119,29 @@ Important!
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-emerald-700 truncate">
-          {walletAddress}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={async () => {
-            await navigator.clipboard.writeText(walletAddress);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
-          className="flex items-center gap-1 ml-2"
-        >
-          <Copy className="h-4 w-4" /> {copied ? "Copied" : "Copy"}
-        </Button>
+      {/* Bottom Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 mt-4">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="font-mono text-emerald-700 text-sm truncate">
+            {walletAddress}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              await navigator.clipboard.writeText(walletAddress);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            }}
+            className="flex items-center gap-1 shrink-0"
+          >
+            <Copy className="h-4 w-4" /> {copied ? "Copied" : "Copy"}
+          </Button>
+        </div>
 
         <Button
           onClick={() => downloadGuideAsPdf(guideText, "BTC-deposit-guide.txt")}
-          className="ml-auto"
+          className="sm:ml-auto w-full sm:w-auto"
         >
           Download Guide
         </Button>
