@@ -5,20 +5,39 @@ import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Edit2, LogOut } from "lucide-react";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser(data.user);
-        setName(data.user.user_metadata?.name || "");
+    const fetchUserAndInvestor = async () => {
+      const { data } = await supabase.auth.getUser();
+      const authUser = data.user;
+      if (authUser) {
+        setUser(authUser);
+        setName(authUser.user_metadata?.name || "");
+        setPhone(authUser.user_metadata?.phone || "");
+
+        // Fetch investor record (if it exists)
+        const { data: investor } = await supabase
+          .from("investors")
+          .select("name, phone")
+          .eq("user_id", authUser.id)
+          .single();
+
+        if (investor) {
+          setName(investor.name || "");
+          setPhone(investor.phone || "");
+        }
       }
-    });
+    };
+    fetchUserAndInvestor();
   }, []);
 
   async function handleLogout() {
@@ -28,11 +47,23 @@ export default function ProfilePage() {
 
   async function handleSave() {
     if (!user) return;
-    const { error } = await supabase.auth.updateUser({
-      data: { name },
+
+    // ✅ 1. Update Supabase Auth metadata
+    const { error: authError } = await supabase.auth.updateUser({
+      data: { name, phone },
     });
-    if (error) return alert(error.message);
-    setUser({ ...user, user_metadata: { name } });
+    if (authError) return alert(authError.message);
+
+    // ✅ 2. Update or insert in investor table
+    const { error: dbError } = await supabase.from("investors").upsert({
+      user_id: user.id,
+      name,
+      phone,
+    });
+
+    if (dbError) return alert(dbError.message);
+
+    setUser({ ...user, user_metadata: { ...user.user_metadata, name, phone } });
     setEditing(false);
     alert("Profile updated!");
   }
@@ -55,19 +86,24 @@ export default function ProfilePage() {
 
       {user ? (
         <div className="flex flex-col gap-6">
-          {/* Avatar & Name */}
           <div className="flex items-center gap-6">
             <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center text-3xl font-bold text-emerald-700">
               {name?.[0] || user.email?.[0] || "U"}
             </div>
             <div className="flex-1">
               {editing ? (
-                <div className="flex gap-2 items-center">
+                <div className="flex flex-col gap-3">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="border border-emerald-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="border border-emerald-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  />
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="border border-emerald-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   />
                   <Button
                     onClick={handleSave}
@@ -77,21 +113,25 @@ export default function ProfilePage() {
                   </Button>
                 </div>
               ) : (
-                <div className="flex gap-2 items-center">
-                  <h2 className="text-2xl font-semibold text-emerald-700">
-                    {name || "N/A"}
-                  </h2>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditing(true)}
-                    className="flex items-center gap-1 border-emerald-300 hover:bg-emerald-50"
-                  >
-                    <Edit2 className="h-4 w-4" /> Edit
-                  </Button>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-2xl font-semibold text-emerald-700">
+                      {name || "N/A"}
+                    </h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditing(true)}
+                      className="flex items-center gap-1 border-emerald-300 hover:bg-emerald-50"
+                    >
+                      <Edit2 className="h-4 w-4" /> Edit
+                    </Button>
+                  </div>
+                  {phone && (
+                    <p className="text-sm text-emerald-700 mt-1">📞 +{phone}</p>
+                  )}
                 </div>
               )}
-              <p className="text-sm text-slate-500 mt-1">Full Name</p>
             </div>
           </div>
 
@@ -107,7 +147,7 @@ export default function ProfilePage() {
             <p className="font-mono text-emerald-700 mt-1">{user.id}</p>
           </div>
 
-          {/* Additional Info Placeholder */}
+          {/* Account Info */}
           <div className="bg-emerald-50 p-4 rounded-2xl shadow flex flex-col space-y-2">
             <span className="text-sm text-slate-500">Account Status</span>
             <p className="text-emerald-700 font-medium">Active</p>

@@ -216,19 +216,20 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
 
-          {/* Trade Controls */}
-          <TradeControls
-            takeProfit={takeProfit}
-            stopLoss={stopLoss}
-            setTakeProfit={setTakeProfit}
-            setStopLoss={setStopLoss}
-            latest={latest}
-            setSeries={setSeries}
-            setTrades={setTrades}
-            setBalance={setBalance}
-            setNotifications={setNotifications}
-            trades={trades}
-          />
+          {balance !== 0 && (
+            <TradeControls
+              takeProfit={takeProfit}
+              stopLoss={stopLoss}
+              setTakeProfit={setTakeProfit}
+              setStopLoss={setStopLoss}
+              latest={latest}
+              setSeries={setSeries}
+              setTrades={setTrades}
+              setBalance={setBalance}
+              setNotifications={setNotifications}
+              trades={trades}
+            />
+          )}
 
           {/* Trade History */}
           <div className="bg-white rounded-2xl p-4 shadow">
