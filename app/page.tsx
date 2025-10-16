@@ -285,16 +285,16 @@ export default function ForexLandingPage() {
             Telegram
           </Button>
           <Button className="bg-emerald-600 hover:bg-emerald-700">
-            <a href="mailto:info@forexmanagedinvestments.com">Send Email</a>
+            <a href="mailto:forexpromanage@gmail.com">Send Email</a>
           </Button>
         </div>
         <p className="mt-8 text-gray-500">
           Or email us at{" "}
           <a
-            href="mailto:info@forexmanagedinvestments.com"
+            href="mailto:forexpromanage@gmail.com"
             className="text-emerald-600 font-medium"
           >
-            info@forexmanagedinvestments.com
+            forexpromanage@gmail.com
           </a>
         </p>
       </section>
