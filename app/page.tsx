@@ -18,8 +18,64 @@ export default function HomePage() {
     },
     {
       title: "3. Start Earning",
-      desc: "Our expert trading team manages your funds with a focus on stable, consistent growth.",
-      icon: "📈",
+      desc: "Our AI-powered trading bots manage your funds with precision and consistency, generating steady returns.",
+      icon: "🤖",
+    },
+  ];
+
+  const plans = [
+    {
+      name: "Starter Plan",
+      price: "$100 - $999",
+      features: [
+        "Automated AI Trading",
+        "Weekly Performance Reports",
+        "Instant Withdrawals",
+        "24/7 Dashboard Access",
+      ],
+    },
+    {
+      name: "Pro Plan",
+      price: "$1,000 - $4,999",
+      features: [
+        "Advanced AI Bots + Market Analysis",
+        "Higher Profit Margin",
+        "Dedicated Account Manager",
+        "Priority Withdrawals",
+      ],
+    },
+    {
+      name: "Elite Plan",
+      price: "$5,000+",
+      features: [
+        "Smart Portfolio Diversification",
+        "Top-tier AI Algorithms",
+        "Personalized Growth Strategy",
+        "Exclusive VIP Support",
+      ],
+    },
+  ];
+
+  const benefits = [
+    {
+      title: "AI-Driven Precision",
+      desc: "Our trading bots analyze thousands of market signals in real time for optimal performance.",
+      icon: "⚙️",
+    },
+    {
+      title: "24/7 Profit Generation",
+      desc: "AI bots never sleep — your investments keep working around the clock.",
+      icon: "🌙",
+    },
+    {
+      title: "Risk Management",
+      desc: "Each trade is executed with intelligent risk control mechanisms to protect your capital.",
+      icon: "🛡️",
+    },
+    {
+      title: "Instant Withdrawals",
+      desc: "Easily withdraw your profits anytime directly through BTC or USDT.",
+      icon: "💳",
     },
   ];
 
@@ -33,7 +89,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            Empower Your Investments with Confidence
+            Empower Your Investments with AI & Automation
           </motion.h1>
           <motion.p
             className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto"
@@ -41,8 +97,9 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            Partner with our expert trading team and grow your portfolio through
-            strategic investments and transparent performance.
+            Let our AI-driven trading bots grow your portfolio through
+            intelligent automation, real-time analytics, and transparent
+            performance tracking.
           </motion.p>
 
           <div className="flex justify-center gap-4 mt-4">
@@ -71,27 +128,28 @@ export default function HomePage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Why Choose Us
+            Why Choose Our AI Trading Platform
           </h2>
           <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
-            Our investment platform is built on trust, security, and
-            performance. Every decision is data-driven, ensuring your capital is
-            managed responsibly while maximizing potential returns.
+            Our investment system combines artificial intelligence with
+            automation to maximize returns and minimize emotional decision
+            errors. Your capital is managed with data-driven accuracy and full
+            transparency.
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 text-left">
             {[
               {
-                title: "Transparent Reporting",
-                desc: "View your trades, profits, and withdrawals in real-time from your dashboard.",
+                title: "Automated Performance",
+                desc: "AI bots monitor the market 24/7 to capture profitable opportunities instantly.",
               },
               {
                 title: "Secure Asset Management",
-                desc: "All funds are protected through multi-layered security and compliance standards.",
+                desc: "All funds are held safely with advanced encryption and multi-layered security systems.",
               },
               {
-                title: "Expert Trading Team",
-                desc: "Our traders employ advanced algorithms and fundamental analysis to optimize results.",
+                title: "Real-Time Transparency",
+                desc: "Access your dashboard anytime to view profits, trades, and growth analytics.",
               },
             ].map((item, idx) => (
               <motion.div
@@ -109,6 +167,73 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Investment Plans */}
+      <section className="py-20 bg-white border-t">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
+            Choose Your Investment Plan
+          </h2>
+          <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
+            Select a plan that aligns with your goals. All plans include AI
+            trading, transparent reporting, and secure withdrawals.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {plans.map((plan, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ scale: 1.03 }}
+                className="p-8 bg-gray-50 rounded-2xl shadow-sm border hover:shadow-md transition text-left"
+              >
+                <h3 className="text-xl font-semibold text-emerald-700 mb-2">
+                  {plan.name}
+                </h3>
+                <p className="text-gray-800 font-medium mb-4">{plan.price}</p>
+                <ul className="text-gray-600 text-sm space-y-2 mb-6">
+                  {plan.features.map((f, i) => (
+                    <li key={i}>✅ {f}</li>
+                  ))}
+                </ul>
+                <Link href="/register">
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full">
+                    Invest Now
+                  </Button>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-gray-50 border-t">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
+            Benefits of Investing With Us
+          </h2>
+          <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
+            Experience hands-free investing powered by artificial intelligence
+            and automation. Your money works for you — intelligently.
+          </p>
+
+          <div className="grid md:grid-cols-4 gap-6 text-left">
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.03 }}
+                className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition"
+              >
+                <div className="text-3xl mb-3">{benefit.icon}</div>
+                <h3 className="text-lg font-semibold text-emerald-700 mb-1">
+                  {benefit.title}
+                </h3>
+                <p className="text-gray-600 text-sm">{benefit.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How to Get Started Section */}
       <section className="py-20 bg-white border-t">
         <div className="max-w-6xl mx-auto px-6 text-center">
@@ -116,8 +241,7 @@ export default function HomePage() {
             How to Get Started
           </h2>
           <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
-            Getting started is simple. Follow three easy steps to begin your
-            investment journey and start earning passive income.
+            It’s simple to start your AI-powered trading journey.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -146,87 +270,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Regulations & Compliance Section */}
-      <section className="py-20 bg-gray-50 border-t">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Regulations & Compliance
-          </h2>
-          <p className="text-gray-600 mb-6 max-w-3xl mx-auto">
-            We adhere to international financial compliance standards to
-            maintain transparency, client protection, and ethical trading
-            practices. Our operations follow{" "}
-            <span className="font-medium text-emerald-700">
-              Anti-Money Laundering (AML)
-            </span>{" "}
-            and{" "}
-            <span className="font-medium text-emerald-700">
-              Know Your Customer (KYC)
-            </span>{" "}
-            guidelines to ensure integrity in every transaction.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6 mt-10 text-left">
-            <div className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition">
-              <h3 className="text-lg font-semibold text-emerald-700 mb-2">
-                Data & Fund Security
-              </h3>
-              <p className="text-gray-600 text-sm">
-                All investor data and funds are protected through encryption,
-                secure wallets, and compliance with leading cybersecurity
-                protocols.
-              </p>
-            </div>
-            <div className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition">
-              <h3 className="text-lg font-semibold text-emerald-700 mb-2">
-                Transparent Operations
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Our trading performance is available for audit, and clients
-                receive transparent reporting on every transaction.
-              </p>
-            </div>
-            <div className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition">
-              <h3 className="text-lg font-semibold text-emerald-700 mb-2">
-                Compliance & Ethics
-              </h3>
-              <p className="text-gray-600 text-sm">
-                We operate under fair market standards, ensuring all activity
-                complies with legal and ethical guidelines.
-              </p>
-            </div>
-          </div>
-
-          <p className="text-gray-500 text-sm mt-10 max-w-3xl mx-auto">
-            <strong>Disclaimer:</strong> Trading and investing carry inherent
-            risks. Past performance is not indicative of future results. Always
-            invest what you can afford to lose and seek independent financial
-            advice when necessary.
-          </p>
-        </div>
-      </section>
-
-      {/* Legal & Risk Disclosure */}
-      <section className="py-16 bg-white border-t">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-2xl font-semibold text-emerald-700 mb-4">
-            Legal & Risk Disclosure
-          </h2>
-          <p className="text-gray-600 max-w-3xl mx-auto mb-6">
-            This platform is intended for individuals who understand and accept
-            the risks involved in financial trading. We do not offer financial
-            advice, and all investment decisions are made at your own
-            discretion. Regulatory requirements may vary by jurisdiction.
-          </p>
-          <p className="text-gray-500 text-sm max-w-3xl mx-auto">
-            By accessing or using this platform, you acknowledge that you have
-            read and understood our terms, risk warnings, and policies.
-          </p>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="py-8 text-center text-sm text-gray-500 border-t bg-gray-50">
+      <footer className="py-8 text-center text-sm text-gray-500 border-t bg-white">
         <p>
           © {new Date().getFullYear()} FX PRO INVESTMENTS. All rights reserved.
         </p>
