@@ -50,7 +50,7 @@ export default function DashboardPage() {
   const latest = series[series.length - 1]?.value ?? balance;
   const first = series[0]?.value ?? latest;
   const profit = +(latest - first).toFixed(2);
-  const roi = first ? +((profit / first) * 100).toFixed(2) : 0;
+  const roi = first ? +((profit / first) * 1.2).toFixed(2) : 0;
 
   const tradesRef = useRef<HTMLDivElement>(null);
 
@@ -90,7 +90,7 @@ export default function DashboardPage() {
   // Live bot trade simulation
   useEffect(() => {
     if (balance === 0) return;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       const newTrade = generateTrade(latest);
       setTrades((prev) => [newTrade, ...prev.slice(0, 49)]);
       setSeries((prev) => [
@@ -98,6 +98,12 @@ export default function DashboardPage() {
         { name: `T${prev.length + 1}`, value: newTrade.newBalance },
       ]);
       setBalance(newTrade.newBalance);
+
+      // 🔁 Update balance in Supabase
+      await supabase
+        .from("investors")
+        .update({ balance: newTrade.newBalance })
+        .eq("id", profile?.id);
 
       if (Math.random() < 0.2) {
         setNotifications((n) =>
@@ -112,7 +118,7 @@ export default function DashboardPage() {
     }, 3500);
 
     return () => clearInterval(interval);
-  }, [balance]);
+  }, [balance, latest, profile]);
 
   // Scroll table to top for new trades
   useEffect(() => {
@@ -160,6 +166,15 @@ export default function DashboardPage() {
           >
             Deposit
           </Button>
+
+          {balance > 0 && (
+            <Button
+              onClick={() => router.push("/dashboard/withdraw")}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              Withdraw
+            </Button>
+          )}
           <Button variant="outline" onClick={handleLogout}>
             Logout
           </Button>
@@ -412,7 +427,7 @@ function TradeControls({
 function mockSeries(len = 20, base = 1000) {
   return Array.from({ length: len }).map((_, i) => ({
     name: `T${i + 1}`,
-    value: Math.round((base + i * 8 + (Math.random() - 0.4) * 40) * 100) / 100,
+    value: Math.round((base + i * 8 + (Math.random() - 0.4) * 2) * 4) / 100,
   }));
 }
 

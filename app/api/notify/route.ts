@@ -15,7 +15,8 @@ const transporter = nodemailer.createTransport({
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const { type, name, email, phone, depositAmount, file } = data;
+    const { type, name, email, phone, depositAmount, withdrawalAmount, file } =
+      data;
 
     if (!type || !name || !email) {
       return NextResponse.json(
@@ -29,6 +30,7 @@ export async function POST(req: Request) {
     let attachments: { filename: string; content: string; encoding: string }[] =
       [];
 
+    // ✅ New user registration
     if (type === "registration") {
       subject = `🎉 New User Registration: ${name}`;
       html = `
@@ -44,7 +46,10 @@ export async function POST(req: Request) {
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
-    } else if (type === "deposit") {
+    }
+
+    // 💰 Deposit notification
+    else if (type === "deposit") {
       if (!depositAmount) {
         return NextResponse.json(
           { message: "Deposit amount is required for deposit notifications" },
@@ -67,7 +72,6 @@ export async function POST(req: Request) {
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
 
-      // Attach file if provided
       if (file && file.base64 && file.filename && file.mimetype) {
         attachments.push({
           filename: file.filename,
@@ -75,6 +79,52 @@ export async function POST(req: Request) {
           encoding: "base64",
         });
       }
+    }
+
+    // 💸 Withdrawal request notification
+    else if (type === "withdrawal") {
+      if (!withdrawalAmount) {
+        return NextResponse.json(
+          {
+            message:
+              "Withdrawal amount is required for withdrawal notifications",
+          },
+          { status: 400 }
+        );
+      }
+
+      subject = `💸 Withdrawal Request from ${name}`;
+      html = `
+      <div style="font-family:Arial,sans-serif;color:#333;">
+        <div style="background:#fef3c7;padding:20px;border-radius:10px;text-align:center;">
+          <h2 style="color:#b45309;">Withdrawal Request Received</h2>
+          <p>An investor has requested a crypto withdrawal. Details below:</p>
+        </div>
+        <div style="margin-top:20px;padding:20px;border:1px solid #fde68a;border-radius:10px;">
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Requested Amount:</strong> ${withdrawalAmount}</p>
+        </div>
+        <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
+      </div>`;
+    }
+
+    // ✅ Withdrawal completed notification (optional future use)
+    else if (type === "withdrawal_complete") {
+      subject = `✅ Withdrawal Completed for ${name}`;
+      html = `
+      <div style="font-family:Arial,sans-serif;color:#333;">
+        <div style="background:#dcfce7;padding:20px;border-radius:10px;text-align:center;">
+          <h2 style="color:#166534;">Withdrawal Completed</h2>
+          <p>The following withdrawal has been successfully processed:</p>
+        </div>
+        <div style="margin-top:20px;padding:20px;border:1px solid #bbf7d0;border-radius:10px;">
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Amount:</strong> ${withdrawalAmount}</p>
+        </div>
+        <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
+      </div>`;
     } else {
       return NextResponse.json(
         { message: "Invalid notification type" },
