@@ -53,7 +53,7 @@ export default function DashboardPage() {
   const latest = series[series.length - 1]?.value ?? balance;
   const first = series[0]?.value ?? latest;
   const profit = +(latest - first).toFixed(2);
-  const roi = first ? +((profit / first) * 1.2).toFixed(2) : 0;
+  const roi = first ? +((profit / first) * 8.9).toFixed(2) : 0;
 
   // Load profile
   useEffect(() => {
@@ -474,11 +474,22 @@ function mockTrades() {
 }
 
 function generateTrade(currentBalance: number) {
-  const pairs = ["EUR/USD", "GBP/USD", "USD/JPY"];
+  const pairs = ["EUR/USD", "GBP/USD", "USD/JPY", "XAU/USD", "BTC/USD"];
   const side = Math.random() < 0.5 ? "BUY" : "SELL";
   const pair = pairs[Math.floor(Math.random() * pairs.length)];
   const size = +(Math.random() * 1).toFixed(2);
-  const pnl = +(Math.random() * 20 - 10).toFixed(2);
+
+  // 80% chance of profit, 20% chance of loss
+  const isProfit = Math.random() < 0.8;
+
+  // Use small percentage of balance for pnl (max 5%)
+  const changePercent = isProfit
+    ? Math.random() * 0.05 // up to +5%
+    : -(Math.random() * 0.03); // up to -3%
+
+  const pnl = +(currentBalance * changePercent).toFixed(2);
+
+  // Ensure balance doesn't go below zero
   const newBalance = Math.max(0, +(currentBalance + pnl).toFixed(2));
 
   return {
