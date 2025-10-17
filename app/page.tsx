@@ -1,290 +1,243 @@
 "use client";
 
-import { useRef } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function ForexLandingPage() {
-  const contactRef = useRef<HTMLDivElement>(null);
-  const scrollToContact = () =>
-    contactRef.current?.scrollIntoView({ behavior: "smooth" });
-
-  const plans = [
-    {
-      name: "Starter",
-      deposit: "$100",
-      return: "10–12%",
-      risk: "Low",
-      fee: "20%",
-      color: "bg-emerald-50 text-emerald-600",
-    },
-    {
-      name: "Growth",
-      deposit: "$500",
-      return: "15–18%",
-      risk: "Moderate",
-      fee: "25%",
-      color: "bg-yellow-50 text-yellow-600",
-      recommended: true,
-    },
-    {
-      name: "Premium",
-      deposit: "$1,000+",
-      return: "20%+",
-      risk: "Balanced",
-      fee: "30%",
-      color: "bg-blue-50 text-blue-600",
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: "David M.",
-      comment:
-        "Started with $300 and saw consistent growth. The transparency and easy withdrawals make this my top investment choice.",
-      location: "London",
-    },
-    {
-      name: "Sarah K.",
-      comment:
-        "The Growth Plan has exceeded my expectations — returns are steady and the support team is reliable.",
-      location: "South Africa",
-    },
-    {
-      name: "James O.",
-      comment:
-        "Smart risk management and consistent profits. I love the hybrid of automated and manual strategies.",
-      location: "UAE",
-    },
-  ];
-
+export default function HomePage() {
   const steps = [
     {
-      title: "Create Account",
-      desc: "Sign up and verify your email to get started.",
+      title: "1. Create Your Account",
+      desc: "Sign up securely using your email and verify your identity through our KYC process.",
+      icon: "🧾",
     },
     {
-      title: "Fund Your Account",
-      desc: "Deposit funds securely or send via BTC or USDT.",
+      title: "2. Fund Your Investment",
+      desc: "Deposit funds easily using BTC, USDT, or bank transfer. Your capital remains under your full control.",
+      icon: "💰",
     },
     {
-      title: "Connect to Our System",
-      desc: "We trade on your behalf with expert strategies.",
+      title: "3. Start Earning",
+      desc: "Our expert trading team manages your funds with a focus on stable, consistent growth.",
+      icon: "📈",
     },
-    {
-      title: "Track & Withdraw",
-      desc: "Monitor your returns and withdraw anytime.",
-    },
-  ];
-
-  const tradingPairs = [
-    { id: "EURUSD", title: "EUR/USD" },
-    { id: "GBPUSD", title: "GBP/USD" },
   ];
 
   return (
-    <main className="min-h-screen bg-white text-gray-900">
-      {/* Hero */}
-      <section className="text-center py-28 px-6 bg-gradient-to-b from-emerald-50 to-white">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-5xl md:text-6xl font-bold text-emerald-700 mb-4"
-        >
-          Invest Smart. Earn Consistently.
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-lg text-gray-600 max-w-2xl mx-auto mb-10"
-        >
-          Experience stable monthly returns of{" "}
-          <span className="text-emerald-600 font-medium">10–20%</span> through
-          our managed forex trading services.
-        </motion.p>
-        <div className="flex justify-center gap-4">
-          <Link href="/register">
-            <Button
-              size="lg"
-              className="bg-emerald-600 hover:bg-emerald-700 rounded-full px-8"
-            >
-              Get Started
-            </Button>
-          </Link>
-          <Link href="/login">
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full px-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-            >
-              Login
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-5xl mx-auto text-center px-6">
-          <h2 className="text-3xl font-semibold text-emerald-700 mb-4">
-            Live Forex Market
-          </h2>
-          <p className="text-gray-600 mb-10">
-            Select any forex pair directly in the chart below. Use the tools to
-            analyze and trade effectively.
-          </p>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-8"
+    <main className="bg-white text-gray-900">
+      {/* Hero Section */}
+      <section className="relative bg-emerald-700 text-white py-32">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <motion.h1
+            className="text-5xl font-bold mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            <iframe
-              src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=30&theme=light&style=1&toolbarbg=F1F3F6&withdateranges=1&allow_symbol_change=1&hideideas=0&enable_publishing=0&hide_side_toolbar=0&save_image=1&studies=[]&show_popup_button=1"
-              width="100%"
-              height="500"
-              className="rounded-2xl border shadow-sm"
-              allowFullScreen
-            />
-          </motion.div>
+            Empower Your Investments with Confidence
+          </motion.h1>
+          <motion.p
+            className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Partner with our expert trading team and grow your portfolio through
+            strategic investments and transparent performance.
+          </motion.p>
+
+          <div className="flex justify-center gap-4 mt-4">
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="bg-white text-emerald-700 hover:bg-emerald-50 font-medium px-8 rounded-full"
+              >
+                Get Started
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-emerald-700 hover:bg-emerald-600 font-medium px-8 rounded-full"
+              >
+                Login
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* How to Invest */}
-      <section className="py-20 max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl font-semibold text-center text-emerald-700 mb-10">
-          How It Works
-        </h2>
-        <div className="grid md:grid-cols-4 gap-8">
-          {steps.map((step, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.03 }}
-              className="p-6 bg-white border rounded-2xl shadow-sm hover:shadow-md transition"
-            >
-              <div className="text-emerald-600 text-xl font-semibold mb-3">
-                {step.title}
-              </div>
-              <p className="text-gray-600">{step.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Plans */}
+      {/* About Section */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto text-center px-6">
+        <div className="max-w-5xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Investment Plans
+            Why Choose Us
           </h2>
-          <p className="text-gray-600 mb-10">
-            Select a plan that matches your investment goals.
+          <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
+            Our investment platform is built on trust, security, and
+            performance. Every decision is data-driven, ensuring your capital is
+            managed responsibly while maximizing potential returns.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {plans.map((plan) => (
+          <div className="grid md:grid-cols-3 gap-6 text-left">
+            {[
+              {
+                title: "Transparent Reporting",
+                desc: "View your trades, profits, and withdrawals in real-time from your dashboard.",
+              },
+              {
+                title: "Secure Asset Management",
+                desc: "All funds are protected through multi-layered security and compliance standards.",
+              },
+              {
+                title: "Expert Trading Team",
+                desc: "Our traders employ advanced algorithms and fundamental analysis to optimize results.",
+              },
+            ].map((item, idx) => (
               <motion.div
-                key={plan.name}
+                key={idx}
                 whileHover={{ scale: 1.03 }}
-                className={`p-8 rounded-2xl border bg-white shadow-sm relative ${
-                  plan.recommended
-                    ? "border-emerald-500 ring-1 ring-emerald-100"
-                    : ""
-                }`}
+                className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition"
               >
-                {plan.recommended && (
-                  <span className="absolute top-3 right-3 bg-emerald-600 text-white text-xs px-3 py-1 rounded-full">
-                    Recommended
-                  </span>
-                )}
-                <h3 className="text-2xl font-semibold mb-4 text-emerald-700">
-                  {plan.name}
+                <h3 className="text-lg font-semibold text-emerald-700 mb-2">
+                  {item.title}
                 </h3>
-                <p className="text-gray-600 mb-2">💵 Deposit: {plan.deposit}</p>
-                <p className="text-gray-600 mb-2">📈 Return: {plan.return}</p>
-                <p className="text-gray-600 mb-2">💼 Fee: {plan.fee}</p>
-                <p
-                  className={`text-sm font-medium inline-block mt-2 px-3 py-1 rounded-full ${plan.color}`}
-                >
-                  {plan.risk} Risk
-                </p>
-                <Button
-                  className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700"
-                  onClick={scrollToContact}
-                >
-                  Invest Now
-                </Button>
+                <p className="text-gray-600 text-sm">{item.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl font-semibold text-center text-emerald-700 mb-10">
-          What Investors Say
-        </h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.02 }}
-              className="p-6 bg-white rounded-2xl border shadow-sm hover:shadow-md"
-            >
-              <p className="italic text-gray-600 mb-4">“{t.comment}”</p>
-              <div className="font-semibold text-emerald-700">{t.name}</div>
-              <div className="text-sm text-gray-500">{t.location}</div>
-            </motion.div>
-          ))}
+      {/* How to Get Started Section */}
+      <section className="py-20 bg-white border-t">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
+            How to Get Started
+          </h2>
+          <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
+            Getting started is simple. Follow three easy steps to begin your
+            investment journey and start earning passive income.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.03 }}
+                className="p-6 bg-gray-50 rounded-2xl shadow-sm border hover:shadow-md transition"
+              >
+                <div className="text-4xl mb-4">{step.icon}</div>
+                <h3 className="text-lg font-semibold text-emerald-700 mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 text-sm">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10">
+            <Link href="/register">
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 rounded-full">
+                Start Now
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Contact */}
-      <section
-        ref={contactRef}
-        className="py-20 text-center max-w-4xl mx-auto px-6"
-      >
-        <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-          Get in Touch
-        </h2>
-        <p className="text-gray-600 mb-8">
-          Reach out to us for inquiries, partnerships, or guidance.
-        </p>
-        <div className="flex justify-center flex-wrap gap-4">
-          <Button
-            variant="outline"
-            className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-          >
-            WhatsApp
-          </Button>
-          <Button
-            variant="outline"
-            className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-          >
-            <a href="https://t.me/forex_pro_manage">Telegram</a>
-          </Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
-            <a href="mailto:forexpromanage@gmail.com">Send Email</a>
-          </Button>
+      {/* Regulations & Compliance Section */}
+      <section className="py-20 bg-gray-50 border-t">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
+            Regulations & Compliance
+          </h2>
+          <p className="text-gray-600 mb-6 max-w-3xl mx-auto">
+            We adhere to international financial compliance standards to
+            maintain transparency, client protection, and ethical trading
+            practices. Our operations follow{" "}
+            <span className="font-medium text-emerald-700">
+              Anti-Money Laundering (AML)
+            </span>{" "}
+            and{" "}
+            <span className="font-medium text-emerald-700">
+              Know Your Customer (KYC)
+            </span>{" "}
+            guidelines to ensure integrity in every transaction.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-6 mt-10 text-left">
+            <div className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition">
+              <h3 className="text-lg font-semibold text-emerald-700 mb-2">
+                Data & Fund Security
+              </h3>
+              <p className="text-gray-600 text-sm">
+                All investor data and funds are protected through encryption,
+                secure wallets, and compliance with leading cybersecurity
+                protocols.
+              </p>
+            </div>
+            <div className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition">
+              <h3 className="text-lg font-semibold text-emerald-700 mb-2">
+                Transparent Operations
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Our trading performance is available for audit, and clients
+                receive transparent reporting on every transaction.
+              </p>
+            </div>
+            <div className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition">
+              <h3 className="text-lg font-semibold text-emerald-700 mb-2">
+                Compliance & Ethics
+              </h3>
+              <p className="text-gray-600 text-sm">
+                We operate under fair market standards, ensuring all activity
+                complies with legal and ethical guidelines.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-gray-500 text-sm mt-10 max-w-3xl mx-auto">
+            <strong>Disclaimer:</strong> Trading and investing carry inherent
+            risks. Past performance is not indicative of future results. Always
+            invest what you can afford to lose and seek independent financial
+            advice when necessary.
+          </p>
         </div>
-        <p className="mt-8 text-gray-500">
-          Or email us at{" "}
-          <a
-            href="mailto:forexpromanage@gmail.com"
-            className="text-emerald-600 font-medium"
-          >
-            forexpromanage@gmail.com
-          </a>
-        </p>
+      </section>
+
+      {/* Legal & Risk Disclosure */}
+      <section className="py-16 bg-white border-t">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <h2 className="text-2xl font-semibold text-emerald-700 mb-4">
+            Legal & Risk Disclosure
+          </h2>
+          <p className="text-gray-600 max-w-3xl mx-auto mb-6">
+            This platform is intended for individuals who understand and accept
+            the risks involved in financial trading. We do not offer financial
+            advice, and all investment decisions are made at your own
+            discretion. Regulatory requirements may vary by jurisdiction.
+          </p>
+          <p className="text-gray-500 text-sm max-w-3xl mx-auto">
+            By accessing or using this platform, you acknowledge that you have
+            read and understood our terms, risk warnings, and policies.
+          </p>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-sm text-gray-500 border-t">
-        © {new Date().getFullYear()} Forex Managed Investments. All rights
-        reserved.
+      <footer className="py-8 text-center text-sm text-gray-500 border-t bg-gray-50">
+        <p>
+          © {new Date().getFullYear()} FX PRO INVESTMENTS. All rights reserved.
+        </p>
+        <p className="mt-2">
+          <a
+            href="/legal"
+            className="text-emerald-700 hover:underline transition"
+          >
+            View Full Legal Disclosure
+          </a>
+        </p>
       </footer>
     </main>
   );
