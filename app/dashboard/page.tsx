@@ -46,13 +46,14 @@ export default function DashboardPage() {
   const [takeProfit, setTakeProfit] = useState<number>(0);
   const [stopLoss, setStopLoss] = useState<number>(0);
   const [balance, setBalance] = useState<number>(0);
+  const [isTrading, setIsTrading] = useState(false);
+
+  const tradesRef = useRef<HTMLDivElement>(null);
 
   const latest = series[series.length - 1]?.value ?? balance;
   const first = series[0]?.value ?? latest;
   const profit = +(latest - first).toFixed(2);
   const roi = first ? +((profit / first) * 1.2).toFixed(2) : 0;
-
-  const tradesRef = useRef<HTMLDivElement>(null);
 
   // Load profile
   useEffect(() => {
@@ -87,11 +88,24 @@ export default function DashboardPage() {
     setTimeout(() => setAiInsight(insight), 1000);
   }, []);
 
-  // Live bot trade simulation
+  // Controlled live trading simulation
   useEffect(() => {
-    if (balance === 0) return;
+    if (!isTrading || balance <= 0 || !profile) return;
+
     const interval = setInterval(async () => {
       const newTrade = generateTrade(latest);
+
+      if (newTrade.newBalance <= 0) {
+        setBalance(0);
+        setIsTrading(false);
+        setNotifications((n) => [
+          "⚠️ Trading stopped — balance depleted.",
+          ...n,
+        ]);
+        clearInterval(interval);
+        return;
+      }
+
       setTrades((prev) => [newTrade, ...prev.slice(0, 49)]);
       setSeries((prev) => [
         ...prev,
@@ -99,18 +113,17 @@ export default function DashboardPage() {
       ]);
       setBalance(newTrade.newBalance);
 
-      // 🔁 Update balance in Supabase
       await supabase
         .from("investors")
         .update({ balance: newTrade.newBalance })
         .eq("id", profile?.id);
 
-      if (Math.random() < 0.2) {
+      if (Math.random() < 0.25) {
         setNotifications((n) =>
           [
-            `Bot trade: ${newTrade.side} ${
-              newTrade.pair
-            } +${newTrade.pnl.toFixed(2)}`,
+            `Bot trade: ${newTrade.side} ${newTrade.pair} ${
+              newTrade.pnl >= 0 ? "+" : ""
+            }${newTrade.pnl.toFixed(2)}`,
             ...n,
           ].slice(0, 4)
         );
@@ -118,9 +131,9 @@ export default function DashboardPage() {
     }, 3500);
 
     return () => clearInterval(interval);
-  }, [balance, latest, profile]);
+  }, [isTrading, balance, latest, profile]);
 
-  // Scroll table to top for new trades
+  // Scroll to top for new trades
   useEffect(() => {
     if (tradesRef.current) tradesRef.current.scrollTop = 0;
   }, [trades]);
@@ -159,7 +172,7 @@ export default function DashboardPage() {
             <p className="text-sm text-slate-600">Investor Dashboard</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             onClick={() => router.push("/dashboard/deposit")}
             className="bg-emerald-600 hover:bg-emerald-700"
@@ -168,19 +181,40 @@ export default function DashboardPage() {
           </Button>
 
           {balance > 0 && (
-            <Button
-              onClick={() => router.push("/dashboard/withdraw")}
-              className="bg-yellow-600 hover:bg-yellow-700"
-            >
-              Withdraw
-            </Button>
+            <>
+              <Button
+                onClick={() => router.push("/dashboard/withdraw")}
+                className="bg-yellow-600 hover:bg-yellow-700"
+              >
+                Withdraw
+              </Button>
+
+              <motion.button
+                onClick={() => setIsTrading((prev) => !prev)}
+                className={`px-4 py-2 rounded-lg font-medium text-white ${
+                  isTrading
+                    ? "bg-rose-600 hover:bg-rose-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                }`}
+                animate={
+                  isTrading
+                    ? { scale: [1, 1.05, 1], boxShadow: "0 0 10px #34d399" }
+                    : { scale: 1, boxShadow: "none" }
+                }
+                transition={{ repeat: isTrading ? Infinity : 0, duration: 1 }}
+              >
+                {isTrading ? "Stop Trading" : "Start Trading"}
+              </motion.button>
+            </>
           )}
+
           <Button variant="outline" onClick={handleLogout}>
             Logout
           </Button>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left */}
         <section className="lg:col-span-8 space-y-6">
@@ -338,6 +372,7 @@ export default function DashboardPage() {
   );
 }
 
+/* -------------------- StatCard -------------------- */
 function StatCard({ label, value, hint, accent, isNegative }: any) {
   return (
     <div
@@ -388,7 +423,10 @@ function TradeControls({
     setBalance(newTrade.newBalance);
 
     setNotifications((n: string[]) =>
-      [`Trade placed TP:${takeProfit}% SL:${stopLoss}%`, ...n].slice(0, 4)
+      [`Manual trade placed TP:${takeProfit}% SL:${stopLoss}%`, ...n].slice(
+        0,
+        4
+      )
     );
   };
 
@@ -440,8 +478,9 @@ function generateTrade(currentBalance: number) {
   const side = Math.random() < 0.5 ? "BUY" : "SELL";
   const pair = pairs[Math.floor(Math.random() * pairs.length)];
   const size = +(Math.random() * 1).toFixed(2);
-  const pnl = +(Math.random() * 50 - 25).toFixed(2);
-  const newBalance = +(currentBalance + pnl).toFixed(2);
+  const pnl = +(Math.random() * 20 - 10).toFixed(2);
+  const newBalance = Math.max(0, +(currentBalance + pnl).toFixed(2));
+
   return {
     id: `TR${Math.floor(Math.random() * 99999)
       .toString()
