@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FXPro -Expert Account Management",
+  title: "StockPro - AI Stocks",
   description: "Let your investment money work for you.",
 };
 

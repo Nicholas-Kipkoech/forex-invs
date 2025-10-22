@@ -1,13 +1,16 @@
+"use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, Info, FileDown } from "lucide-react";
 
 type Props = {
   walletAddress: string;
   qrImage?: string;
+  broker?: string;
 };
 
-function downloadGuideAsPdf(text: string, filename = "deposit-guide.txt") {
+function downloadGuideAsTxt(text: string, filename = "btc-deposit-guide.txt") {
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -17,110 +20,102 @@ function downloadGuideAsPdf(text: string, filename = "deposit-guide.txt") {
   URL.revokeObjectURL(url);
 }
 
-export default function DepositGuide({ walletAddress, qrImage }: Props) {
+export default function DepositGuide({
+  walletAddress,
+  qrImage,
+  broker = "TradingView",
+}: Props) {
+  const [copied, setCopied] = useState(false);
+
   const guideText = `
-How to deposit Bitcoin (BTC) to Forex Pro Manage
-------------------------------------------------
-Wallet address:
+How to Deposit Bitcoin (BTC) to ${broker}
+------------------------------------------
+Wallet Address:
 ${walletAddress}
 
 Steps:
-1. Open your wallet or exchange (e.g., Binance, Coinbase, Trust Wallet).
-2. Choose Withdraw / Send -> Bitcoin (BTC).
-3. Paste address or scan QR.
-4. Ensure network is BTC.
-5. (Optional) Send a small test first.
-6. Upload TXID proof here.
+1. Open your preferred crypto wallet or exchange (e.g., Binance, Coinbase, Trust Wallet).
+2. Choose “Withdraw” or “Send” → Select Bitcoin (BTC).
+3. Paste the wallet address or scan the QR code.
+4. Ensure the network is BTC (Bitcoin).
+5. (Optional) Send a small test amount first.
+6. Once confirmed, your account will be funded automatically.
 `;
 
-  const [copied, setCopied] = useState(false);
+  const steps = [
+    "Open your crypto wallet or exchange (e.g., Binance, Coinbase, Trust Wallet).",
+    "Go to 'Send' or 'Withdraw' and select Bitcoin (BTC).",
+    "Paste the BTC wallet address or scan the QR code below.",
+    "Ensure the transfer network is BTC only — not BEP20 or ERC20.",
+    "Confirm and send your funds.",
+    "Wait for blockchain confirmation (usually 1–3 confirmations).",
+  ];
 
   return (
-    <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl space-y-4">
-      {/* Top Section */}
-      <div className="flex flex-col md:flex-row md:items-start gap-6">
-        {/* Text Section */}
-        <div className="flex-1">
+    <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border border-emerald-200 p-6 rounded-2xl shadow-sm space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Info className="h-6 w-6 text-emerald-600" />
+        <div>
           <h3 className="text-lg font-semibold text-emerald-700">
-            How to deposit BTC
+            Deposit Bitcoin (BTC)
           </h3>
-          <p className="text-sm text-slate-700 mt-1">
-            Step-by-step instructions for common wallets and exchanges. If you
-            need help, download the guide or contact support.
+          <p className="text-sm text-slate-600">
+            Fund your {broker} trading account securely using Bitcoin.
           </p>
+        </div>
+      </div>
 
-          <div className="mt-4 space-y-5">
-            {/* General steps */}
-            <div>
-              <h4 className="text-sm font-medium text-slate-600">
-                General steps
-              </h4>
-              <ol className="list-decimal list-inside text-sm text-slate-700 mt-2 space-y-1">
-                <li>Open your exchange or wallet app.</li>
-                <li>Go to Withdraw / Send and choose Bitcoin (BTC).</li>
-                <li>Paste the address or scan the QR code.</li>
-                <li>Use the Bitcoin network only.</li>
-                <li>Send a small test if unsure.</li>
-                <li>Copy TXID and upload proof.</li>
-              </ol>
-            </div>
+      {/* Main Section */}
+      <div className="flex flex-col md:flex-row gap-8 md:gap-10">
+        {/* Steps */}
+        <div className="flex-1 space-y-5">
+          <div>
+            <h4 className="text-sm font-medium text-slate-700">
+              Deposit Steps
+            </h4>
+            <ol className="list-decimal list-inside text-sm text-slate-700 mt-2 space-y-1">
+              {steps.map((s, i) => (
+                <li key={i}>{s}</li>
+              ))}
+            </ol>
+          </div>
 
-            {/* Binance */}
-            <div>
-              <h4 className="text-sm font-medium text-slate-600">
-                Binance (mobile)
-              </h4>
-              <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
-                <li>Wallet → Fiat and Spot → Withdraw → Crypto → BTC</li>
-                <li>Paste address → choose network: BTC → confirm</li>
-                <li>Copy TXID and upload screenshot</li>
-              </ul>
-            </div>
-
-            {/* Trust Wallet */}
-            <div>
-              <h4 className="text-sm font-medium text-slate-600">
-                Trust Wallet
-              </h4>
-              <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
-                <li>Open Trust Wallet → Bitcoin → Receive → copy or show QR</li>
-                <li>From sending app → Send → paste address → confirm</li>
-              </ul>
-            </div>
-
-            {/* Safety Tips */}
-            <div>
-              <h4 className="text-sm font-medium text-slate-600">
-                Safety tips
-              </h4>
-              <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
-                <li>Always confirm the network: BTC only.</li>
-                <li>Send a small test amount first.</li>
-                <li>Keep a screenshot and TXID.</li>
-                <li>Contact support if unsure before sending.</li>
-              </ul>
-            </div>
+          {/* Safety */}
+          <div>
+            <h4 className="text-sm font-medium text-slate-700">Safety Tips</h4>
+            <ul className="list-disc list-inside text-sm text-slate-700 mt-2 space-y-1">
+              <li>Always confirm the network is BTC before sending.</li>
+              <li>
+                Send a small test amount if you’re depositing for the first
+                time.
+              </li>
+              <li>Keep your transaction ID (TXID) as proof of transfer.</li>
+              <li>
+                Contact support if your deposit doesn’t reflect after 1 hour.
+              </li>
+            </ul>
           </div>
         </div>
 
         {/* QR Section */}
-        <div className="w-full md:w-40 flex justify-center md:justify-end">
+        <div className="w-full md:w-48 flex justify-center md:justify-end">
           {qrImage ? (
             <img
               src={qrImage}
-              alt="Deposit QR"
-              className="w-40 h-40 object-contain rounded-md bg-white p-2"
+              alt="BTC Deposit QR"
+              className="w-48 h-48 object-contain rounded-xl bg-white p-2 shadow-md"
             />
           ) : (
-            <div className="w-40 h-40 bg-white rounded-md flex items-center justify-center text-sm text-slate-500">
-              QR
+            <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center text-slate-500 border border-slate-200">
+              QR Not Available
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 mt-4">
+      {/* Footer */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="font-mono text-emerald-700 text-sm truncate">
             {walletAddress}
@@ -135,15 +130,18 @@ Steps:
             }}
             className="flex items-center gap-1 shrink-0"
           >
-            <Copy className="h-4 w-4" /> {copied ? "Copied" : "Copy"}
+            <Copy className="h-4 w-4" />
+            {copied ? "Copied" : "Copy"}
           </Button>
         </div>
 
         <Button
-          onClick={() => downloadGuideAsPdf(guideText, "BTC-deposit-guide.txt")}
-          className="sm:ml-auto w-full sm:w-auto"
+          onClick={() =>
+            downloadGuideAsTxt(guideText, `${broker}-btc-deposit-guide.txt`)
+          }
+          className="sm:ml-auto w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
         >
-          Download Guide
+          <FileDown className="h-4 w-4 mr-2" /> Download Guide
         </Button>
       </div>
     </div>

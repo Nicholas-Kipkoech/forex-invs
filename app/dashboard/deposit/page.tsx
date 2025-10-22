@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, UploadCloud } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import DepositGuide from "./DepositGuide";
 
@@ -92,97 +92,111 @@ export default function DepositPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-3xl shadow-xl space-y-6">
-      <h1 className="text-3xl font-extrabold text-emerald-700">Deposit BTC</h1>
-      <p className="text-slate-600">
-        Send Bitcoin to the address below to fund your account. After sending,
-        upload your proof of payment for verification.
+    <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-8 border border-slate-200">
+      <h1 className="text-3xl font-bold text-emerald-700 mb-2">Deposit BTC</h1>
+      <p className="text-slate-600 mb-6">
+        Fund your account securely using Bitcoin. After sending, upload your
+        proof of payment for quick verification.
       </p>
 
       {/* Wallet Card */}
-      <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="flex-1 flex flex-col gap-3">
-          <span className="font-mono text-emerald-700 text-sm sm:text-base truncate">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="flex-1">
+          <p className="text-xs uppercase text-emerald-700 font-semibold">
+            Wallet Address
+          </p>
+          <p className="font-mono text-slate-800 break-all mt-1">
             {walletAddress}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopy}
-            className={`w-32 flex items-center justify-center gap-1 border-emerald-300 ${
-              copied
-                ? "bg-emerald-100 text-emerald-700"
-                : "hover:bg-emerald-100"
-            }`}
-          >
-            <Copy className="h-4 w-4" /> {copied ? "Copied" : "Copy"}
-          </Button>
+          </p>
         </div>
+        <Button
+          onClick={handleCopy}
+          variant="outline"
+          className={`border-emerald-300 ${
+            copied ? "bg-emerald-100 text-emerald-700" : "hover:bg-emerald-50"
+          }`}
+        >
+          <Copy className="h-4 w-4 mr-1" />
+          {copied ? "Copied!" : "Copy"}
+        </Button>
       </div>
 
+      {/* Deposit Guide */}
       <DepositGuide walletAddress={walletAddress} qrImage={qrImage} />
 
-      {/* Deposit Amount */}
       {!submitted && (
-        <div className="space-y-4">
-          <label className="block text-sm text-slate-600">
-            Deposit Amount (USD)
-          </label>
-          <input
-            type="number"
-            min="1"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter deposit amount"
-            className="w-full border border-slate-300 rounded-md px-3 py-2"
-          />
-        </div>
-      )}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 mt-6 border-t border-slate-100 pt-6"
+        >
+          {/* Amount */}
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">
+              Deposit Amount (USD)
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
 
-      {/* Instructions */}
-      <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-sm text-slate-700 space-y-2">
-        <p>⚠️ Important:</p>
-        <ul className="list-disc list-inside space-y-1">
-          <li>Send Bitcoin only to the address above.</li>
-          <li>Do not send any other cryptocurrency.</li>
-          <li>After sending, upload your proof of transaction below.</li>
-          <li>Deposits are credited once confirmed on the Bitcoin network.</li>
-        </ul>
-      </div>
-
-      {/* Upload Proof */}
-      {!submitted ? (
-        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Proof Upload */}
           <div>
             <label className="block text-sm text-slate-600 mb-1">
               Upload Proof of Payment
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full border border-slate-300 rounded-md px-3 py-2"
-            />
-            {file && (
-              <p className="mt-2 text-xs text-emerald-700">
-                Selected: {file.name}
-              </p>
-            )}
+            <div className="border border-dashed border-slate-300 rounded-xl p-6 flex flex-col items-center justify-center text-slate-500 hover:border-emerald-400 transition">
+              <UploadCloud className="h-8 w-8 text-emerald-500 mb-2" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="text-sm text-center"
+              />
+              {file && (
+                <p className="text-xs text-emerald-700 mt-2 font-medium">
+                  {file.name}
+                </p>
+              )}
+            </div>
           </div>
 
+          {/* Instructions */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-700">
+            <p className="font-semibold text-emerald-700 mb-1">⚠️ Important</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Send only Bitcoin (BTC) to this address.</li>
+              <li>Sending other coins may result in permanent loss.</li>
+              <li>Upload your transaction proof immediately after sending.</li>
+              <li>Deposits are credited after blockchain confirmation.</li>
+            </ul>
+          </div>
+
+          {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit Proof"}
           </Button>
         </form>
-      ) : (
-        <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center text-emerald-700 font-semibold shadow-md">
-          ✅ Payment proof submitted! <br />
-          Your deposit of ${amount} is currently being processed. Please wait
-          for confirmation.
+      )}
+
+      {submitted && (
+        <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center shadow-sm">
+          <p className="text-emerald-700 font-semibold text-lg">
+            ✅ Payment proof submitted successfully!
+          </p>
+          <p className="text-slate-600 mt-2">
+            Your deposit of{" "}
+            <span className="font-bold text-emerald-700">${amount}</span> is
+            being processed. You’ll receive confirmation once verified.
+          </p>
         </div>
       )}
     </div>

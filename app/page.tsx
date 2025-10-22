@@ -2,286 +2,138 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { LineChart, TrendingUp, Lock, Globe } from "lucide-react";
 import Link from "next/link";
 
-export default function HomePage() {
-  const steps = [
-    {
-      title: "1. Create Your Account",
-      desc: "Sign up securely using your email and complete a quick verification process to unlock your dashboard.",
-      icon: "📈",
-    },
-    {
-      title: "2. Fund Your Portfolio",
-      desc: "Easily deposit funds via crypto transfer (Bitcon). Start investing in AI-managed stock portfolios instantly.",
-      icon: "💳",
-    },
-    {
-      title: "3. Watch Your Investments Grow",
-      desc: "Our AI automatically diversifies, rebalances, and optimizes your stock portfolio for consistent growth.",
-      icon: "🤖",
-    },
-  ];
-
-  const plans = [
-    {
-      name: "Starter Portfolio",
-      price: "$100 - $999",
-      features: [
-        "Automated Stock Portfolio Management",
-        "Weekly Performance Insights",
-        "No Hidden Fees",
-        "Full Dashboard Access",
-      ],
-    },
-    {
-      name: "Growth Portfolio",
-      price: "$1,000 - $4,999",
-      features: [
-        "AI Optimization + Human Oversight",
-        "Dynamic Market Adjustments",
-        "Tax-Efficient Strategies",
-        "Priority Support",
-      ],
-    },
-    {
-      name: "Elite Portfolio",
-      price: "$5,000+",
-      features: [
-        "Custom Stock Basket Creation",
-        "Smart Diversification Across Sectors",
-        "Dedicated Financial Analyst",
-        "Exclusive Investment Insights",
-      ],
-    },
-  ];
-
-  const benefits = [
-    {
-      title: "AI-Powered Insights",
-      desc: "Our algorithms analyze thousands of market signals and trends to make smart investment decisions.",
-      icon: "🧠",
-    },
-    {
-      title: "Passive Growth",
-      desc: "Your portfolio is automatically adjusted to capture growth opportunities while minimizing risks.",
-      icon: "📊",
-    },
-    {
-      title: "Built-In Risk Control",
-      desc: "AI monitors volatility and rebalances portfolios to protect your investments.",
-      icon: "🛡️",
-    },
-    {
-      title: "Transparent Reporting",
-      desc: "Track performance and returns in real time through your dashboard — anytime, anywhere.",
-      icon: "📱",
-    },
-  ];
-
+export default function LandingPage() {
   return (
-    <main className="bg-white text-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative bg-emerald-700 text-white py-32">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <motion.h1
-            className="text-5xl font-bold mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            Smarter Stock Investing with AI
-          </motion.h1>
-          <motion.p
-            className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            Harness the power of artificial intelligence to build and manage
-            your stock portfolio — automatically, intelligently, and securely.
-          </motion.p>
+      <section className="relative flex flex-col items-center justify-center text-center px-6 py-32">
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent"
+        >
+          Trade Smarter. Grow Faster.
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="max-w-2xl mt-6 text-slate-300 text-lg"
+        >
+          Real-time market data, AI insights, and secure crypto deposits —
+          everything you need to master your investments.
+        </motion.p>
 
-          <div className="flex justify-center gap-4 mt-4">
-            <Link href="/register">
-              <Button
-                size="lg"
-                className="bg-white text-emerald-700 hover:bg-emerald-50 font-medium px-8 rounded-full"
-              >
-                Get Started
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-emerald-700 hover:bg-emerald-600 font-medium px-8 rounded-full"
-              >
-                Login
-              </Button>
-            </Link>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-10 flex gap-4"
+        >
+          <Link href="/register">
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-lg px-6 py-3 rounded-xl">
+              Get Started
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button
+              variant="outline"
+              className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 text-lg px-6 py-3 rounded-xl"
+            >
+              Login
+            </Button>
+          </Link>
+        </motion.div>
+
+        {/* Floating glow */}
+        <div className="absolute -z-10 w-[600px] h-[600px] rounded-full bg-emerald-600/10 blur-3xl"></div>
+      </section>
+
+      {/* TradingView Preview Section */}
+      <section className="relative flex flex-col items-center py-20 px-6">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-emerald-400">
+          Live Market Overview
+        </h2>
+        <div className="w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl border border-emerald-500/20">
+          <iframe
+            src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_8b80d&symbol=NASDAQ:AAPL&interval=15&hide_top_toolbar=1&hide_legend=1&theme=dark"
+            style={{ height: "500px", width: "100%" }}
+          ></iframe>
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Why Choose Our AI Stock Platform
-          </h2>
-          <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
-            We combine AI technology with market expertise to help you invest in
-            high-performing stocks automatically. No guesswork, no stress — just
-            smart, data-driven investing.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            {[
-              {
-                title: "Smart Portfolio Management",
-                desc: "AI constantly tracks market trends and rebalances your portfolio for optimal returns.",
-              },
-              {
-                title: "Safe & Secure Investments",
-                desc: "Your funds and data are protected by bank-grade security and regulatory compliance.",
-              },
-              {
-                title: "Real-Time Transparency",
-                desc: "Get instant insights on your portfolio’s performance, gains, and diversification.",
-              },
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ scale: 1.03 }}
-                className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition"
-              >
-                <h3 className="text-lg font-semibold text-emerald-700 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+      {/* Features Section */}
+      <section className="py-28 bg-slate-900/60 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 px-6">
+          {[
+            {
+              icon: <LineChart className="h-10 w-10 text-emerald-400" />,
+              title: "Live Price Feeds",
+              text: "Real-time updates for stocks, ETFs, bonds, and crypto — no delays, no noise.",
+            },
+            {
+              icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
+              title: "AI-Driven Insights",
+              text: "Smart analytics that highlight opportunities before others even notice.",
+            },
+            {
+              icon: <Lock className="h-10 w-10 text-emerald-400" />,
+              title: "Secure BTC Deposits",
+              text: "Instantly fund your account using Bitcoin with multilayer encryption.",
+            },
+          ].map((f, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.05 }}
+              className="p-6 bg-slate-950/40 border border-emerald-400/20 rounded-2xl shadow-lg backdrop-blur-xl transition"
+            >
+              <div className="flex items-center gap-3 mb-4">{f.icon}</div>
+              <h3 className="text-xl font-semibold text-emerald-300 mb-2">
+                {f.title}
+              </h3>
+              <p className="text-slate-300 text-sm">{f.text}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* Investment Plans */}
-      <section className="py-20 bg-white border-t">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Choose Your Investment Plan
-          </h2>
-          <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
-            Whether you’re a beginner or an experienced investor, our AI-powered
-            portfolios adapt to your goals and risk appetite.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {plans.map((plan, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ scale: 1.03 }}
-                className="p-8 bg-gray-50 rounded-2xl shadow-sm border hover:shadow-md transition text-left"
-              >
-                <h3 className="text-xl font-semibold text-emerald-700 mb-2">
-                  {plan.name}
-                </h3>
-                <p className="text-gray-800 font-medium mb-4">{plan.price}</p>
-                <ul className="text-gray-600 text-sm space-y-2 mb-6">
-                  {plan.features.map((f, i) => (
-                    <li key={i}>✅ {f}</li>
-                  ))}
-                </ul>
-                <Link href="/register">
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full">
-                    Invest Now
-                  </Button>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-20 bg-gray-50 border-t">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Benefits of AI Stock Investing
-          </h2>
-          <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
-            Experience the future of investing — data-driven, emotion-free, and
-            effortlessly profitable.
-          </p>
-
-          <div className="grid md:grid-cols-4 gap-6 text-left">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.03 }}
-                className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition"
-              >
-                <div className="text-3xl mb-3">{benefit.icon}</div>
-                <h3 className="text-lg font-semibold text-emerald-700 mb-1">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-600 text-sm">{benefit.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How to Get Started Section */}
-      <section className="py-20 bg-white border-t">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            How to Get Started
-          </h2>
-          <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
-            Begin your AI investing journey in just a few simple steps.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((step, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.03 }}
-                className="p-6 bg-gray-50 rounded-2xl shadow-sm border hover:shadow-md transition"
-              >
-                <div className="text-4xl mb-4">{step.icon}</div>
-                <h3 className="text-lg font-semibold text-emerald-700 mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 text-sm">{step.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mt-10">
-            <Link href="/register">
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 rounded-full">
-                Start Investing
-              </Button>
-            </Link>
-          </div>
-        </div>
+      {/* Global CTA */}
+      <section className="text-center py-24 px-6">
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent"
+        >
+          Ready to Trade the Future?
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-2xl mx-auto text-slate-300 mb-10"
+        >
+          Join thousands of investors leveraging next-gen analytics and secure
+          crypto deposits.
+        </motion.p>
+        <Link href="/register">
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-lg px-8 py-4 rounded-xl">
+            Get Started Now
+          </Button>
+        </Link>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-sm text-gray-500 border-t bg-white">
-        <p>
-          © {new Date().getFullYear()} StockAI Investments. All rights reserved.
-        </p>
-        <p className="mt-2">
-          <a
-            href="/legal"
-            className="text-emerald-700 hover:underline transition"
-          >
-            View Legal Disclosure
-          </a>
-        </p>
+      <footer className="border-t border-emerald-500/10 py-8 text-center text-slate-500 text-sm">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Globe className="h-4 w-4" />
+          <span>© {new Date().getFullYear()} NexTrade Global</span>
+        </div>
       </footer>
-    </main>
+    </div>
   );
 }

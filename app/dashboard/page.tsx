@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -16,628 +15,656 @@ import {
 } from "recharts";
 
 /**
- * StockProManage Dashboard (Supabase-connected)
- * - switched to stocks (AAPL, TSLA, AMZN, NVDA, MSFT)
- * - includes TradingView widget embed for the selected symbol
- * - mobile responsive
+ * StockAI Dashboard — Multi-asset, TradingView embed, mock real-time prices, simulated orders
  *
- * Keep your existing DB schema (investors table).
+ * Notes:
+ * - TradingView widget script is used (official embed). Ensure CSP allows s3.tradingview.com if deploying.
+ * - All trading is simulated locally (no real execution). Replace with broker/brokerage API for production.
  */
 
-const DEFAULT_SERIES_LEN = 40;
-const MAX_TRADES_STORED = 50;
-const STOCKS = ["AAPL", "TSLA", "AMZN", "NVDA", "MSFT", "GOOGL", "META"];
+const CATEGORIES: Record<
+  string,
+  { label: string; list: { id: string; name: string; tvSymbol: string }[] }
+> = {
+  Stocks: {
+    label: "Stocks",
+    list: [
+      { id: "AAPL", name: "Apple", tvSymbol: "NASDAQ:AAPL" },
+      { id: "TSLA", name: "Tesla", tvSymbol: "NASDAQ:TSLA" },
+      { id: "NVDA", name: "NVIDIA", tvSymbol: "NASDAQ:NVDA" },
+      { id: "AMZN", name: "Amazon", tvSymbol: "NASDAQ:AMZN" },
+      { id: "MSFT", name: "Microsoft", tvSymbol: "NASDAQ:MSFT" },
+    ],
+  },
+  ETFs: {
+    label: "ETFs",
+    list: [
+      { id: "SPY", name: "SPDR S&P 500 ETF", tvSymbol: "ARCA:SPY" },
+      { id: "QQQ", name: "Invesco QQQ", tvSymbol: "NASDAQ:QQQ" },
+      { id: "VOO", name: "Vanguard S&P 500", tvSymbol: "AMEX:VOO" },
+    ],
+  },
+  Bonds: {
+    label: "Bonds",
+    list: [
+      { id: "US10Y", name: "U.S. 10Y Yield", tvSymbol: "CBOE:TNX" },
+      { id: "US02Y", name: "U.S. 2Y Yield", tvSymbol: "CBOE:US02Y" }, // placeholder
+    ],
+  },
+  Funds: {
+    label: "Mutual Funds",
+    list: [
+      {
+        id: "VTSAX",
+        name: "Vanguard Total Stock Mkt Adm",
+        tvSymbol: "MUTF:VTSAX",
+      }, // MUTF is an example prefix
+      { id: "FXAIX", name: "Fidelity 500 Index Fund", tvSymbol: "MUTF:FXAIX" },
+    ],
+  },
+  Commodities: {
+    label: "Commodities",
+    list: [
+      { id: "XAUUSD", name: "Gold (XAU/USD)", tvSymbol: "FOREXCOM:XAUUSD" },
+      { id: "CL", name: "Crude Oil (WTI)", tvSymbol: "NYMEX:CL1!" },
+    ],
+  },
+  Indices: {
+    label: "Indices",
+    list: [
+      { id: "SPX", name: "S&P 500", tvSymbol: "SP:SPX" },
+      { id: "NDX", name: "NASDAQ 100", tvSymbol: "NASDAQ:NDX" },
+    ],
+  },
+  Crypto: {
+    label: "Crypto",
+    list: [
+      { id: "BTCUSD", name: "Bitcoin", tvSymbol: "COINBASE:BTCUSD" },
+      { id: "ETHUSD", name: "Ethereum", tvSymbol: "COINBASE:ETHUSD" },
+    ],
+  },
+};
 
-const samplePlans = [
-  {
-    name: "Starter",
-    deposit: "$100",
-    target: "4–6% / month",
-    tag: "Conservative",
-  },
-  { name: "Growth", deposit: "$500", target: "8–12% / month", tag: "Balanced" },
-  {
-    name: "Premium",
-    deposit: "$1,000+",
-    target: "12%+ / month",
-    tag: "Aggressive",
-  },
-];
+const DEFAULT_CATEGORY = "Stocks";
+const DEFAULT_SYMBOL = CATEGORIES[DEFAULT_CATEGORY].list[0].id;
+
+// initial mock balance
+const START_BALANCE = 5000;
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  // Profile & data
-  const [profile, setProfile] = useState<any>(null);
-  const [balance, setBalance] = useState<number>(0);
-  const [series, setSeries] = useState<{ name: string; value: number }[]>([]);
-  const [trades, setTrades] = useState<any[]>([]);
+  // auth/profile would go here — for this example it's simulated
+  const [balance, setBalance] = useState<number>(START_BALANCE);
+  const [portfolio, setPortfolio] = useState<
+    Record<string, { shares: number; avgPrice: number }>
+  >({});
+  const [trades, setTrades] = useState<any[]>([]); // recent orders
   const [notifications, setNotifications] = useState<string[]>([]);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [isTrading, setIsTrading] = useState(false);
-  const [speed, setSpeed] = useState<"slow" | "normal" | "fast">("normal");
 
-  // Market selection + real-time mock prices
-  const [selectedSymbol, setSelectedSymbol] = useState<string>("AAPL");
-  const [prices, setPrices] = useState<Record<string, number>>(() =>
-    STOCKS.reduce((acc, s) => {
-      acc[s] = +(100 + Math.random() * 900).toFixed(2);
-      return acc;
-    }, {} as Record<string, number>)
+  // market state
+  const [category, setCategory] = useState<string>(DEFAULT_CATEGORY);
+  const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL);
+  const [prices, setPrices] = useState<Record<string, number>>(() => {
+    // seed prices for every supported symbol
+    const out: Record<string, number> = {};
+    Object.values(CATEGORIES).forEach((cat) => {
+      cat.list.forEach((s) => {
+        out[s.id] = +(50 + Math.random() * 950).toFixed(2);
+      });
+    });
+    return out;
+  });
+
+  // TradingView embed container ref + unique id to recreate widget on symbol change
+  const tvContainerIdRef = useRef(
+    `tv-widget-${Math.random().toString(36).slice(2, 9)}`
+  );
+  const [tvWidgetKey, setTvWidgetKey] = useState<number>(0);
+
+  // mini portfolio series for chart
+  const [series, setSeries] = useState<{ name: string; value: number }[]>(() =>
+    mockSeries(30, START_BALANCE)
   );
 
-  // Trade control refs
-  const tradingIntervalRef = useRef<number | null>(null);
-  const latestRef = useRef<number>(0); // keep latest balance for interval callbacks
-
-  // TradingView embed ref
-  const tvRef = useRef<HTMLDivElement | null>(null);
-
-  // Derived metrics
-  const latest = series[series.length - 1]?.value ?? balance;
-  const first = series[0]?.value ?? latest;
-  const profit = useMemo(() => {
-    const p = latest - first;
-    return Math.round(p * 100) / 100;
-  }, [latest, first]);
-
-  const roi = useMemo(() => {
-    if (!first || first === 0) return 0;
-    const raw = (profit / first) * 100;
-    return Math.round(raw * 100) / 100;
-  }, [profit, first]);
-
-  // --- Load profile & starting data ---
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData?.session) {
-        router.push("/login");
-        return;
-      }
-      const userId = sessionData.session.user.id;
-      try {
-        const { data: investor, error } = await supabase
-          .from("investors")
-          .select("*")
-          .eq("user_id", userId)
-          .single();
-
-        if (error) throw error;
-        if (cancelled) return;
-
-        const startingBalance = Number(investor?.balance ?? 1000);
-        setProfile(investor || null);
-        setBalance(startingBalance);
-        latestRef.current = startingBalance;
-
-        // seed series and trades for UI
-        setSeries(mockSeries(DEFAULT_SERIES_LEN, startingBalance));
-        setTrades(
-          mockTrades(
-            Math.min(10, Math.floor(startingBalance / 100) || 3),
-            startingBalance
-          )
-        );
-      } catch (err) {
-        console.error("Failed loading investor", err);
-        setNotifications((n) =>
-          ["Failed to load profile. Please login again.", ...n].slice(0, 6)
-        );
-      }
-    }
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
-
-  // AI insight: dynamic based on recent series growth
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const recent = series.slice(-6).map((s) => s.value);
-      if (recent.length < 2) {
-        setAiInsight("Analyzing portfolio performance...");
-        return;
-      }
-      const change =
-        ((recent[recent.length - 1] - recent[0]) / (recent[0] || 1)) * 100;
-      const formatted = `${(Math.round(change * 10) / 10).toFixed(1)}%`;
-      setAiInsight(
-        `AI Insight: Portfolio changed ${formatted} over recent trades. Consider rebalancing across sectors.`
-      );
-    }, 900);
-    return () => clearTimeout(timer);
-  }, [series]);
-
-  // Keep latestRef in sync
-  useEffect(() => {
-    latestRef.current = balance;
-  }, [balance]);
-
-  // Quick mock of real-time prices (client-only; replace with real feed later)
+  // realtime price jitter simulation
   useEffect(() => {
     const id = window.setInterval(() => {
       setPrices((p) => {
         const next = { ...p };
-        STOCKS.forEach((s) => {
-          const jitter = (Math.random() - 0.5) * (next[s] * 0.0025); // ±0.25%
-          next[s] = Math.max(1, +(next[s] + jitter).toFixed(2));
+        Object.keys(next).forEach((k) => {
+          const jitter = (Math.random() - 0.5) * (next[k] * 0.003); // ±0.3%
+          next[k] = Math.max(0.01, +(next[k] + jitter).toFixed(2));
         });
         return next;
       });
-    }, 2500);
-    return () => window.clearInterval(id);
+
+      // also nudge portfolio series to feel dynamic
+      setSeries((s) => {
+        const last = s[s.length - 1]?.value ?? START_BALANCE;
+        const change = (Math.random() - 0.45) * (last * 0.002); // small changes
+        const nextVal = Math.max(0, Math.round((last + change) * 100) / 100);
+        return [...s.slice(-29), { name: `T${s.length + 1}`, value: nextVal }];
+      });
+    }, 2000);
+    return () => clearInterval(id);
   }, []);
 
-  // Trading control (start/stop) - stock flavor
+  // handle tradingview embed lifecycle (lazy load and recreate on symbol change)
   useEffect(() => {
-    if (tradingIntervalRef.current) {
-      window.clearInterval(tradingIntervalRef.current);
-      tradingIntervalRef.current = null;
-    }
+    // create a unique container id so we can recreate the widget
+    const containerId = tvContainerIdRef.current;
+    // clear previous contents
+    const container = document.getElementById(containerId);
+    if (container) container.innerHTML = "";
 
-    if (!isTrading) return;
-
-    const intervalMs = speed === "slow" ? 6000 : speed === "fast" ? 1500 : 3500;
-
-    tradingIntervalRef.current = window.setInterval(async () => {
-      const current = latestRef.current;
-      if (!profile || current <= 0) {
-        setIsTrading(false);
-        setNotifications((n) =>
-          ["Trading stopped — no funds or session expired.", ...n].slice(0, 6)
-        );
-        if (tradingIntervalRef.current) {
-          window.clearInterval(tradingIntervalRef.current);
-          tradingIntervalRef.current = null;
-        }
-        return;
-      }
-
-      // generate trade (stock)
-      const newTrade = generateTrade(current, prices);
-
-      const clampedNewBalance = Math.max(
-        0,
-        Math.round(newTrade.newBalance * 100) / 100
-      );
-      const tradeWithClamp = { ...newTrade, newBalance: clampedNewBalance };
-
-      // update UI state atomically
-      setTrades((prev) => {
-        const updated = [tradeWithClamp, ...prev].slice(0, MAX_TRADES_STORED);
-        return updated;
-      });
-      setSeries((prev) => {
-        const next = [
-          ...prev,
-          { name: `T${prev.length + 1}`, value: tradeWithClamp.newBalance },
-        ];
-        return next.slice(-DEFAULT_SERIES_LEN);
-      });
-      setBalance(tradeWithClamp.newBalance);
-      latestRef.current = tradeWithClamp.newBalance;
-
-      // persist optimistic balance update
-      try {
-        const { error } = await supabase
-          .from("investors")
-          .update({ balance: tradeWithClamp.newBalance })
-          .eq("id", profile?.id);
-        if (error) console.error("Failed to persist balance", error);
-      } catch (err) {
-        console.error("Supabase update error", err);
-      }
-
-      // occasional notification
-      if (Math.random() < 0.28) {
-        setNotifications((n) =>
-          [
-            `${tradeWithClamp.pnl >= 0 ? "▲" : "▼"} ${tradeWithClamp.symbol} ${
-              tradeWithClamp.pnl >= 0 ? "+" : ""
-            }${tradeWithClamp.pnl.toFixed(2)}`,
-            ...n,
-          ].slice(0, 6)
-        );
-      }
-
-      // auto-stop safety
-      if (tradeWithClamp.newBalance <= 0) {
-        setIsTrading(false);
-        setNotifications((n) =>
-          ["⚠️ Trading stopped — balance depleted.", ...n].slice(0, 6)
-        );
-        if (tradingIntervalRef.current) {
-          window.clearInterval(tradingIntervalRef.current);
-          tradingIntervalRef.current = null;
-        }
-      }
-    }, intervalMs);
-
-    return () => {
-      if (tradingIntervalRef.current) {
-        window.clearInterval(tradingIntervalRef.current);
-        tradingIntervalRef.current = null;
-      }
-    };
-  }, [isTrading, speed, profile, prices]);
-
-  // TradingView embed loader — uses TradingView widget script to embed selectedSymbol
-  useEffect(() => {
-    // remove old widget if present
-    if (!tvRef.current) return;
-    tvRef.current.innerHTML = "";
-
+    // create script tag for TradingView widget
     const script = document.createElement("script");
-    script.type = "text/javascript";
     script.src = "https://s3.tradingview.com/tv.js";
     script.async = true;
     script.onload = () => {
       try {
-        // @ts-ignore — TradingView global added by script
+        // find tvSymbol for current symbol
+        const tvSymbol = findTvSymbol(symbol);
+        // instantiate widget
+        // @ts-ignore
         new (window as any).TradingView.widget({
-          container_id: tvRef.current?.id,
+          container_id: containerId,
           autosize: true,
-          symbol: `NASDAQ:${selectedSymbol}`,
+          symbol: tvSymbol,
           interval: "D",
           timezone: "Etc/UTC",
-          theme: "light",
+          theme: "dark",
           style: "1",
           locale: "en",
-          toolbar_bg: "#f1f5f9",
+          toolbar_bg: "#1b2430",
           enable_publishing: false,
           allow_symbol_change: true,
         });
       } catch (err) {
-        console.warn("TradingView widget load error", err);
+        console.error("TradingView widget error:", err);
       }
     };
-    document.body.appendChild(script);
+
+    // append script and ensure container exists
+    if (!container) {
+      const wrapper = document.getElementById("tv-wrapper");
+      if (wrapper) {
+        const div = document.createElement("div");
+        div.id = containerId;
+        div.style.width = "100%";
+        div.style.height = "100%";
+        wrapper.appendChild(div);
+        document.body.appendChild(script);
+      }
+    } else {
+      document.body.appendChild(script);
+    }
+
+    // increment key to force re-render (optional)
+    setTvWidgetKey((k) => k + 1);
 
     return () => {
-      // cleanup script (leave widget container empty)
-      document.body.removeChild(script);
-      if (tvRef.current) tvRef.current.innerHTML = "";
+      // cleanup: remove the script (might remove other tv scripts if multiple on page — keep simple)
+      // Better approach: track script element by id; here we remove the one we appended if still present.
+      const scripts = Array.from(document.getElementsByTagName("script"));
+      scripts.forEach((s) => {
+        if (s.src && s.src.includes("s3.tradingview.com/tv.js")) {
+          // don't remove all tradingview scripts if other pages rely on them; this is a safe-try cleanup
+          // s.parentNode?.removeChild(s);
+        }
+      });
+      // clear container to avoid duplicate widgets
+      const c = document.getElementById(containerId);
+      if (c) c.innerHTML = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSymbol]);
+  }, [symbol]);
 
-  // Scroll trades to top on update
-  const tradesRef = useRef<HTMLDivElement | null>(null);
+  // helpers
+  const tvListForCategory = CATEGORIES[category].list;
+  const tvSymbol = findTvSymbol(symbol);
+
+  // portfolio metrics
+  const portfolioValue = useMemo(() => {
+    return Object.entries(portfolio).reduce((acc, [id, pos]) => {
+      const price = prices[id] ?? 0;
+      return acc + pos.shares * price;
+    }, 0);
+  }, [portfolio, prices]);
+
+  const totalEquity = useMemo(
+    () => Math.round((balance + portfolioValue) * 100) / 100,
+    [balance, portfolioValue]
+  );
+
+  // Simulated trade placement (BUY/SELL)
+  const placeOrder = (opts: {
+    side: "BUY" | "SELL";
+    symbol: string;
+    shares: number;
+  }) => {
+    const price = prices[opts.symbol] ?? 0;
+    const cost = Math.round(price * opts.shares * 100) / 100;
+
+    if (opts.side === "BUY") {
+      if (cost > balance) {
+        setNotifications((n) =>
+          [`Insufficient funds: need $${cost}`, ...n].slice(0, 6)
+        );
+        return;
+      }
+      // debit cash, add to holdings (weighted avg)
+      setBalance((b) => Math.round((b - cost) * 100) / 100);
+      setPortfolio((p) => {
+        const prev = p[opts.symbol];
+        if (!prev) {
+          return {
+            ...p,
+            [opts.symbol]: { shares: opts.shares, avgPrice: price },
+          };
+        } else {
+          const totalShares = prev.shares + opts.shares;
+          const avgPrice =
+            Math.round(
+              ((prev.avgPrice * prev.shares + price * opts.shares) /
+                totalShares) *
+                100
+            ) / 100;
+          return { ...p, [opts.symbol]: { shares: totalShares, avgPrice } };
+        }
+      });
+    } else {
+      // SELL
+      setPortfolio((p) => {
+        const prev = p[opts.symbol];
+        if (!prev || prev.shares < opts.shares) {
+          setNotifications((n) =>
+            ["Not enough shares to sell", ...n].slice(0, 6)
+          );
+          return p;
+        }
+        const remaining = prev.shares - opts.shares;
+        const updated = { ...p };
+        if (remaining === 0) {
+          delete updated[opts.symbol];
+        } else {
+          updated[opts.symbol] = { shares: remaining, avgPrice: prev.avgPrice };
+        }
+        // credit cash
+        setBalance((b) => Math.round((b + cost) * 100) / 100);
+        return updated;
+      });
+    }
+
+    // push trade record
+    const trade = {
+      id: `T${Math.floor(Math.random() * 900000 + 100000)}`,
+      symbol: opts.symbol,
+      side: opts.side,
+      shares: opts.shares,
+      price,
+      cost,
+      time: new Date().toLocaleTimeString(),
+    };
+    setTrades((t) => [trade, ...t].slice(0, 50));
+    setNotifications((n) =>
+      [
+        `${opts.side} ${opts.shares} ${opts.symbol} @ ${formatMoney(
+          price
+        )} — ${formatMoney(trade.cost)}`,
+        ...n,
+      ].slice(0, 6)
+    );
+  };
+
+  // mini helper to update symbol when category changes
   useEffect(() => {
-    if (tradesRef.current) tradesRef.current.scrollTop = 0;
-  }, [trades]);
-
-  // Logout
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
-  }
-
-  // UI helpers
-  const formatMoney = (n: number) =>
-    `$${n.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    const first = CATEGORIES[category].list[0]?.id;
+    if (first) setSymbol(first);
+  }, [category]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white p-4 sm:p-6">
-      {/* Notifications stack */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col gap-3 w-[320px] max-w-[90vw]">
-        {notifications.map((note, i) => (
+    <div className="min-h-screen bg-[#0B0E13] text-gray-100 p-4 sm:p-6">
+      {/* notifications */}
+      <div className="fixed top-4 right-4 z-50 w-[320px] max-w-[90vw] flex flex-col gap-2">
+        {notifications.map((n, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="bg-white px-4 py-2 rounded-xl shadow flex items-start gap-3 text-xs border border-emerald-100"
+            className="bg-[#081018] border border-gray-700 px-4 py-2 rounded-lg text-sm"
           >
-            <div className="text-sm">{note}</div>
+            {n}
           </motion.div>
         ))}
       </div>
 
-      {/* Header */}
+      {/* header */}
       <header className="max-w-7xl mx-auto mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 text-white flex items-center justify-center font-bold text-lg shadow">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400 text-[#091018] flex items-center justify-center font-bold text-lg shadow">
             STK
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-emerald-700">
-              StockProManage
-            </h1>
-            <p className="text-sm text-slate-500">AI Stock Portfolio</p>
+            <h1 className="text-2xl font-extrabold">StockAI Dashboard</h1>
+            <div className="text-xs text-gray-400">
+              Multi-asset live market & trading (simulated)
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <Button
-            onClick={() => router.push("/dashboard/deposit")}
-            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => {
+              /* deposit flow */
+            }}
+            className="bg-emerald-500 hover:bg-emerald-400"
           >
             Deposit
           </Button>
-
           <Button
-            onClick={() => router.push("/dashboard/withdraw")}
-            className="bg-yellow-600 hover:bg-yellow-700"
+            variant="outline"
+            onClick={() => {
+              /* withdraw flow */
+            }}
+            className="border-gray-600"
           >
             Withdraw
-          </Button>
-
-          <motion.button
-            onClick={() => setIsTrading((s) => !s)}
-            className={`px-4 py-2 rounded-lg font-medium text-white ${
-              isTrading ? "bg-emerald-600" : "bg-rose-600"
-            }`}
-            animate={
-              isTrading
-                ? {
-                    scale: [1, 1.03, 1],
-                    boxShadow: "0 0 16px rgba(16,185,129,0.18)",
-                  }
-                : { scale: 1 }
-            }
-            transition={{ repeat: isTrading ? Infinity : 0, duration: 1.5 }}
-          >
-            {isTrading ? "Stop Auto-Trading" : "Start Auto-Trading"}
-          </motion.button>
-
-          <Button variant="outline" onClick={handleLogout}>
-            Logout
           </Button>
         </div>
       </header>
 
-      {/* Main grid */}
+      {/* main grid */}
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left main column */}
+        {/* left column */}
         <section className="lg:col-span-8 space-y-6">
-          {/* Summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard
-              label="Balance"
-              value={formatMoney(balance)}
-              hint="Current equity"
-            />
-            <StatCard
-              label="Profit"
-              value={`${profit >= 0 ? "+" : ""}${formatMoney(profit)}`}
-              hint={`ROI ${roi}%`}
-              accent
-              isNegative={profit < 0}
-            />
-            <ProfileCard profile={profile} />
-          </div>
-
-          {/* Chart & controls (TradingView embed) */}
-          <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3">
+          {/* portfolio summary */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <div className="text-lg font-semibold text-emerald-700">
-                  Market Chart
+                <div className="text-xs text-gray-400">Total Equity</div>
+                <div className="text-3xl font-bold">
+                  {formatMoney(totalEquity)}
                 </div>
-                <div className="text-sm text-slate-500">
-                  TradingView live chart — select a symbol
+                <div className="text-sm text-gray-500">
+                  Cash: {formatMoney(balance)} • Holdings:{" "}
+                  {formatMoney(portfolioValue)}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <select
-                  value={selectedSymbol}
-                  onChange={(e) => setSelectedSymbol(e.target.value)}
-                  className="border rounded px-2 py-1 text-sm"
+              <div className="flex gap-2">
+                <Button
+                  onClick={() =>
+                    setNotifications((n) =>
+                      ["Exported performance (mock)", ...n].slice(0, 6)
+                    )
+                  }
+                  className="bg-gray-700 border"
                 >
-                  {STOCKS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                  Export
+                </Button>
+                <Button
+                  onClick={() => {
+                    setPortfolio({});
+                    setBalance(START_BALANCE);
+                    setTrades([]);
+                    setNotifications((n) =>
+                      ["Reset portfolio (demo)", ...n].slice(0, 6)
+                    );
+                  }}
+                  className="bg-rose-600"
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+
+            {/* small area chart */}
+            <div className="mt-4 w-full h-36">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={series}>
+                  <defs>
+                    <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#0b1220"
+                  />
+                  <XAxis dataKey="name" hide />
+                  <YAxis hide domain={["auto", "auto"]} />
+                  <Tooltip formatter={(v: any) => formatMoney(v)} />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#10b981"
+                    fill="url(#g1)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* market selector + tradingview container */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-3">
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-gray-300">Category</div>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
+                >
+                  {Object.keys(CATEGORIES).map((c) => (
+                    <option key={c} value={c}>
+                      {CATEGORIES[c].label}
                     </option>
                   ))}
                 </select>
 
-                <div className="text-xs text-slate-500 ml-auto">Speed</div>
+                <div className="ml-2 text-sm text-gray-300">Symbol</div>
                 <select
-                  value={speed}
-                  onChange={(e) => setSpeed(e.target.value as any)}
-                  className="border rounded px-2 py-1 text-sm"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value)}
+                  className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
                 >
-                  <option value="slow">Slow</option>
-                  <option value="normal">Normal</option>
-                  <option value="fast">Fast</option>
+                  {tvListForCategory.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.id} — {s.name}
+                    </option>
+                  ))}
                 </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-gray-400 mr-2">Live price</div>
+                <div className="text-xl font-semibold">
+                  {formatMoney(prices[symbol])}
+                </div>
               </div>
             </div>
 
-            {/* TradingView widget container */}
-            <div className="w-full h-[360px] sm:h-[420px] md:h-[440px]">
+            {/* TradingView container fallback: we place a wrapper div with id 'tv-wrapper' and a child container id computed above */}
+            <div
+              id="tv-wrapper"
+              className="w-full h-[420px] rounded-lg overflow-hidden border border-gray-800"
+              style={{ background: "#071018" }}
+            >
               <div
-                id={`tv-widget-${selectedSymbol}`}
-                ref={tvRef}
+                id={tvContainerIdRef.current}
                 style={{ width: "100%", height: "100%" }}
               />
             </div>
           </div>
 
-          {/* Trade Controls */}
-          <TradeControls
-            latest={latest}
-            setSeries={setSeries}
-            setTrades={setTrades}
-            setBalance={(v: number) => {
-              setBalance(v);
-              latestRef.current = v;
-            }}
-            setNotifications={setNotifications}
-            prices={prices}
-          />
+          {/* Trade controls */}
+          <TradePanel prices={prices} placeOrder={placeOrder} />
 
-          {/* Trade History */}
-          <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-sm text-slate-500">Recent Trades</div>
-              <div className="text-xs text-slate-400">
-                {trades.length} trades
+          {/* recent trades table */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-gray-300">Recent Orders</div>
+              <div className="text-xs text-gray-500">
+                {trades.length} orders
               </div>
             </div>
 
-            <div
-              ref={tradesRef}
-              className="overflow-y-auto max-h-80 border border-slate-100 rounded-lg"
-            >
+            <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-xs text-slate-400 text-left sticky top-0 bg-white">
+                <thead className="text-xs text-gray-400 text-left border-b border-gray-800">
                   <tr>
-                    <th className="p-2">ID</th>
-                    <th className="p-2">Symbol</th>
-                    <th className="p-2">Side</th>
-                    <th className="p-2">Shares</th>
-                    <th className="p-2">P/L</th>
-                    <th className="p-2">Time</th>
+                    <th className="py-2 px-2">ID</th>
+                    <th className="py-2 px-2">Symbol</th>
+                    <th className="py-2 px-2">Side</th>
+                    <th className="py-2 px-2">Shares</th>
+                    <th className="py-2 px-2">Price</th>
+                    <th className="py-2 px-2">Total</th>
+                    <th className="py-2 px-2">Time</th>
                   </tr>
                 </thead>
                 <tbody>
                   {trades.map((t) => (
-                    <tr key={t.id} className="border-t">
-                      <td className="py-2 px-2">{t.id}</td>
-                      <td className="py-2 px-2 font-medium">{t.symbol}</td>
-                      <td className="py-2 px-2 font-semibold text-xs">
+                    <tr key={t.id} className="border-b border-gray-800">
+                      <td className="py-2 px-2 text-gray-300">{t.id}</td>
+                      <td className="py-2 px-2">{t.symbol}</td>
+                      <td
+                        className={`py-2 px-2 font-semibold ${
+                          t.side === "BUY"
+                            ? "text-emerald-400"
+                            : "text-rose-400"
+                        }`}
+                      >
                         {t.side}
                       </td>
                       <td className="py-2 px-2">{t.shares}</td>
-                      <td
-                        className={`py-2 px-2 font-semibold ${
-                          t.pnl >= 0 ? "text-emerald-600" : "text-rose-600"
-                        }`}
-                      >
-                        {t.pnl >= 0 ? `+${t.pnl.toFixed(2)}` : t.pnl.toFixed(2)}
-                      </td>
-                      <td className="py-2 px-2 text-xs text-slate-500">
+                      <td className="py-2 px-2">{formatMoney(t.price)}</td>
+                      <td className="py-2 px-2">{formatMoney(t.cost)}</td>
+                      <td className="py-2 px-2 text-xs text-gray-500">
                         {t.time}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          {/* AI Insight */}
-          <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="text-sm text-slate-500">AI Insight</div>
-            <div className="text-lg font-semibold mt-1 text-emerald-700">
-              Portfolio Suggestion
-            </div>
-            <div className="mt-3 text-sm text-slate-700">
-              {aiInsight ?? "Analyzing..."}
+              {trades.length === 0 && (
+                <div className="text-sm text-gray-500 py-4">
+                  No orders yet — try placing a simulated trade.
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Right sidebar */}
+        {/* right sidebar */}
         <aside className="lg:col-span-4 space-y-6">
-          {/* Account */}
-          <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-slate-500">Account</div>
-                <div className="font-semibold text-lg">
-                  {profile?.name ?? "Investor"}
-                </div>
-                <div className="text-xs text-slate-400 mt-1">
-                  ID: {profile?.id ?? "—"}
-                </div>
+          {/* quick portfolio */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+            <div className="text-sm text-gray-400">Portfolio Snapshot</div>
+            <div className="mt-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-gray-400">Cash</div>
+                <div className="font-medium">{formatMoney(balance)}</div>
               </div>
-              <div className="flex flex-col items-end">
-                <div className="text-xs text-slate-400">Plan</div>
-                <div className="text-sm font-medium text-emerald-700">
-                  {profile?.plan ?? "Growth"}
+              <div className="flex items-center justify-between mt-2">
+                <div className="text-xs text-gray-400">Holdings</div>
+                <div className="font-medium">{formatMoney(portfolioValue)}</div>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <div className="text-xs text-gray-400">Equity</div>
+                <div className="font-bold text-xl">
+                  {formatMoney(totalEquity)}
                 </div>
               </div>
             </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Tip: This is a simulated balance and holdings view for demo
+              purposes.
+            </div>
           </div>
 
-          {/* Quick actions */}
-          <div className="bg-white rounded-2xl p-4 shadow space-y-3">
-            <div className="text-sm text-slate-500">Quick Actions</div>
-            <Button
-              onClick={() => setIsTrading((s) => !s)}
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
-            >
-              {isTrading ? "Stop Auto-Trading" : "Start Auto-Trading"}
-            </Button>
-            <Button
-              onClick={() => router.push("/dashboard/deposit")}
-              variant="outline"
-              className="w-full"
-            >
-              Add Funds
-            </Button>
-            <Button
-              onClick={() => router.push("/dashboard/withdraw")}
-              className="w-full bg-yellow-600 hover:bg-yellow-700"
-            >
-              Withdraw
-            </Button>
-          </div>
-
-          {/* Market Watch (mock real-time) */}
-          <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="text-sm text-slate-500 mb-3">Market Watch</div>
-            <div className="grid grid-cols-2 gap-2">
-              {STOCKS.slice(0, 6).map((s) => (
-                <div
-                  key={s}
-                  className="p-2 rounded-lg border flex items-center justify-between cursor-pointer hover:bg-emerald-50"
-                  onClick={() => setSelectedSymbol(s)}
-                >
-                  <div className="text-sm font-medium">{s}</div>
-                  <div className="text-sm font-semibold">
-                    {formatMoney(prices[s])}
+          {/* holdings */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+            <div className="text-sm text-gray-300 mb-2">Holdings</div>
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {Object.entries(portfolio).length === 0 && (
+                <div className="text-sm text-gray-500">No holdings yet.</div>
+              )}
+              {Object.entries(portfolio).map(([id, pos]) => {
+                const current = prices[id] ?? 0;
+                const value = +(pos.shares * current).toFixed(2);
+                const pnl = +(value - pos.shares * pos.avgPrice).toFixed(2);
+                return (
+                  <div key={id} className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium">{id}</div>
+                      <div className="text-xs text-gray-400">
+                        {pos.shares} shares • avg {formatMoney(pos.avgPrice)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{formatMoney(value)}</div>
+                      <div
+                        className={`text-xs ${
+                          pnl >= 0 ? "text-emerald-400" : "text-rose-400"
+                        }`}
+                      >
+                        {pnl >= 0 ? "+" : ""}
+                        {formatMoney(pnl)}
+                      </div>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* supported markets */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+            <div className="text-sm text-gray-300 mb-3">Supported Markets</div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {[
+                "Stocks",
+                "ETFs",
+                "Bonds",
+                "Mutual Funds",
+                "Commodities",
+                "Indices",
+                "Crypto",
+              ].map((m) => (
+                <div
+                  key={m}
+                  className="p-3 bg-[#0b1220] rounded border border-gray-700 text-gray-300"
+                >
+                  {m}
                 </div>
               ))}
             </div>
-            <div className="text-xs text-slate-400 mt-2">
-              Tap a symbol to view chart
+            <div className="text-xs text-gray-500 mt-3">
+              Access thousands of global instruments across major exchanges —
+              U.S., Europe & Asia.
             </div>
           </div>
 
-          {/* Plans */}
-          <div className="bg-white rounded-2xl p-4 shadow">
-            <div className="text-sm text-slate-500 mb-3">Plans</div>
-            {samplePlans.map((p) => (
-              <div
-                key={p.name}
-                className="flex items-center justify-between bg-emerald-50 border rounded-lg p-3 mt-2"
-              >
-                <div>
-                  <div className="font-semibold text-emerald-700">{p.name}</div>
-                  <div className="text-xs text-slate-600">{p.target}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium">{p.deposit}</div>
-                  <div className="text-xs text-slate-500">{p.tag}</div>
-                </div>
+          {/* faq / help */}
+          <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800 text-sm">
+            <div className="text-sm text-gray-300 mb-2">Help & FAQ</div>
+            <div className="text-gray-400">
+              <div className="mb-2">
+                <strong>Is this live trading?</strong> No — this demo simulates
+                orders locally. Integrate a broker API for real execution.
               </div>
-            ))}
-            <Button
-              onClick={() => router.push("/dashboard/plans")}
-              className="w-full mt-3"
-            >
-              See all plans
-            </Button>
-          </div>
-
-          {/* Contact / Support */}
-          <div className="bg-white rounded-2xl p-4 shadow text-sm text-slate-600">
-            <div className="font-medium mb-1">Need help?</div>
-            <div>forexpromanage@gmail.com</div>
-            <div className="text-xs text-slate-400 mt-2">
-              Mon–Fri • 09:00–18:00
+              <div className="mb-2">
+                <strong>How do I fund?</strong> Use the Deposit button to begin
+                — link to your funding providers in production.
+              </div>
+              <div>
+                <strong>Security:</strong> We recommend bank-grade custody &
+                two-factor authentication in production.
+              </div>
             </div>
           </div>
         </aside>
@@ -646,244 +673,96 @@ export default function DashboardPage() {
   );
 }
 
-/* -------------------- Subcomponents -------------------- */
+/* -------------------- TradePanel -------------------- */
 
-function StatCard({ label, value, hint, accent, isNegative }: any) {
-  return (
-    <div
-      className={`p-4 rounded-2xl shadow-sm ${
-        accent
-          ? "bg-gradient-to-br from-emerald-50 to-white border border-emerald-100"
-          : "bg-white border"
-      }`}
-    >
-      <div className="text-sm text-slate-500">{label}</div>
-      <div
-        className={`text-xl font-bold mt-1 ${
-          isNegative ? "text-rose-600" : "text-emerald-700"
-        }`}
-      >
-        {value}
-      </div>
-      {hint && <div className="text-xs text-slate-400 mt-1">{hint}</div>}
-    </div>
-  );
-}
-
-function ProfileCard({ profile }: { profile: any }) {
-  return (
-    <div className="p-4 rounded-2xl shadow-sm bg-white border">
-      <div className="text-sm text-slate-500">Investor</div>
-      <div className="flex items-center mt-2 gap-3">
-        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
-          {profile?.name ? profile.name[0]?.toUpperCase() : "I"}
-        </div>
-        <div>
-          <div className="font-medium">{profile?.name ?? "Investor"}</div>
-          <div className="text-xs text-slate-400">
-            Member since{" "}
-            {profile?.created_at
-              ? new Date(profile.created_at).getFullYear()
-              : "—"}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------- Trade Controls -------------------- */
-function TradeControls({
-  latest,
-  setSeries,
-  setTrades,
-  setBalance,
-  setNotifications,
-  prices,
-}: any) {
-  const [symbol, setSymbol] = useState<string>("AAPL");
-  const [shares, setShares] = useState<number | "">("");
+function TradePanel({ prices, placeOrder }: any) {
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
+  const [symbol, setSymbol] = useState<string>(() => DEFAULT_SYMBOL);
+  const [shares, setShares] = useState<number | "">("");
 
-  const placeManual = () => {
-    if (!symbol || !shares || Number(shares) <= 0) {
-      setNotifications((n: string[]) =>
-        ["Set symbol & share count first", ...n].slice(0, 6)
-      );
-      return;
-    }
-    const current = latest;
-    const trade = generateManualTrade(current, {
-      symbol,
-      shares: Number(shares),
-      side,
-      prices,
-    });
-    const clamped = {
-      ...trade,
-      newBalance: Math.max(0, Math.round(trade.newBalance * 100) / 100),
-    };
-
-    setTrades((prev: any[]) => [clamped, ...prev].slice(0, MAX_TRADES_STORED));
-    setSeries((prev: any[]) =>
-      [
-        ...prev,
-        { name: `T${prev.length + 1}`, value: clamped.newBalance },
-      ].slice(-DEFAULT_SERIES_LEN)
-    );
-    setBalance(clamped.newBalance);
-
-    setNotifications((n: string[]) =>
-      [
-        `Manual: ${clamped.symbol} ${clamped.side} ${clamped.shares} ${
-          clamped.pnl >= 0 ? "+" : ""
-        }${clamped.pnl.toFixed(2)}`,
-        ...n,
-      ].slice(0, 6)
-    );
-  };
+  useEffect(() => {
+    setSymbol(DEFAULT_SYMBOL);
+  }, []);
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow space-y-4">
-      <div className="text-lg font-semibold text-emerald-700">
-        Trade Control
-      </div>
+    <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
+      <div className="text-sm text-gray-300 mb-3">Quick Trade</div>
       <div className="grid sm:grid-cols-4 gap-3">
         <select
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          className="border rounded p-2"
+          className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
         >
-          {STOCKS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
+          {Object.values(CATEGORIES)
+            .flatMap((c) => c.list)
+            .map((s: any) => (
+              <option key={s.id} value={s.id}>
+                {s.id} • {s.name}
+              </option>
+            ))}
         </select>
         <input
           type="number"
+          min={0}
           placeholder="Shares"
-          className="border rounded p-2"
           value={shares as any}
           onChange={(e) =>
             setShares(e.target.value === "" ? "" : Number(e.target.value))
           }
+          className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
         />
         <select
           value={side}
           onChange={(e) => setSide(e.target.value as any)}
-          className="border rounded p-2"
+          className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
         >
           <option value="BUY">BUY</option>
           <option value="SELL">SELL</option>
         </select>
         <Button
-          onClick={placeManual}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          onClick={() => {
+            if (!symbol || !shares || Number(shares) <= 0) return;
+            placeOrder({ side, symbol, shares: Number(shares) });
+            setShares("");
+          }}
+          className="bg-emerald-500"
         >
-          Place Trade
+          Place Order
         </Button>
       </div>
-      <div className="text-xs text-slate-500">
-        Tip: Manual trades are simulated locally. Replace with real execution
-        API in production.
+      <div className="text-xs text-gray-500 mt-3">
+        Orders are simulated locally — connect a brokerage API for real
+        execution.
+      </div>
+      <div className="mt-3 text-xs text-gray-400">
+        Current price: {formatMoney(prices[symbol])}
       </div>
     </div>
   );
 }
 
-/* -------------------- Helpers (mock data & trade generation) -------------------- */
+/* -------------------- Helpers -------------------- */
 
-function mockSeries(len = 20, base = 1000) {
+function findTvSymbol(id: string) {
+  for (const cat of Object.values(CATEGORIES)) {
+    const found = cat.list.find((s) => s.id === id);
+    if (found) return found.tvSymbol;
+  }
+  return `NASDAQ:${id}`;
+}
+
+function formatMoney(n: number) {
+  return `$${n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function mockSeries(len = 30, base = 5000) {
   let val = base;
   return Array.from({ length: len }).map((_, i) => {
-    const change =
-      Math.random() < 0.7
-        ? Math.random() * (base * 0.006)
-        : -(Math.random() * (base * 0.003));
-    val = Math.max(0, +(val + change));
-    return { name: `T${i + 1}`, value: Math.round(val * 100) / 100 };
+    const change = (Math.random() - 0.45) * (base * 0.01);
+    val = Math.max(0, Math.round((val + change) * 100) / 100);
+    return { name: `T${i + 1}`, value: val };
   });
-}
-
-function mockTrades(count = 6, base = 1000) {
-  return Array.from({ length: count }).map(() => generateTrade(base));
-}
-
-/**
- * generateTrade (auto-simulated):
- * - uses STOCKS list and prices are approximated using current price heuristic
- * - 75% chance of small profit proportional to balance (0.3% - 2%)
- * - 25% chance of a small loss (-0.2% - -1.2%)
- */
-function generateTrade(
-  currentBalance: number,
-  prices?: Record<string, number>
-) {
-  const symbol = STOCKS[Math.floor(Math.random() * STOCKS.length)];
-  const side = Math.random() < 0.5 ? "BUY" : "SELL";
-  const shares = +(Math.random() * 5).toFixed(2);
-
-  const isProfit = Math.random() < 0.75;
-  const changePercent = isProfit
-    ? Math.random() * 0.017 + 0.003
-    : -(Math.random() * 0.01 + 0.002);
-  // pnl computed relative to balance
-  let pnl = +(currentBalance * changePercent);
-  // small adjustment using price scale if available
-  const priceFactor = prices?.[symbol] ? Math.min(1, prices[symbol] / 500) : 1;
-  pnl = Math.round(pnl * priceFactor * 100) / 100;
-
-  const newBalance = Math.max(
-    0,
-    Math.round((currentBalance + pnl) * 100) / 100
-  );
-
-  return {
-    id: `TR${Math.floor(Math.random() * 900000 + 100000).toString()}`,
-    side,
-    symbol,
-    shares,
-    pnl,
-    time: new Date().toLocaleTimeString().slice(0, 5),
-    newBalance,
-  };
-}
-
-/**
- * generateManualTrade:
- * - uses the provided symbol, shares, side and current mock prices
- * - approximates P/L based on a tiny immediate fill slippage and random outcome
- */
-function generateManualTrade(
-  currentBalance: number,
-  opts: {
-    symbol: string;
-    shares: number;
-    side: "BUY" | "SELL";
-    prices: Record<string, number>;
-  }
-) {
-  const { symbol, shares, side, prices } = opts;
-  const price = prices[symbol] ?? 100;
-  // approximate trade value
-  const tradeValue = price * shares;
-  // simulate outcome: small move after entry
-  const movePercent = (Math.random() - 0.4) * 0.02; // -0.8% .. +1.2% skewed slightly positive
-  const pnl = Math.round(tradeValue * movePercent * 100) / 100;
-  // if selling, pnl sign flips if our simulation assumes direction; keep as is for simplicity
-  const newBalance = Math.max(
-    0,
-    Math.round((currentBalance + pnl) * 100) / 100
-  );
-
-  return {
-    id: `TR${Math.floor(Math.random() * 900000 + 100000).toString()}`,
-    side,
-    symbol,
-    shares,
-    pnl,
-    time: new Date().toLocaleTimeString().slice(0, 5),
-    newBalance,
-  };
 }
