@@ -8,74 +8,74 @@ export default function HomePage() {
   const steps = [
     {
       title: "1. Create Your Account",
-      desc: "Sign up securely using your email and verify your identity through our KYC process.",
-      icon: "🧾",
+      desc: "Sign up securely using your email and complete a quick verification process to unlock your dashboard.",
+      icon: "📈",
     },
     {
-      title: "2. Fund Your Investment",
-      desc: "Deposit funds easily using BTC, USDT, or bank transfer. Your capital remains under your full control.",
-      icon: "💰",
+      title: "2. Fund Your Portfolio",
+      desc: "Easily deposit funds via crypto transfer (Bitcon). Start investing in AI-managed stock portfolios instantly.",
+      icon: "💳",
     },
     {
-      title: "3. Start Earning",
-      desc: "Our AI-powered trading bots manage your funds with precision and consistency, generating steady returns.",
+      title: "3. Watch Your Investments Grow",
+      desc: "Our AI automatically diversifies, rebalances, and optimizes your stock portfolio for consistent growth.",
       icon: "🤖",
     },
   ];
 
   const plans = [
     {
-      name: "Starter Plan",
+      name: "Starter Portfolio",
       price: "$100 - $999",
       features: [
-        "Automated AI Trading",
-        "Weekly Performance Reports",
-        "Instant Withdrawals",
-        "24/7 Dashboard Access",
+        "Automated Stock Portfolio Management",
+        "Weekly Performance Insights",
+        "No Hidden Fees",
+        "Full Dashboard Access",
       ],
     },
     {
-      name: "Pro Plan",
+      name: "Growth Portfolio",
       price: "$1,000 - $4,999",
       features: [
-        "Advanced AI Bots + Market Analysis",
-        "Higher Profit Margin",
-        "Dedicated Account Manager",
-        "Priority Withdrawals",
+        "AI Optimization + Human Oversight",
+        "Dynamic Market Adjustments",
+        "Tax-Efficient Strategies",
+        "Priority Support",
       ],
     },
     {
-      name: "Elite Plan",
+      name: "Elite Portfolio",
       price: "$5,000+",
       features: [
-        "Smart Portfolio Diversification",
-        "Top-tier AI Algorithms",
-        "Personalized Growth Strategy",
-        "Exclusive VIP Support",
+        "Custom Stock Basket Creation",
+        "Smart Diversification Across Sectors",
+        "Dedicated Financial Analyst",
+        "Exclusive Investment Insights",
       ],
     },
   ];
 
   const benefits = [
     {
-      title: "AI-Driven Precision",
-      desc: "Our trading bots analyze thousands of market signals in real time for optimal performance.",
-      icon: "⚙️",
+      title: "AI-Powered Insights",
+      desc: "Our algorithms analyze thousands of market signals and trends to make smart investment decisions.",
+      icon: "🧠",
     },
     {
-      title: "24/7 Profit Generation",
-      desc: "AI bots never sleep — your investments keep working around the clock.",
-      icon: "🌙",
+      title: "Passive Growth",
+      desc: "Your portfolio is automatically adjusted to capture growth opportunities while minimizing risks.",
+      icon: "📊",
     },
     {
-      title: "Risk Management",
-      desc: "Each trade is executed with intelligent risk control mechanisms to protect your capital.",
+      title: "Built-In Risk Control",
+      desc: "AI monitors volatility and rebalances portfolios to protect your investments.",
       icon: "🛡️",
     },
     {
-      title: "Instant Withdrawals",
-      desc: "Easily withdraw your profits anytime directly through BTC or USDT.",
-      icon: "💳",
+      title: "Transparent Reporting",
+      desc: "Track performance and returns in real time through your dashboard — anytime, anywhere.",
+      icon: "📱",
     },
   ];
 
@@ -89,7 +89,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            Empower Your Investments with AI & Automation
+            Smarter Stock Investing with AI
           </motion.h1>
           <motion.p
             className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto"
@@ -97,9 +97,8 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            Let our AI-driven trading bots grow your portfolio through
-            intelligent automation, real-time analytics, and transparent
-            performance tracking.
+            Harness the power of artificial intelligence to build and manage
+            your stock portfolio — automatically, intelligently, and securely.
           </motion.p>
 
           <div className="flex justify-center gap-4 mt-4">
@@ -128,28 +127,27 @@ export default function HomePage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Why Choose Our AI Trading Platform
+            Why Choose Our AI Stock Platform
           </h2>
           <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
-            Our investment system combines artificial intelligence with
-            automation to maximize returns and minimize emotional decision
-            errors. Your capital is managed with data-driven accuracy and full
-            transparency.
+            We combine AI technology with market expertise to help you invest in
+            high-performing stocks automatically. No guesswork, no stress — just
+            smart, data-driven investing.
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 text-left">
             {[
               {
-                title: "Automated Performance",
-                desc: "AI bots monitor the market 24/7 to capture profitable opportunities instantly.",
+                title: "Smart Portfolio Management",
+                desc: "AI constantly tracks market trends and rebalances your portfolio for optimal returns.",
               },
               {
-                title: "Secure Asset Management",
-                desc: "All funds are held safely with advanced encryption and multi-layered security systems.",
+                title: "Safe & Secure Investments",
+                desc: "Your funds and data are protected by bank-grade security and regulatory compliance.",
               },
               {
                 title: "Real-Time Transparency",
-                desc: "Access your dashboard anytime to view profits, trades, and growth analytics.",
+                desc: "Get instant insights on your portfolio’s performance, gains, and diversification.",
               },
             ].map((item, idx) => (
               <motion.div
@@ -174,8 +172,8 @@ export default function HomePage() {
             Choose Your Investment Plan
           </h2>
           <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
-            Select a plan that aligns with your goals. All plans include AI
-            trading, transparent reporting, and secure withdrawals.
+            Whether you’re a beginner or an experienced investor, our AI-powered
+            portfolios adapt to your goals and risk appetite.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -209,11 +207,11 @@ export default function HomePage() {
       <section className="py-20 bg-gray-50 border-t">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-semibold text-emerald-700 mb-6">
-            Benefits of Investing With Us
+            Benefits of AI Stock Investing
           </h2>
           <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
-            Experience hands-free investing powered by artificial intelligence
-            and automation. Your money works for you — intelligently.
+            Experience the future of investing — data-driven, emotion-free, and
+            effortlessly profitable.
           </p>
 
           <div className="grid md:grid-cols-4 gap-6 text-left">
@@ -241,7 +239,7 @@ export default function HomePage() {
             How to Get Started
           </h2>
           <p className="text-gray-600 mb-10 max-w-3xl mx-auto">
-            It’s simple to start your AI-powered trading journey.
+            Begin your AI investing journey in just a few simple steps.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -263,7 +261,7 @@ export default function HomePage() {
           <div className="mt-10">
             <Link href="/register">
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 rounded-full">
-                Start Now
+                Start Investing
               </Button>
             </Link>
           </div>
@@ -273,14 +271,14 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="py-8 text-center text-sm text-gray-500 border-t bg-white">
         <p>
-          © {new Date().getFullYear()} FX PRO INVESTMENTS. All rights reserved.
+          © {new Date().getFullYear()} StockAI Investments. All rights reserved.
         </p>
         <p className="mt-2">
           <a
             href="/legal"
             className="text-emerald-700 hover:underline transition"
           >
-            View Full Legal Disclosure
+            View Legal Disclosure
           </a>
         </p>
       </footer>
