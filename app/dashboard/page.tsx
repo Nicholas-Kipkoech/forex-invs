@@ -358,7 +358,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <Button
             onClick={() => {
-              router.push("/dashbord/deposit");
+              router.push("/dashboard/deposit");
             }}
             className="bg-emerald-500 hover:bg-emerald-400"
           >
