@@ -13,6 +13,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useRouter } from "next/navigation";
 
 /**
  * StockAI Dashboard — Multi-asset, TradingView embed, mock real-time prices, simulated orders
@@ -322,6 +323,8 @@ export default function DashboardPage() {
     if (first) setSymbol(first);
   }, [category]);
 
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-[#0B0E13] text-gray-100 p-4 sm:p-6">
       {/* notifications */}
@@ -355,21 +358,21 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <Button
             onClick={() => {
-              /* deposit flow */
+              router.push("/dashbord/deposit");
             }}
             className="bg-emerald-500 hover:bg-emerald-400"
           >
             Deposit
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => {
-              /* withdraw flow */
+              router.push("/dashbord/withdraw");
             }}
             className="border-gray-600"
           >
             Withdraw
-          </Button>
+          </Button> */}
         </div>
       </header>
 
