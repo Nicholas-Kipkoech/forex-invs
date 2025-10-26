@@ -89,7 +89,7 @@ const DEFAULT_CATEGORY = "Stocks";
 const DEFAULT_SYMBOL = CATEGORIES[DEFAULT_CATEGORY].list[0].id;
 
 // initial mock balance
-const START_BALANCE = 5000;
+const START_BALANCE = 0;
 
 export default function DashboardPage() {
   // auth/profile would go here — for this example it's simulated
