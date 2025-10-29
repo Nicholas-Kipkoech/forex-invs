@@ -345,10 +345,10 @@ export default function DashboardPage() {
       <header className="max-w-7xl mx-auto mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400 text-[#091018] flex items-center justify-center font-bold text-lg shadow">
-            STK
+            MP
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold">StockAI Dashboard</h1>
+            <h1 className="text-2xl font-extrabold">My Portfolio</h1>
             <div className="text-xs text-gray-400">
               Multi-asset live market & trading (simulated)
             </div>
