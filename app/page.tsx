@@ -82,8 +82,8 @@ export default function LandingPage() {
             },
             {
               icon: <Lock className="h-10 w-10 text-emerald-400" />,
-              title: "Secure BTC Deposits",
-              text: "Instantly fund your account using Bitcoin with multilayer encryption.",
+              title: "Secure crypto Deposits",
+              text: "Instantly fund your account using Bitcoin and USDT with multilayer encryption.",
             },
           ].map((f, i) => (
             <motion.div
@@ -131,7 +131,9 @@ export default function LandingPage() {
       <footer className="border-t border-emerald-500/10 py-8 text-center text-slate-500 text-sm">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Globe className="h-4 w-4" />
-          <span>© {new Date().getFullYear()} NexTrade Global</span>
+          <span>
+            © {new Date().getFullYear()} NexTrade Global Incorporation
+          </span>
         </div>
       </footer>
     </div>
