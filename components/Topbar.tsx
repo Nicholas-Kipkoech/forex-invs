@@ -17,7 +17,7 @@ export default function Topbar() {
     <header className="w-full bg-white shadow-sm py-3">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
         <Link href={"/"} className="font-bold text-emerald-700">
-          StockProManage
+          NexTrade Inc
         </Link>
         <div className="text-sm text-slate-500">{email}</div>
       </div>
