@@ -584,8 +584,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-4 text-xs text-gray-500">
-              Tip: This is a simulated balance and holdings view for demo
-              purposes.
+              Tip: This is a your balance and holdings view.
             </div>
           </div>
 
@@ -656,10 +655,6 @@ export default function DashboardPage() {
           <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800 text-sm">
             <div className="text-sm text-gray-300 mb-2">Help & FAQ</div>
             <div className="text-gray-400">
-              <div className="mb-2">
-                <strong>Is this live trading?</strong> No — this demo simulates
-                orders locally. Integrate a broker API for real execution.
-              </div>
               <div className="mb-2">
                 <strong>How do I fund?</strong> Use the Deposit button to begin
                 — link to your funding providers in production.
