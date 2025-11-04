@@ -12,12 +12,28 @@ export default function DepositPage() {
   const [submitted, setSubmitted] = useState(false);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedCoin, setSelectedCoin] = useState<"BTC" | "USDT">("BTC");
   const [user, setUser] = useState<{ email: string; name?: string } | null>(
     null
   );
 
-  const walletAddress = "1CDYEta833Bd4uLNTpPRQhwDtjzb7cvFAa";
-  const qrImage = "/btc-qrcode.png";
+  // Wallet addresses
+  const wallets = {
+    BTC: {
+      address: "1CDYEta833Bd4uLNTpPRQhwDtjzb7cvFAa",
+      qr: "/btc-qrcode.png",
+      network: "Bitcoin Network",
+    },
+    USDT: {
+      address: "TPDrmoEkGiYkGuQQY5r6DvVrriqAbSicWf", // example TRC20
+      qr: "/usdt-qrcode.png",
+      network: "TRC20 (USDT)",
+    },
+  };
+
+  const walletAddress = wallets[selectedCoin].address;
+  const qrImage = wallets[selectedCoin].qr;
+  const network = wallets[selectedCoin].network;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -70,6 +86,8 @@ export default function DepositPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             type: "deposit",
+            coin: selectedCoin,
+            network,
             name: user.name || "User",
             email: user.email,
             depositAmount: `$${amount}`,
@@ -93,17 +111,34 @@ export default function DepositPage() {
 
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-8 border border-slate-200">
-      <h1 className="text-3xl font-bold text-emerald-700 mb-2">Deposit BTC</h1>
+      <h1 className="text-3xl font-bold text-emerald-700 mb-2">Deposit</h1>
       <p className="text-slate-600 mb-6">
-        Fund your account securely using Bitcoin. After sending, upload your
-        proof of payment for quick verification.
+        Fund your account securely using Bitcoin (BTC) or Tether (USDT).
       </p>
+
+      {/* Coin Selector */}
+      <div className="flex gap-3 mb-6">
+        {(["BTC", "USDT"] as const).map((coin) => (
+          <Button
+            key={coin}
+            variant={selectedCoin === coin ? "default" : "outline"}
+            onClick={() => setSelectedCoin(coin)}
+            className={`px-5 ${
+              selectedCoin === coin
+                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                : "border-emerald-300 hover:bg-emerald-50"
+            }`}
+          >
+            {coin}
+          </Button>
+        ))}
+      </div>
 
       {/* Wallet Card */}
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex-1">
           <p className="text-xs uppercase text-emerald-700 font-semibold">
-            Wallet Address
+            {selectedCoin} Wallet Address ({network})
           </p>
           <p className="font-mono text-slate-800 break-all mt-1">
             {walletAddress}
@@ -122,7 +157,7 @@ export default function DepositPage() {
       </div>
 
       {/* Deposit Guide */}
-      <DepositGuide walletAddress={walletAddress} qrImage={qrImage} />
+      {/* <DepositGuide walletAddress={walletAddress} qrImage={qrImage} /> */}
 
       {!submitted && (
         <form
@@ -169,7 +204,9 @@ export default function DepositPage() {
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-700">
             <p className="font-semibold text-emerald-700 mb-1">⚠️ Important</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Send only Bitcoin (BTC) to this address.</li>
+              <li>
+                Send only {selectedCoin} to the address shown above ({network}).
+              </li>
               <li>Sending other coins may result in permanent loss.</li>
               <li>Upload your transaction proof immediately after sending.</li>
               <li>Deposits are credited after blockchain confirmation.</li>
@@ -182,7 +219,7 @@ export default function DepositPage() {
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
             disabled={loading}
           >
-            {loading ? "Submitting..." : "Submit Proof"}
+            {loading ? "Submitting..." : `Submit ${selectedCoin} Deposit Proof`}
           </Button>
         </form>
       )}
@@ -193,9 +230,10 @@ export default function DepositPage() {
             ✅ Payment proof submitted successfully!
           </p>
           <p className="text-slate-600 mt-2">
-            Your deposit of{" "}
-            <span className="font-bold text-emerald-700">${amount}</span> is
-            being processed. You’ll receive confirmation once verified.
+            Your {selectedCoin} deposit of{" "}
+            <span className="font-bold text-emerald-700">${amount}</span> on{" "}
+            {network} is being processed. You’ll receive confirmation once
+            verified.
           </p>
         </div>
       )}
