@@ -14,6 +14,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 /**
  * StockAI Dashboard — Multi-asset, TradingView embed, mock real-time prices, simulated orders
@@ -114,6 +115,29 @@ export default function DashboardPage() {
     });
     return out;
   });
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("investors")
+        .select("balance")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching balance:", error);
+      } else {
+        setBalance(data?.balance ?? 0);
+      }
+    };
+
+    fetchBalance();
+  }, [supabase]);
 
   // TradingView embed container ref + unique id to recreate widget on symbol change
   const tvContainerIdRef = useRef(
@@ -350,7 +374,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-2xl font-extrabold">My Portfolio</h1>
             <div className="text-xs text-gray-400">
-              Multi-asset live market & trading (simulated)
+              Multi-asset live market & trading
             </div>
           </div>
         </div>
