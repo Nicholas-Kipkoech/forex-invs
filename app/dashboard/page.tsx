@@ -350,7 +350,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#0B0E13] text-gray-100 p-4 sm:p-6">
+    <div className="min-h-screen  bg-[#0B0E13] text-gray-100 p-4 sm:p-6">
       {/* notifications */}
       <div className="fixed top-4 right-4 z-50 w-[320px] max-w-[90vw] flex flex-col gap-2">
         {notifications.map((n, i) => (

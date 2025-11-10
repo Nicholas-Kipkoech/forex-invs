@@ -42,11 +42,12 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-slate-50">
       <Topbar />
+
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-6 gap-6 px-4 py-6">
-        <aside className="lg:col-span-1">
+        <aside className="lg:col-span-1 h-[100%]">
           <Sidebar />
         </aside>
-        <main className="lg:col-span-5">{children}</main>
+        <main className="lg:col-span-5 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
