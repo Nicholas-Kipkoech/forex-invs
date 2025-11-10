@@ -14,9 +14,9 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [phone, setPhone] = useState(""); // phone number
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -36,23 +36,16 @@ export default function RegisterPage() {
     }
 
     if (data.user?.id) {
-      // Create investor in your DB
       await fetch("/api/create-investor", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "Content-type": "application/json" },
         body: JSON.stringify({ user_id: data.user.id, name, email, phone }),
       });
 
-      // Send notification email
       await fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "registration",
-          name,
-          email,
-          phone,
-        }),
+        body: JSON.stringify({ type: "registration", name, email, phone }),
       });
     }
 
@@ -61,98 +54,115 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0F1F] px-4 relative overflow-hidden">
+      {/* GLASS GLOW BACKDROPS */}
+      <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-emerald-500/10 blur-[140px] rounded-full"></div>
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-teal-500/10 blur-[120px] rounded-full"></div>
+
       <motion.form
         onSubmit={handleRegister}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white/90 backdrop-blur-sm border border-emerald-100 shadow-lg p-8 rounded-2xl"
+        transition={{ duration: 0.4 }}
+        className="relative w-full max-w-md p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl"
       >
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-emerald-700">
-            Create Your Account
+        {/* HEADER */}
+        <div className="text-center mb-6">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+            Join Elite Investors
           </h2>
-          <p className="text-gray-500 mt-2 text-sm">
-            Start growing your capital today
+          <p className="text-gray-400 text-sm mt-2">
+            Start from as low as{" "}
+            <span className="text-emerald-300 font-semibold">$100</span> and
+            grow your wealth
           </p>
         </div>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-md p-2 mb-4">
+          <div className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-3 mb-4">
             {error}
           </div>
         )}
 
+        {/* INPUTS */}
         <div className="space-y-4">
+          {/* NAME */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Full Name
-            </label>
+            <label className="text-sm text-gray-300">Full Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
-              className="w-full border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-2 outline-none text-gray-800 placeholder-gray-400 transition"
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 outline-none transition"
               required
             />
           </div>
 
+          {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Email
-            </label>
+            <label className="text-sm text-gray-300">Email</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="john@example.com"
               type="email"
-              className="w-full border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-2 outline-none text-gray-800 placeholder-gray-400 transition"
+              placeholder="name@domain.com"
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 outline-none transition"
               required
             />
           </div>
-          <label className="block text-sm text-slate-600">Phone Number</label>
-          <PhoneInput
-            country={"us"}
-            value={phone}
-            onChange={setPhone}
-            inputClass="w-full border border-slate-300 rounded-md px-3 py-2"
-          />
 
+          {/* PHONE */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Password
-            </label>
+            <label className="text-sm text-gray-300">Phone Number</label>
+            <PhoneInput
+              country={"us"}
+              value={phone}
+              onChange={setPhone}
+              containerClass="mt-1"
+              inputClass="!w-full !h-[50px] !bg-white/5 !border !border-white/10 !text-white !rounded-lg !pl-14 focus:!border-emerald-400 focus:!ring-2 focus:!ring-emerald-500/40 outline-none transition"
+              buttonClass="!bg-white/10 !border-white/10 !rounded-l-lg"
+              dropdownClass="!bg-[#111827] !text-white"
+            />
+          </div>
+
+          {/* PASSWORD */}
+          <div>
+            <label className="text-sm text-gray-300">Password</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
               type="password"
-              className="w-full border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-2 outline-none text-gray-800 placeholder-gray-400 transition"
+              placeholder="••••••••"
+              className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 outline-none transition"
               required
             />
           </div>
         </div>
 
-        <div className="mt-8">
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-full text-white py-2 text-lg"
-          >
-            {loading ? "Creating..." : "Create Account"}
-          </Button>
-        </div>
+        {/* CTA BUTTON */}
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full mt-6 py-6 text-lg rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/20 transition-all"
+        >
+          {loading ? "Creating account..." : "Create Account →"}
+        </Button>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        {/* LOGIN LINK */}
+        <p className="text-center text-sm text-gray-400 mt-6">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-emerald-600 hover:underline font-medium"
+            className="text-emerald-400 hover:underline font-medium"
           >
-            Log in
+            Sign in
           </Link>
         </p>
+
+        {/* TRUST BADGE */}
+        <div className="text-center text-xs text-gray-500 mt-4">
+          🔐 Secure, encrypted & regulated investment platform
+        </div>
       </motion.form>
     </div>
   );
