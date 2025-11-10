@@ -17,6 +17,14 @@ export default function DepositPage() {
     null
   );
 
+  const plans = [
+    { name: "Starter", min: 100, max: 999, roi: "6-8%" },
+    { name: "Growth", min: 1000, max: 4999, roi: "8-12%" },
+    { name: "Premium", min: 5000, max: 50000, roi: "12-16%" },
+  ];
+
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
   // Wallet addresses
   const wallets = {
     BTC: {
@@ -164,6 +172,51 @@ export default function DepositPage() {
           onSubmit={handleSubmit}
           className="space-y-6 mt-6 border-t border-slate-100 pt-6"
         >
+          {/* Plan Selection */}
+          <div className="mb-7">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">
+              Select Investment Plan
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {plans.map((plan) => (
+                <div
+                  key={plan.name}
+                  onClick={() => setSelectedPlan(plan.name)}
+                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                    selectedPlan === plan.name
+                      ? "border-emerald-600 bg-emerald-50 shadow"
+                      : "border-slate-200 hover:border-emerald-300"
+                  }`}
+                >
+                  <h3 className="text-xl font-bold text-slate-800">
+                    {plan.name}
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Min:{" "}
+                    <span className="font-medium text-emerald-700">
+                      ${plan.min}
+                    </span>
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Max: <span className="font-medium">${plan.max}</span>
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    ROI:{" "}
+                    <span className="font-medium text-emerald-700">
+                      {plan.roi} / mo
+                    </span>
+                  </p>
+
+                  {selectedPlan === plan.name && (
+                    <div className="mt-3 text-xs bg-emerald-600 text-white py-1 px-2 rounded-md inline-block">
+                      Selected
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Amount */}
           <div>
             <label className="block text-sm text-slate-600 mb-1">
