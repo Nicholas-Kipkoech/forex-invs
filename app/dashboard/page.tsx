@@ -388,15 +388,16 @@ export default function DashboardPage() {
           >
             Deposit
           </Button>
-          {/* <Button
+          <Button
             variant="outline"
+            disabled
             onClick={() => {
-              router.push("/dashbord/withdraw");
+              router.push("/dashboard/withdraw");
             }}
-            className="border-gray-600"
+            className="border-gray-600 text-black"
           >
             Withdraw
-          </Button> */}
+          </Button>
         </div>
       </header>
 
