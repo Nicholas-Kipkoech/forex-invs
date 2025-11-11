@@ -117,27 +117,39 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchData = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // Get balance
+      const { data: investor } = await supabase
         .from("investors")
         .select("balance")
         .eq("user_id", user.id)
         .single();
+      setBalance(investor?.balance ?? 0);
 
-      if (error) {
-        console.error("Error fetching balance:", error);
-      } else {
-        setBalance(data?.balance ?? 0);
-      }
+      // Get portfolio
+      const { data: holdings } = await supabase
+        .from("investor_portfolio")
+        .select("symbol, shares, avg_price")
+        .eq("user_id", user.id);
+
+      const formatted: any = {};
+      holdings?.forEach((h) => {
+        formatted[h.symbol] = {
+          shares: Number(h.shares),
+          avgPrice: Number(h.avg_price),
+        };
+      });
+
+      setPortfolio(formatted);
     };
 
-    fetchBalance();
-  }, [supabase]);
+    fetchData();
+  }, []);
 
   // TradingView embed container ref + unique id to recreate widget on symbol change
   const tvContainerIdRef = useRef(
@@ -261,6 +273,51 @@ export default function DashboardPage() {
     [balance, portfolioValue]
   );
 
+  const saveBalance = async (newBalance: number) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from("investors")
+      .update({ balance: newBalance })
+      .eq("user_id", user.id);
+  };
+
+  const saveHolding = async (
+    symbol: string,
+    shares: number,
+    avgPrice: number
+  ) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("investor_portfolio").upsert(
+      {
+        user_id: user.id,
+        symbol,
+        shares,
+        avg_price: avgPrice,
+      },
+      { onConflict: "user_id,symbol" } // Updates if exists
+    );
+  };
+
+  const removeHolding = async (symbol: string) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from("investor_portfolio")
+      .delete()
+      .match({ user_id: user.id, symbol });
+  };
+
   // Simulated trade placement (BUY/SELL)
   const placeOrder = (opts: {
     side: "BUY" | "SELL";
@@ -277,25 +334,33 @@ export default function DashboardPage() {
         );
         return;
       }
-      // debit cash, add to holdings (weighted avg)
-      setBalance((b) => Math.round((b - cost) * 100) / 100);
+
+      // Update state
+      const newBalance = Math.round((balance - cost) * 100) / 100;
+      setBalance(newBalance);
+
       setPortfolio((p) => {
         const prev = p[opts.symbol];
-        if (!prev) {
-          return {
-            ...p,
-            [opts.symbol]: { shares: opts.shares, avgPrice: price },
-          };
-        } else {
-          const totalShares = prev.shares + opts.shares;
-          const avgPrice =
+        let shares = opts.shares;
+        let avgPrice = price;
+
+        if (prev) {
+          shares = prev.shares + opts.shares;
+          avgPrice =
             Math.round(
-              ((prev.avgPrice * prev.shares + price * opts.shares) /
-                totalShares) *
+              ((prev.avgPrice * prev.shares + price * opts.shares) / shares) *
                 100
             ) / 100;
-          return { ...p, [opts.symbol]: { shares: totalShares, avgPrice } };
         }
+
+        // Persist to DB
+        saveBalance(newBalance);
+        saveHolding(opts.symbol, shares, avgPrice);
+
+        return {
+          ...p,
+          [opts.symbol]: { shares, avgPrice },
+        };
       });
     } else {
       // SELL
@@ -307,16 +372,25 @@ export default function DashboardPage() {
           );
           return p;
         }
+
         const remaining = prev.shares - opts.shares;
-        const updated = { ...p };
+        const newBalance = Math.round((balance + cost) * 100) / 100;
+        setBalance(newBalance);
+
         if (remaining === 0) {
-          delete updated[opts.symbol];
-        } else {
-          updated[opts.symbol] = { shares: remaining, avgPrice: prev.avgPrice };
+          removeHolding(opts.symbol);
+          saveBalance(newBalance);
+          const { [opts.symbol]: _, ...rest } = p;
+          return rest;
         }
-        // credit cash
-        setBalance((b) => Math.round((b + cost) * 100) / 100);
-        return updated;
+
+        saveBalance(newBalance);
+        saveHolding(opts.symbol, remaining, prev.avgPrice);
+
+        return {
+          ...p,
+          [opts.symbol]: { shares: remaining, avgPrice: prev.avgPrice },
+        };
       });
     }
 
