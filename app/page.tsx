@@ -130,6 +130,56 @@ export default function LandingPage() {
         <div className="absolute -z-10 w-[600px] h-[600px] rounded-full bg-emerald-600/8 blur-3xl"></div>
       </section>
 
+      {/* ================= HALAL INVESTMENTS SECTION (ADDED) ================= */}
+      <section className="py-16 px-6 bg-slate-900/40">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-emerald-400 mb-4">
+            Shariah-Compliant (Halal) Investing
+          </h2>
+          <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
+            Invest with confidence in ethically screened, interest-free
+            portfolios aligned with Islamic finance principles. We support
+            globally recognized Shariah-compliant ETFs, non-usurious asset
+            structures, and investments free from alcohol, gambling, pork,
+            tobacco, conventional banking, and other non-permissible industries.
+          </p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Halal ETFs Only",
+                text: "Access reviewed and certified ETFs screened for full Shariah compliance.",
+              },
+              {
+                title: "Zero Riba (No Interest)",
+                text: "All investment models are structured to avoid interest-based returns and debt instruments.",
+              },
+              {
+                title: "Ethical Screening",
+                text: "We exclude non-halal industries and maintain ethical asset purification processes.",
+              },
+            ].map((h, i) => (
+              <div
+                key={i}
+                className="p-5 bg-slate-950 border border-emerald-500/20 rounded-xl"
+              >
+                <CheckCircle className="h-6 w-6 text-emerald-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-emerald-300 mb-2">
+                  {h.title}
+                </h3>
+                <p className="text-slate-300 text-sm">{h.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-8 text-sm text-slate-400">
+            *Available in selected portfolios and screened using independent
+            Shariah compliance standards.
+          </p>
+        </div>
+      </section>
+      {/* ================= END HALAL SECTION ================= */}
+
       {/* Plans Section (Placement: After Hero) */}
       <section className="py-16 px-6">
         <div className="max-w-6xl mx-auto">
