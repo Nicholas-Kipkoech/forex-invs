@@ -23,31 +23,38 @@ export default function DashboardLayout({
         setLoading(false);
       }
     });
-    // subscribe to auth changes (optional)
+
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) router.push("/login");
     });
+
     return () => subscription.unsubscribe();
   }, [router]);
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500"></div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-white">
+      {/* Topbar */}
       <Topbar />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-6 gap-6 px-4 py-6">
-        <aside className="lg:col-span-1 h-[100%]">
+      <div className="flex flex-1">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:flex flex-col w-64 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800 shadow-xl">
           <Sidebar />
         </aside>
-        <main className="lg:col-span-5 overflow-y-auto">{children}</main>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto">{children}</div>
+        </main>
       </div>
     </div>
   );

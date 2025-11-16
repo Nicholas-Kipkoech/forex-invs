@@ -46,7 +46,7 @@ export default function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: -260 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 z-50 bg-[#0B0E13] h-full w-[250px] p-4 border-r border-[#1B1F2A] flex flex-col justify-between"
+              className="fixed left-0 top-0 z-50  h-screen w-[250px] p-4 border-r border-[#1B1F2A] flex flex-col justify-between"
             >
               <div>
                 <button
@@ -111,9 +111,8 @@ export default function Sidebar() {
         )}
       </AnimatePresence>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex bg-[#0B0E13] text-gray-300  shadow-lg p-4 flex-col justify-between min-h-screen border border-[#1B1F2A] w-[260px]">
-        <nav className="space-y-2">
+      <aside className="hidden md:flex bg-[#0B0E13] text-gray-300 shadow-lg p-4 flex-col justify-between h-screen border border-[#1B1F2A] w-[260px]">
+        <nav className="space-y-2 overflow-y-auto flex-1">
           {items.map((item) => {
             const isActive = path === item.href;
             const Icon = item.icon;
