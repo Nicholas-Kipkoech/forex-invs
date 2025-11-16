@@ -134,29 +134,28 @@ export default function LandingPage() {
       <section className="py-16 px-6 bg-slate-900/40">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-emerald-400 mb-4">
-            Shariah-Compliant (Halal) Investing
+            Ethical & Shariah-Compliant Investing Options
           </h2>
           <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
-            Invest with confidence in ethically screened, interest-free
-            portfolios aligned with Islamic finance principles. We support
-            globally recognized Shariah-compliant ETFs, non-usurious asset
-            structures, and investments free from alcohol, gambling, pork,
-            tobacco, conventional banking, and other non-permissible industries.
+            Choose investment portfolios that align with your values. We support
+            globally recognized Shariah-compliant portfolios, as well as general
+            ethical investing strategies free from high-risk or controversial
+            sectors.
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                title: "Halal ETFs Only",
-                text: "Access reviewed and certified ETFs screened for full Shariah compliance.",
+                title: "Ethical & Halal ETFs",
+                text: "Access reviewed ETFs screened for Shariah compliance and ethical standards.",
               },
               {
-                title: "Zero Riba (No Interest)",
-                text: "All investment models are structured to avoid interest-based returns and debt instruments.",
+                title: "Transparent Risk Models",
+                text: "All portfolios are structured with clear risk-return guidelines.",
               },
               {
-                title: "Ethical Screening",
-                text: "We exclude non-halal industries and maintain ethical asset purification processes.",
+                title: "Flexible Options",
+                text: "Choose general, balanced, or Shariah-compliant strategies to suit your goals.",
               },
             ].map((h, i) => (
               <div
@@ -173,11 +172,12 @@ export default function LandingPage() {
           </div>
 
           <p className="mt-8 text-sm text-slate-400">
-            *Available in selected portfolios and screened using independent
-            Shariah compliance standards.
+            *Available in selected portfolios. Ethical and Shariah-compliant
+            options are verified independently.
           </p>
         </div>
       </section>
+
       {/* ================= END HALAL SECTION ================= */}
 
       {/* Plans Section (Placement: After Hero) */}
