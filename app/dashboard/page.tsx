@@ -85,6 +85,32 @@ const CATEGORIES: Record<
       { id: "ETHUSD", name: "Ethereum", tvSymbol: "COINBASE:ETHUSD" },
     ],
   },
+  shariah: {
+    label: "Shariah-Compliant",
+    list: [
+      {
+        id: "HLAL",
+        name: "Wahed FTSE USA Shariah ETF",
+        tvSymbol: "NASDAQ:HLAL",
+      },
+      {
+        id: "SPUS",
+        name: "SP Funds S&P 500 Shariah ETF",
+        tvSymbol: "NYSEARCA:SPUS",
+      },
+      { id: "SPSK", name: "SP Funds Sukuk ETF", tvSymbol: "NYSEARCA:SPSK" },
+      {
+        id: "ISWD",
+        name: "iShares MSCI World Islamic ETF",
+        tvSymbol: "LSE:ISWD",
+      },
+      {
+        id: "ISUS",
+        name: "iShares MSCI USA Islamic ETF",
+        tvSymbol: "LSE:ISUS",
+      },
+    ],
+  },
 };
 
 const DEFAULT_CATEGORY = "Stocks";
