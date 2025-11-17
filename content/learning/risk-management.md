@@ -8,7 +8,7 @@ description: "Learn position sizing, stop-loss strategies, and how to manage ris
 Protecting your capital is more important than chasing profits.  
 Risk management ensures you survive long enough to trade successfully.
 
----
+
 
 ## 1. Position Sizing
 
@@ -20,7 +20,7 @@ Risk management ensures you survive long enough to trade successfully.
 Position Size = (Account Balance * Risk %) / Stop Loss (in $)
 
 
----
+
 
 ## 2. Stop-Loss & Take-Profit
 
@@ -29,21 +29,21 @@ Position Size = (Account Balance * Risk %) / Stop Loss (in $)
 
 Always define SL/TP before entering a trade.
 
----
+
 
 ## 3. Risk-Reward Ratio
 
 - Aim for trades where potential reward > risk  
 - Common ratio: 2:1 or 3:1 (risking $100 to make $200–$300)
 
----
+
 
 ## 4. Diversification
 
 - Don’t put all capital into a single asset or market  
 - Spread risk across instruments, sectors, or strategies
 
----
+
 
 ## 5. Emotional Control
 
@@ -51,7 +51,7 @@ Always define SL/TP before entering a trade.
 - Avoid revenge trading or chasing losses  
 - Consistency beats impulsive trades
 
----
+
 
 ## Conclusion
 

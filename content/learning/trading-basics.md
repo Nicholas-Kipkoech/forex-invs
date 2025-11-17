@@ -8,7 +8,7 @@ description: "Learn order types, brokers, chart reading, timeframes, and how mar
 Trading is the act of buying and selling financial assets to profit from market movements.  
 Whether you trade stocks, forex, or crypto, understanding the fundamentals is key to success.
 
----
+
 
 ## What You Will Learn
 
@@ -18,7 +18,7 @@ Whether you trade stocks, forex, or crypto, understanding the fundamentals is ke
 - Reading charts and candlesticks  
 - Key trading terms  
 
----
+
 
 ## 1. How Markets Work
 
@@ -30,7 +30,7 @@ Prices are determined by **supply and demand**. Key markets include:
 - **Crypto** – digital assets like Bitcoin or Ethereum  
 - **Commodities** – oil, gold, silver  
 
----
+
 
 ## 2. Types of Orders
 
@@ -41,7 +41,7 @@ Prices are determined by **supply and demand**. Key markets include:
 | Stop-Loss  | Automatically closes a trade to limit losses |
 | Take Profit| Automatically closes a trade to lock in profits |
 
----
+
 
 ## 3. Brokers & Platforms
 
@@ -49,7 +49,7 @@ Prices are determined by **supply and demand**. Key markets include:
 - Popular platforms: **MetaTrader 4/5**, **TradingView**, **WeBull**, **Binance**.  
 - Check for: low fees, fast execution, good interface, and security.
 
----
+
 
 ## 4. Reading Charts
 
@@ -68,7 +68,7 @@ Charts visualize price movement over time.
 
 
 
----
+
 
 ## 5. Key Trading Terms
 
@@ -78,7 +78,7 @@ Charts visualize price movement over time.
 - **Spread** – Difference between buy/sell price  
 - **Risk Management** – Strategies to protect your capital  
 
----
+
 
 ## 6. Tips for Beginners
 
@@ -88,7 +88,7 @@ Charts visualize price movement over time.
 4. Understand basic technical analysis (support/resistance, moving averages)  
 5. Practice with demo accounts before going live  
 
----
+
 
 ## Conclusion
 

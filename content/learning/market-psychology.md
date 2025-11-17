@@ -7,7 +7,7 @@ description: "Understand FOMO, fear, greed, and discipline to become a consisten
 
 Markets are driven by human emotions. Controlling your mind is as important as controlling your trades.
 
----
+
 
 ## 1. Key Emotions
 
@@ -15,7 +15,7 @@ Markets are driven by human emotions. Controlling your mind is as important as c
 - **Greed** – Leads to overtrading or chasing losses  
 - **FOMO** – Fear of missing out often triggers bad trades  
 
----
+
 
 ## 2. Discipline
 
@@ -23,7 +23,7 @@ Markets are driven by human emotions. Controlling your mind is as important as c
 - Avoid impulsive decisions  
 - Journal your trades to analyze mistakes
 
----
+
 
 ## 3. Patience
 
@@ -31,7 +31,7 @@ Markets are driven by human emotions. Controlling your mind is as important as c
 - Avoid forcing trades during low-confidence periods  
 - Let winners run, cut losers quickly
 
----
+
 
 ## 4. Cognitive Biases
 
@@ -39,7 +39,7 @@ Markets are driven by human emotions. Controlling your mind is as important as c
 - **Recency Bias** – Overweighting recent events  
 - **Overconfidence** – Believing you “can’t lose”  
 
----
+
 
 ## 5. Building Consistency
 
@@ -47,7 +47,7 @@ Markets are driven by human emotions. Controlling your mind is as important as c
 - Review trades regularly  
 - Stick to proven strategies  
 
----
+
 
 ## Conclusion
 

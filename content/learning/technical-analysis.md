@@ -8,7 +8,7 @@ description: "Learn candlesticks, indicators, trends, and patterns to make infor
 Technical analysis (TA) is the study of past price and volume data to predict future market movements.  
 Traders use charts, indicators, and patterns to find high-probability trades.
 
----
+
 
 ## 1. Candlestick Patterns
 
@@ -18,7 +18,7 @@ Traders use charts, indicators, and patterns to find high-probability trades.
 
 Candlestick charts are essential for identifying market sentiment.
 
----
+
 
 ## 2. Support & Resistance
 
@@ -27,7 +27,7 @@ Candlestick charts are essential for identifying market sentiment.
 
 Breakouts and bounces from these levels are key trade setups.
 
----
+
 
 ## 3. Trends
 
@@ -37,7 +37,7 @@ Breakouts and bounces from these levels are key trade setups.
 
 Trading with the trend increases probability of success.
 
----
+
 
 ## 4. Indicators
 
@@ -46,7 +46,7 @@ Trading with the trend increases probability of success.
 - **MACD** – Momentum and trend-following indicator  
 - **Bollinger Bands** – Volatility and potential reversal zones  
 
----
+
 
 ## 5. Chart Patterns
 
@@ -54,7 +54,7 @@ Trading with the trend increases probability of success.
 - **Triangles** – Continuation or breakout setups  
 - **Double Tops/Bottoms** – Reversal signals  
 
----
+
 
 ## Conclusion
 
