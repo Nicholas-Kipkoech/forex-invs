@@ -49,8 +49,7 @@ export default function LearningPage() {
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-4xl md:text-5xl font-bold text-center
-        bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent"
+        className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent"
       >
         Learning Center
       </motion.h1>
@@ -70,8 +69,7 @@ export default function LearningPage() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="p-6 bg-slate-900 border border-emerald-500/20
-              rounded-2xl shadow-lg hover:shadow-emerald-500/20 cursor-pointer"
+              className="p-6 bg-slate-900 border border-emerald-500/20 rounded-2xl shadow-lg hover:shadow-emerald-500/20 cursor-pointer"
             >
               <div className="flex items-center gap-4 mb-4">
                 <Icon className="h-8 w-8 text-emerald-400" />

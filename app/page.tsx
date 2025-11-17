@@ -112,6 +112,14 @@ export default function LandingPage() {
               Login
             </Button>
           </Link>
+          <Link href="/learning">
+            <Button
+              variant="outline"
+              className="border-yellow-400 text-emerald-400 hover:bg-emerald-400/10 text-lg px-6 py-3 rounded-xl"
+            >
+              Start Learning
+            </Button>
+          </Link>
         </motion.div>
 
         {/* Small trust strip */}
