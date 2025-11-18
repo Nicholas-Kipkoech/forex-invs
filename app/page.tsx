@@ -97,17 +97,17 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="mt-8 flex gap-4"
+          className="mt-8 flex flex-col md:flex-row gap-2"
         >
           <Link href="/register">
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-lg px-6 py-3 rounded-xl shadow-lg shadow-emerald-700/30">
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-md px-3 py-2 rounded-xl shadow-lg shadow-emerald-700/30">
               Get Started — From $100
             </Button>
           </Link>
           <Link href="/login">
             <Button
               variant="outline"
-              className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 text-lg px-6 py-3 rounded-xl"
+              className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 text-md px-3 py-2 rounded-xl"
             >
               Login
             </Button>
@@ -115,7 +115,7 @@ export default function LandingPage() {
           <Link href="/learning">
             <Button
               variant="outline"
-              className="border-yellow-400 text-emerald-400 hover:bg-emerald-400/10 text-lg px-6 py-3 rounded-xl"
+              className="border-yellow-400 text-emerald-400 hover:bg-emerald-400/10 text-md px-3 py-2 rounded-xl"
             >
               Start Learning
             </Button>
@@ -136,6 +136,50 @@ export default function LandingPage() {
 
         {/* Floating glow */}
         <div className="absolute -z-10 w-[600px] h-[600px] rounded-full bg-emerald-600/8 blur-3xl"></div>
+      </section>
+
+      {/* NEW: MT5 + BENEFITS SECTION */}
+      <section className="py-24 bg-slate-900/40 px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">Now Supporting MT5</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-12">
+            Trade with the world’s most powerful and trusted platform.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-5 bg-slate-950 border border-emerald-500/20 rounded-xl">
+              <CheckCircle className="h-10 w-10 " />
+              <h3 className="text-lg font-semibold text-emerald-300 mb-22">
+                MT5 Fully Supported
+              </h3>
+              <p className="text-slate-300 text-sm">
+                Seamless integration with MetaTrader 5 for advanced trading.
+              </p>
+            </div>
+
+            <div className="p-5 bg-slate-950 border border-emerald-500/20 rounded-xl">
+              <Zap className="h-10 w-10 " />
+              <h3 className="text-lg font-semibold text-emerald-300 mb-22">
+                Low Fees
+              </h3>
+              <p className="text-slate-300 text-sm">
+                Trade more and keep more of your profits with transparent low
+                fees.
+              </p>
+            </div>
+
+            <div className="p-5 bg-slate-950 border border-emerald-500/20 rounded-xl">
+              <CreditCard className="h-10 w-10 " />
+              <h3 className="text-lg font-semibold text-emerald-300 mb-22">
+                Fast Deposits & Withdrawals
+              </h3>
+              <p className="text-slate-300 text-sm">
+                Get your money in and out quickly with instant processing
+                options.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ================= HALAL INVESTMENTS SECTION (ADDED) ================= */}
