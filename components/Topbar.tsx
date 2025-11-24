@@ -1,4 +1,3 @@
-// components/Topbar.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,13 +14,13 @@ export default function Topbar() {
   }, []);
 
   return (
-    <header className="w-full bg-slate-900 shadow-sm border-b border-slate-800 py-3 sticky top-0 z-20">
+    <header className="w-full bg-[#0A0F1E] shadow-sm border-b border-[#1B2340] py-3 sticky top-0 z-20">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
         <Link
           href="/"
-          className="font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+          className="font-bold text-[#00A6FF] hover:text-[#33CFFF] transition-colors"
         >
-          NexTrade Inc
+          OKX
         </Link>
         {email && (
           <div className="text-sm text-gray-400 truncate max-w-xs text-right">

@@ -17,14 +17,6 @@ export default function DepositPageContent() {
     null
   );
 
-  const plans = [
-    { name: "Starter", min: 100, max: 999, roi: "6-8%" },
-    { name: "Growth", min: 1000, max: 4999, roi: "8-12%" },
-    { name: "Premium", min: 5000, max: 50000, roi: "12-16%" },
-  ];
-
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-
   const wallets = {
     BTC: {
       address: "1CDYEta833Bd4uLNTpPRQhwDtjzb7cvFAa",
@@ -107,9 +99,9 @@ export default function DepositPageContent() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-slate-950 rounded-3xl shadow-md p-8 border border-slate-800 text-white">
-      <h1 className="text-3xl font-bold text-emerald-400 mb-2">Deposit</h1>
-      <p className="text-slate-400 mb-6">
+    <div className="max-w-3xl mx-auto bg-[#0A0F1E] rounded-2xl shadow-md p-8 border border-[#1B2340] text-white">
+      <h1 className="text-3xl font-bold text-[#00A6FF] mb-2">Deposit</h1>
+      <p className="text-[#A0A8B8] mb-6">
         Fund your account securely using Bitcoin (BTC) or Tether (USDT).
       </p>
 
@@ -122,8 +114,8 @@ export default function DepositPageContent() {
             onClick={() => setSelectedCoin(coin)}
             className={`px-5 ${
               selectedCoin === coin
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "border-emerald-300 hover:bg-emerald-700/10 text-emerald-400"
+                ? "bg-[#00A6FF] text-black hover:bg-[#0086CC]"
+                : "border-[#00A6FF] hover:bg-[#00A6FF]/10 text-[#00A6FF]"
             }`}
           >
             {coin}
@@ -132,20 +124,20 @@ export default function DepositPageContent() {
       </div>
 
       {/* Wallet Card */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="bg-[#1B2340] border border-[#2B3455] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex-1">
-          <p className="text-xs uppercase text-emerald-400 font-semibold">
+          <p className="text-xs uppercase text-[#00A6FF] font-semibold">
             {selectedCoin} Wallet Address ({network})
           </p>
-          <p className="font-mono text-slate-300 break-all mt-1">
+          <p className="font-mono text-[#C0C8D0] break-all mt-1">
             {walletAddress}
           </p>
         </div>
         <Button
           onClick={handleCopy}
           variant="outline"
-          className={`border-emerald-400 text-black ${
-            copied ? "bg-emerald-600 text-white" : "hover:bg-emerald-700/10"
+          className={`border-[#00A6FF] text-black ${
+            copied ? "bg-[#00A6FF] text-black" : "hover:bg-[#00A6FF]/10"
           }`}
         >
           <Copy className="h-4 w-4 mr-1" />
@@ -156,58 +148,11 @@ export default function DepositPageContent() {
       {!submitted && (
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 mt-6 border-t border-slate-700 pt-6"
+          className="space-y-6 mt-6 border-t border-[#2B3455] pt-6"
         >
-          {/* Plan Selection */}
-          <div>
-            <h2 className="text-lg font-semibold text-emerald-400 mb-3">
-              Select Investment Plan
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  onClick={() => setSelectedPlan(plan.name)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                    selectedPlan === plan.name
-                      ? "border-emerald-600 bg-slate-800 shadow"
-                      : "border-slate-700 hover:border-emerald-500/50"
-                  }`}
-                >
-                  <h3 className="text-xl font-bold text-slate-200">
-                    {plan.name}
-                  </h3>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Min:{" "}
-                    <span className="font-medium text-emerald-400">
-                      ${plan.min}
-                    </span>
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Max:{" "}
-                    <span className="font-medium text-emerald-400">
-                      ${plan.max}
-                    </span>
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    ROI:{" "}
-                    <span className="font-medium text-emerald-400">
-                      {plan.roi} / mo
-                    </span>
-                  </p>
-                  {selectedPlan === plan.name && (
-                    <div className="mt-3 text-xs bg-emerald-600 text-white py-1 px-2 rounded-md inline-block">
-                      Selected
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Amount */}
           <div>
-            <label className="block text-sm text-slate-400 mb-1">
+            <label className="block text-sm text-[#A0A8B8] mb-1">
               Deposit Amount (USD)
             </label>
             <input
@@ -216,17 +161,17 @@ export default function DepositPageContent() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
-              className="w-full border border-slate-700 rounded-md px-3 py-2 bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-[#2B3455] rounded-md px-3 py-2 bg-[#0A0F1E] text-white focus:outline-none focus:ring-2 focus:ring-[#00A6FF]"
             />
           </div>
 
           {/* Proof Upload */}
           <div>
-            <label className="block text-sm text-slate-400 mb-1">
+            <label className="block text-sm text-[#A0A8B8] mb-1">
               Upload Proof of Payment
             </label>
-            <div className="border border-dashed border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-slate-400 hover:border-emerald-500 transition">
-              <UploadCloud className="h-8 w-8 text-emerald-400 mb-2" />
+            <div className="border border-dashed border-[#2B3455] rounded-xl p-6 flex flex-col items-center justify-center text-[#A0A8B8] hover:border-[#00A6FF] transition">
+              <UploadCloud className="h-8 w-8 text-[#00A6FF] mb-2" />
               <input
                 type="file"
                 accept="image/*"
@@ -234,7 +179,7 @@ export default function DepositPageContent() {
                 className="text-sm text-center"
               />
               {file && (
-                <p className="text-xs text-emerald-400 mt-2 font-medium">
+                <p className="text-xs text-[#00A6FF] mt-2 font-medium">
                   {file.name}
                 </p>
               )}
@@ -242,11 +187,11 @@ export default function DepositPageContent() {
           </div>
 
           {/* Instructions */}
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 text-sm text-slate-300">
-            <p className="font-semibold text-emerald-400 mb-1">⚠️ Important</p>
+          <div className="bg-[#1B2340] border border-[#2B3455] rounded-xl p-4 text-sm text-[#A0A8B8]">
+            <p className="font-semibold text-[#00A6FF] mb-1">⚠️ Important</p>
             <ul className="list-disc list-inside space-y-1">
               <li>
-                Send only {selectedCoin} to the address shown above ({network}).
+                Send only {selectedCoin} to the address above ({network}).
               </li>
               <li>Sending other coins may result in permanent loss.</li>
               <li>Upload your transaction proof immediately after sending.</li>
@@ -257,7 +202,7 @@ export default function DepositPageContent() {
           {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="w-full bg-[#00A6FF] hover:bg-[#0086CC] text-black"
             disabled={loading}
           >
             {loading ? "Submitting..." : `Submit ${selectedCoin} Deposit Proof`}
@@ -266,13 +211,13 @@ export default function DepositPageContent() {
       )}
 
       {submitted && (
-        <div className="mt-6 bg-slate-800 border border-emerald-500 rounded-2xl p-6 text-center shadow-sm">
-          <p className="text-emerald-400 font-semibold text-lg">
+        <div className="mt-6 bg-[#1B2340] border border-[#00A6FF] rounded-xl p-6 text-center shadow-sm">
+          <p className="text-[#00A6FF] font-semibold text-lg">
             ✅ Payment proof submitted successfully!
           </p>
-          <p className="text-slate-300 mt-2">
+          <p className="text-[#C0C8D0] mt-2">
             Your {selectedCoin} deposit of{" "}
-            <span className="font-bold text-emerald-400">${amount}</span> on{" "}
+            <span className="font-bold text-[#00A6FF]">${amount}</span> on{" "}
             {network} is being processed. You’ll receive confirmation once
             verified.
           </p>

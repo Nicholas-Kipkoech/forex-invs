@@ -54,27 +54,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A0F1F] px-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-black px-4 relative overflow-hidden">
       {/* GLASS GLOW BACKDROPS */}
-      <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-emerald-500/10 blur-[140px] rounded-full"></div>
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-teal-500/10 blur-[120px] rounded-full"></div>
+      <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-white/5 blur-[140px] rounded-full"></div>
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-white/5 blur-[120px] rounded-full"></div>
 
       <motion.form
         onSubmit={handleRegister}
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative w-full max-w-md p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl"
+        className="relative w-full max-w-md p-8 rounded-3xl bg-gray-900 border border-gray-700 shadow-2xl"
       >
         {/* HEADER */}
         <div className="text-center mb-6">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-            Join Elite Investors
-          </h2>
+          <h2 className="text-4xl font-bold text-white">Join OKX Traders</h2>
           <p className="text-gray-400 text-sm mt-2">
-            Start from as low as{" "}
-            <span className="text-emerald-300 font-semibold">$100</span> and
-            grow your wealth
+            Start trading crypto today — deposit USDT or BTC instantly.
           </p>
         </div>
 
@@ -86,19 +82,17 @@ export default function RegisterPage() {
 
         {/* INPUTS */}
         <div className="space-y-4">
-          {/* NAME */}
           <div>
             <label className="text-sm text-gray-300">Full Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
-              className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 outline-none transition"
+              className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-white focus:ring-1 focus:ring-white outline-none transition"
               required
             />
           </div>
 
-          {/* EMAIL */}
           <div>
             <label className="text-sm text-gray-300">Email</label>
             <input
@@ -106,12 +100,11 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="name@domain.com"
-              className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 outline-none transition"
+              className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-white focus:ring-1 focus:ring-white outline-none transition"
               required
             />
           </div>
 
-          {/* PHONE */}
           <div>
             <label className="text-sm text-gray-300">Phone Number</label>
             <PhoneInput
@@ -119,13 +112,12 @@ export default function RegisterPage() {
               value={phone}
               onChange={setPhone}
               containerClass="mt-1"
-              inputClass="!w-full !h-[50px] !bg-white/5 !border !border-white/10 !text-white !rounded-lg !pl-14 focus:!border-emerald-400 focus:!ring-2 focus:!ring-emerald-500/40 outline-none transition"
-              buttonClass="!bg-white/10 !border-white/10 !rounded-l-lg"
-              dropdownClass="!bg-[#111827] !text-white"
+              inputClass="!w-full !h-[50px] !bg-gray-800 !border !border-gray-700 !text-white !rounded-lg !pl-14 focus:!border-white focus:!ring-1 outline-none transition"
+              buttonClass="!bg-gray-700 !border-gray-700 !rounded-l-lg"
+              dropdownClass="!bg-gray-900 !text-white"
             />
           </div>
 
-          {/* PASSWORD */}
           <div>
             <label className="text-sm text-gray-300">Password</label>
             <input
@@ -133,7 +125,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="••••••••"
-              className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 outline-none transition"
+              className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-white focus:ring-1 focus:ring-white outline-none transition"
               required
             />
           </div>
@@ -143,7 +135,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full mt-6 py-6 text-lg rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/20 transition-all"
+          className="w-full mt-6 py-6 text-lg rounded-xl bg-white text-black hover:bg-gray-100 shadow-md transition-all"
         >
           {loading ? "Creating account..." : "Create Account →"}
         </Button>
@@ -153,7 +145,7 @@ export default function RegisterPage() {
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-emerald-400 hover:underline font-medium"
+            className="text-white hover:underline font-medium"
           >
             Sign in
           </Link>
@@ -161,7 +153,7 @@ export default function RegisterPage() {
 
         {/* TRUST BADGE */}
         <div className="text-center text-xs text-gray-500 mt-4">
-          🔐 Secure, encrypted & regulated investment platform
+          🔐 Secure & regulated crypto trading platform
         </div>
       </motion.form>
     </div>

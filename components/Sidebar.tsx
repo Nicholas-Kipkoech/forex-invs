@@ -13,7 +13,6 @@ export default function Sidebar() {
   const items = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/dashboard/deposit", label: "Deposit", icon: Wallet },
-    { href: "/dashboard/demo", label: "Demo", icon: BarChart3 },
     { href: "/dashboard/profile", label: "Profile", icon: User },
   ];
 
@@ -21,7 +20,7 @@ export default function Sidebar() {
     <>
       {/* Hamburger (Mobile Only) */}
       <button
-        className="md:hidden fixed top-5 left-4 z-50 p-2 bg-[#0B0E13] text-gray-300 rounded-lg border border-[#1B1F2A]"
+        className="md:hidden fixed top-5 left-4 z-50 p-2 bg-[#0A0F1E] text-gray-300 rounded-lg border border-[#1B2340]"
         onClick={() => setOpen(true)}
       >
         <Menu size={22} />
@@ -46,7 +45,7 @@ export default function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: -260 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 z-50  h-screen w-[250px] p-4 border-r border-[#1B1F2A] flex flex-col justify-between"
+              className="fixed left-0 top-0 z-50 h-screen w-[250px] p-4 border-r border-[#1B2340] flex flex-col justify-between bg-[#0A0F1E]"
             >
               <div>
                 <button
@@ -68,14 +67,14 @@ export default function Sidebar() {
                         onClick={() => setOpen(false)}
                         className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                           isActive
-                            ? "bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 text-emerald-400"
+                            ? "bg-gradient-to-r from-[#00A6FF]/20 to-[#00A6FF]/10 text-[#00A6FF]"
                             : "hover:bg-[#121823] text-gray-400 hover:text-white"
                         }`}
                       >
                         <Icon
                           className={`w-5 h-5 ${
                             isActive
-                              ? "text-emerald-400"
+                              ? "text-[#00A6FF]"
                               : "text-gray-500 group-hover:text-white"
                           }`}
                         />
@@ -86,7 +85,7 @@ export default function Sidebar() {
                         {isActive && (
                           <motion.div
                             layoutId="activeIndicator"
-                            className="absolute left-0 top-0 w-[3px] h-full bg-emerald-500 rounded-r-md"
+                            className="absolute left-0 top-0 w-[3px] h-full bg-[#00A6FF] rounded-r-md"
                             transition={{
                               type: "spring",
                               stiffness: 350,
@@ -100,8 +99,8 @@ export default function Sidebar() {
                 </nav>
               </div>
 
-              <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B1F2A]">
-                <p className="text-gray-600">v1.0 • StockAI</p>
+              <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B2340]">
+                <p className="text-gray-600">v1.0 • OKX</p>
                 <p className="text-gray-500 mt-1">
                   © {new Date().getFullYear()} All Rights Reserved
                 </p>
@@ -111,7 +110,8 @@ export default function Sidebar() {
         )}
       </AnimatePresence>
 
-      <aside className="hidden md:flex bg-[#0B0E13] text-gray-300 shadow-lg p-4 flex-col justify-between h-screen border border-[#1B1F2A] w-[260px]">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex bg-[#0A0F1E] text-gray-300 shadow-lg p-4 flex-col justify-between h-screen border border-[#1B2340] w-[260px]">
         <nav className="space-y-2 overflow-y-auto flex-1">
           {items.map((item) => {
             const isActive = path === item.href;
@@ -123,14 +123,14 @@ export default function Sidebar() {
                 href={item.href}
                 className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   isActive
-                    ? "bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 text-emerald-400"
+                    ? "bg-gradient-to-r from-[#00A6FF]/20 to-[#00A6FF]/10 text-[#00A6FF]"
                     : "hover:bg-[#121823] text-gray-400 hover:text-white"
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 ${
                     isActive
-                      ? "text-emerald-400"
+                      ? "text-[#00A6FF]"
                       : "text-gray-500 group-hover:text-white"
                   }`}
                 />
@@ -139,7 +139,7 @@ export default function Sidebar() {
                 {isActive && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute left-0 top-0 w-[3px] h-full bg-emerald-500 rounded-r-md"
+                    className="absolute left-0 top-0 w-[3px] h-full bg-[#00A6FF] rounded-r-md"
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
@@ -148,8 +148,8 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B1F2A]">
-          <p className="text-gray-600">v1.0 • StockAI</p>
+        <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B2340]">
+          <p className="text-gray-600">v1.0 • OKX</p>
           <p className="text-gray-500 mt-1">
             © {new Date().getFullYear()} All Rights Reserved
           </p>
