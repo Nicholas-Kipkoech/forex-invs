@@ -47,9 +47,8 @@ export default function DashboardLayout({
 
       <div className="flex flex-1">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800 shadow-xl">
-          <Sidebar />
-        </aside>
+
+        <Sidebar />
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6">
