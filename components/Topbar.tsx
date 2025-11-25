@@ -18,7 +18,7 @@ export default function Topbar() {
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
         <Link
           href="/"
-          className="font-bold text-[#00A6FF] hover:text-[#33CFFF] transition-colors"
+          className="font-bold text-white hover:text-[#33CFFF] transition-colors"
         >
           OKX
         </Link>

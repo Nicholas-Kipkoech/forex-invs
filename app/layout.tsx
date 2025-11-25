@@ -1,7 +1,4 @@
-"use client";
-
 import type { Metadata } from "next";
-import { useEffect } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
@@ -16,9 +13,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const metadata: Metadata = {
-  title: "StockPro - AI Stocks",
-  description: "Let your investment money work for you.",
+export const metadata: Metadata = {
+  title: "OKX - Meta Trader",
+  description: "Trade with confidence",
 };
 
 export default function RootLayout({

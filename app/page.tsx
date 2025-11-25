@@ -15,173 +15,179 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+const HERO_FEATURES = [
+  "Bank-grade encryption",
+  "Audited trading platform",
+  "Instant crypto deposits",
+];
+
+const MT5_FEATURES = [
+  {
+    icon: <CheckCircle className="h-10 w-10 text-white" />,
+    title: "Seamless MT5 Integration",
+    text: "Connect your MT5 account and trade directly with real-time market data.",
+  },
+  {
+    icon: <Zap className="h-10 w-10 text-white" />,
+    title: "Ultra-Low Fees",
+    text: "Transparent pricing with zero hidden costs.",
+  },
+  {
+    icon: <CreditCard className="h-10 w-10 text-white" />,
+    title: "Instant Crypto Funding",
+    text: "Fund your account with USDT & BTC in seconds.",
+  },
+];
+
+const PLATFORM_FEATURES = [
+  {
+    icon: <LineChart className="h-10 w-10 text-white" />,
+    title: "Live Market Feeds",
+    text: "Ultra-fast real-time crypto pricing.",
+  },
+  {
+    icon: <TrendingUp className="h-10 w-10 text-white" />,
+    title: "AI Trade Intelligence",
+    text: "Predictive insights to sharpen your strategy.",
+  },
+  {
+    icon: <Lock className="h-10 w-10 text-white" />,
+    title: "Military-grade Security",
+    text: "Your assets are protected 24/7.",
+  },
+  {
+    icon: <ShieldCheck className="h-10 w-10 text-white" />,
+    title: "Global Compliance",
+    text: "Trade under globally recognised standards.",
+  },
+  {
+    icon: <Users className="h-10 w-10 text-white" />,
+    title: "Elite Trader Network",
+    text: "Access premium trading communities.",
+  },
+  {
+    icon: <Zap className="h-10 w-10 text-white" />,
+    title: "Zero-Latency Execution",
+    text: "Lightning-fast order execution.",
+  },
+];
+
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center text-center px-6 py-24 lg:py-32">
+    <div className="min-h-screen bg-black text-white overflow-hidden relative">
+      {/* HERO */}
+      <section className="relative flex flex-col items-center justify-center text-center px-6 py-28">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-4xl sm:text-6xl font-extrabold leading-tight"
+          className="text-4xl sm:text-6xl font-extrabold leading-tight text-white"
         >
-          Trade Smarter.
+          Trade the Future.
           <br />
-          Powered by MT5 & OKX Platform.
+          Powered by OKX & MT5
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="max-w-2xl mt-6 text-gray-400 text-lg"
+          className="max-w-2xl mt-6 text-gray-300 text-lg"
         >
-          Institutional-grade analytics, AI-driven insights, and secure crypto
-          deposits. Trade USDT, BTC, and other top cryptocurrencies on a fully
-          integrated MT5 trading platform.
+          Futuristic crypto trading ecosystem powered by OKX liquidity and MT5
+          execution. Experience lightning speed, precision analytics, and
+          next-gen security.
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="mt-8 flex flex-col md:flex-row gap-2"
+          className="mt-10"
         >
           <Link href="/register">
-            <Button className="bg-white text-black text-md px-6 py-3 rounded-xl shadow-md">
-              Get Started
+            <Button className="bg-white text-black px-8 py-4 rounded-2xl hover:bg-gray-300 transition">
+              Start Trading
             </Button>
           </Link>
         </motion.div>
 
-        <div className="mt-6 flex items-center gap-4 text-gray-500 text-sm">
-          <ShieldCheck className="h-4 w-4" />
-          <span>Bank-grade encryption</span>
-          <span className="inline-block mx-2">•</span>
-          <CheckCircle className="h-4 w-4" />
-          <span>Audited trading platform</span>
-          <span className="inline-block mx-2">•</span>
-          <CreditCard className="h-4 w-4" />
-          <span>Fast crypto deposits</span>
+        <div className="mt-10 flex flex-wrap gap-4 text-gray-400 text-sm">
+          {HERO_FEATURES.map((f, i) => (
+            <span key={i} className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-white" /> {f}
+            </span>
+          ))}
         </div>
       </section>
 
-      {/* MT5 & Benefits Section */}
-      <section className="py-24 bg-gray-900 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">Trade with MT5</h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-12">
-            Leverage the world's most powerful trading platform. Execute trades
-            faster, access advanced analytics, and manage your crypto portfolio
-            securely.
+      {/* MT5 SECTION */}
+      <section className="py-24 px-6 bg-gray-900">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6 text-white">
+            MT5 x OKX Infrastructure
+          </h2>
+          <p className="text-gray-300 max-w-2xl mx-auto mb-12">
+            Enterprise-level trading powered by OKX liquidity and MT5 precision
+            tools.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <CheckCircle className="h-10 w-10" />,
-                title: "Seamless MT5 Integration",
-                text: "Connect your MT5 account and trade directly with live market data.",
-              },
-              {
-                icon: <Zap className="h-10 w-10" />,
-                title: "Low Fees",
-                text: "Transparent trading fees with no hidden charges.",
-              },
-              {
-                icon: <CreditCard className="h-10 w-10" />,
-                title: "Fast Deposits",
-                text: "Deposit USDT and BTC instantly to start trading immediately.",
-              },
-            ].map((f, i) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {MT5_FEATURES.map((f, i) => (
               <div
                 key={i}
-                className="p-5 bg-gray-800 border border-gray-700 rounded-xl"
+                className="p-6 rounded-2xl bg-gray-800 border border-gray-700 shadow-lg hover:shadow-gray-500 transition"
               >
                 {f.icon}
-                <h3 className="text-lg font-semibold mt-2 mb-2">{f.title}</h3>
-                <p className="text-gray-400 text-sm">{f.text}</p>
+                <h3 className="text-lg font-semibold mt-4 text-white">
+                  {f.title}
+                </h3>
+                <p className="text-gray-300 text-sm mt-2">{f.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trading Features */}
-      <section className="py-20 bg-gray-900">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
-          {[
-            {
-              icon: <LineChart className="h-10 w-10 text-white" />,
-              title: "Live Price Feeds",
-              text: "Track real-time prices for crypto assets with minimal latency.",
-            },
-            {
-              icon: <TrendingUp className="h-10 w-10 text-white" />,
-              title: "AI-Driven Insights",
-              text: "Predictive analytics to help guide your trades.",
-            },
-            {
-              icon: <Lock className="h-10 w-10 text-white" />,
-              title: "Secure Crypto Deposits",
-              text: "Bank-grade encryption ensures your funds are safe.",
-            },
-            {
-              icon: <ShieldCheck className="h-10 w-10 text-white" />,
-              title: "Regulatory Compliance",
-              text: "Operate within international standards with transparency.",
-            },
-            {
-              icon: <Users className="h-10 w-10 text-white" />,
-              title: "Community Support",
-              text: "Join a network of traders sharing strategies and insights.",
-            },
-            {
-              icon: <Zap className="h-10 w-10 text-white" />,
-              title: "Lightning Execution",
-              text: "Execute trades instantly on a low-latency platform.",
-            },
-          ].map((f, i) => (
+      {/* PLATFORM FEATURES */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+          {PLATFORM_FEATURES.map((f, i) => (
             <div
               key={i}
-              className="p-6 bg-gray-800 border border-gray-700 rounded-2xl shadow-md"
+              className="p-6 rounded-2xl bg-gray-800 border border-gray-700 hover:border-white transition"
             >
-              <div className="flex items-center gap-3 mb-4">{f.icon}</div>
-              <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-              <p className="text-gray-400 text-sm">{f.text}</p>
+              {f.icon}
+              <h3 className="text-xl font-semibold mt-4 text-white">
+                {f.title}
+              </h3>
+              <p className="text-gray-300 text-sm mt-2">{f.text}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* TradingView Chart */}
-      <section className="relative flex flex-col items-center py-12 px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
-          Live Market Overview
+      {/* LIVE MARKET */}
+      <section className="flex flex-col items-center py-24 px-6">
+        <h2 className="text-3xl font-bold mb-8 text-white">
+          Live Crypto Markets
         </h2>
-        <div className="w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl border border-gray-700">
+        <div className="w-full max-w-6xl rounded-3xl overflow-hidden border border-gray-700 shadow-lg">
           <iframe
-            src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_8b80d&symbol=NASDAQ:AAPL&interval=15&hide_top_toolbar=1&hide_legend=1&theme=dark"
-            style={{ height: "420px", width: "100%" }}
-            title="TradingView Live Chart"
+            src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=15&theme=dark"
+            style={{ height: "450px", width: "100%" }}
+            title="Crypto Market"
           />
         </div>
-        <p className="text-gray-400 mt-6 max-w-xl text-center">
-          Real-time charts powered by TradingView.
-        </p>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-700 py-8 text-center text-gray-400 text-sm">
-        <div className="flex items-center justify-center gap-2 mb-2">
+      {/* FOOTER */}
+      <footer className="border-t border-gray-700 py-10 text-center text-gray-400 text-sm">
+        <div className="flex justify-center items-center gap-2 mb-2">
           <Globe className="h-4 w-4" />
-          <span>
-            © {new Date().getFullYear()} OKX-Powered-Partner Platform. All
-            rights reserved.
-          </span>
+          <span>© {new Date().getFullYear()} OKX-Powered Trading Platform</span>
         </div>
-        <div className="text-gray-500">Built for traders.</div>
+        <p>Next-generation crypto trading experience</p>
       </footer>
     </div>
   );

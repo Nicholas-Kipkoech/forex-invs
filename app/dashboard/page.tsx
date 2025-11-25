@@ -490,8 +490,11 @@ export default function DashboardPage() {
           </Button>
           <Button
             variant="outline"
-            disabled
+            disabled={totalEquity <= 5000}
             onClick={() => {
+              if (totalEquity <= 5000) {
+                alert("Minimum withdrawal is $5000");
+              }
               router.push("/dashboard/withdraw");
             }}
             className="border-gray-600 text-black"
