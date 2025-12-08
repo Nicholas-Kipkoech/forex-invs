@@ -21,7 +21,7 @@ export default function Topbar() {
           href="/"
           className="font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
         >
-          NexTrade Inc
+          Afroxen Inc
         </Link>
         {email && (
           <div className="text-sm text-gray-400 truncate max-w-xs text-right">

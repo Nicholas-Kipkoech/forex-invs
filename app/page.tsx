@@ -464,7 +464,7 @@ export default function LandingPage() {
           {[
             {
               name: "Sarah L.",
-              text: "NexTrade changed how I invest. The AI insights are remarkably accurate and the interface is top-notch.",
+              text: "Afroxen changed how I invest. The AI insights are remarkably accurate and the interface is top-notch.",
             },
             {
               name: "David R.",
@@ -472,7 +472,7 @@ export default function LandingPage() {
             },
             {
               name: "Aisha M.",
-              text: "Global markets at my fingertips — from stocks to crypto, NexTrade is my go-to investment platform.",
+              text: "Global markets at my fingertips — from stocks to crypto, Afroxen is my go-to investment platform.",
             },
           ].map((t, i) => (
             <motion.div
@@ -546,13 +546,13 @@ export default function LandingPage() {
         <div className="flex items-center justify-center gap-2 mb-2">
           <Globe className="h-4 w-4" />
           <span>
-            © {new Date().getFullYear()} NexTrade Global Incorporation. All
+            © {new Date().getFullYear()} Afroxen Global Incorporation. All
             rights reserved.
           </span>
         </div>
         <div className="text-slate-600">
           Built with ❤️ for investors by{" "}
-          <span className="text-emerald-400">NexTrade Labs</span>.
+          <span className="text-emerald-400">Afroxen Labs</span>.
         </div>
       </footer>
     </div>
