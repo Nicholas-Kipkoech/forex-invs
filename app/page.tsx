@@ -22,12 +22,13 @@ const plans = [
   {
     id: "starter",
     name: "Starter",
-    price: "$100",
-    minDeposit: 100,
+    price: "$300",
+    minDeposit: 300,
     roi: "10–12% / month",
     risk: "Low",
     features: [
       "Conservative strategies",
+      "AI Powered Trading Bots",
       "Monthly performance report",
       "Email support (48h response)",
     ],
@@ -41,6 +42,7 @@ const plans = [
     risk: "Balanced",
     features: [
       "Momentum + mean-reversion strategies",
+      "AI Powered Trading Bots",
       "Weekly performance report",
       "Priority support",
       "Portfolio insights",
@@ -56,6 +58,7 @@ const plans = [
     risk: "High",
     features: [
       "Institutional strategies",
+      "AI Powered Trading Bots",
       "Daily performance report",
       "Dedicated account manager",
       "AI-powered insights",
@@ -90,7 +93,7 @@ export default function LandingPage() {
         >
           Access institutional-grade analytics, AI-driven signals, and secure
           blockchain-backed investing — all in one place. Start with as little
-          as <span className="text-emerald-300 font-semibold">$100</span>.
+          as <span className="text-emerald-300 font-semibold">$300</span>.
         </motion.p>
 
         <motion.div
@@ -101,7 +104,7 @@ export default function LandingPage() {
         >
           <Link href="/register">
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-md px-3 py-2 rounded-xl shadow-lg shadow-emerald-700/30">
-              Get Started — From $100
+              Get Started — From $300
             </Button>
           </Link>
           <Link href="/login">
@@ -242,7 +245,7 @@ export default function LandingPage() {
               </h2>
               <p className="text-slate-400 mt-2 max-w-xl">
                 Start from{" "}
-                <span className="text-emerald-300 font-semibold">$100</span>.
+                <span className="text-emerald-300 font-semibold">$300</span>.
                 Pick a plan based on your goals — we provide transparent monthly
                 ROI ranges and risk classifications so you can choose with
                 confidence.
@@ -253,7 +256,7 @@ export default function LandingPage() {
               <Tag className="h-5 w-5 text-emerald-300" />
               <div className="text-sm text-slate-400">
                 Min. deposit{" "}
-                <span className="text-emerald-300 font-semibold">$100</span>
+                <span className="text-emerald-300 font-semibold">$300</span>
               </div>
             </div>
           </div>
@@ -536,7 +539,7 @@ export default function LandingPage() {
         </p>
         <Link href="/register">
           <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-lg px-8 py-4 rounded-xl shadow-lg shadow-emerald-700/30">
-            Get Started Now — From $100
+            Get Started Now — From $300
           </Button>
         </Link>
       </section>

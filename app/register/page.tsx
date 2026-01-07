@@ -73,7 +73,7 @@ export default function RegisterPage() {
           </h2>
           <p className="text-gray-400 text-sm mt-2">
             Start from as low as{" "}
-            <span className="text-emerald-300 font-semibold">$100</span> and
+            <span className="text-emerald-300 font-semibold">$300</span> and
             grow your wealth
           </p>
         </div>
