@@ -9,25 +9,10 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  LineChart,
-  Line,
-  CandlestickChart,
-  Candle,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Play,
-  Pause,
-  Square,
-  TrendingUp,
-  TrendingDown,
-  Settings,
-  BarChart3,
-  X,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { Play, Pause, Square, X, ChevronDown, ChevronUp } from "lucide-react";
 
 /* ---------------------- Types ---------------------- */
 
@@ -73,11 +58,51 @@ interface Strategy {
 /* ---------------------- Config ---------------------- */
 
 const STOCKS: Stock[] = [
-  { symbol: "EURUSD", name: "Euro vs US Dollar", price: 1.0850, vol: 0.015, bid: 1.0848, ask: 1.0852, spread: 0.0004 },
-  { symbol: "GBPUSD", name: "British Pound vs US Dollar", price: 1.2650, vol: 0.012, bid: 1.2648, ask: 1.2652, spread: 0.0004 },
-  { symbol: "USDJPY", name: "US Dollar vs Japanese Yen", price: 149.50, vol: 0.03, bid: 149.48, ask: 149.52, spread: 0.04 },
-  { symbol: "AUDUSD", name: "Australian Dollar vs US Dollar", price: 0.6540, vol: 0.02, bid: 0.6538, ask: 0.6542, spread: 0.0004 },
-  { symbol: "USDCAD", name: "US Dollar vs Canadian Dollar", price: 1.3520, vol: 0.04, bid: 1.3518, ask: 1.3522, spread: 0.0004 },
+  {
+    symbol: "EURUSD",
+    name: "Euro vs US Dollar",
+    price: 1.085,
+    vol: 0.015,
+    bid: 1.0848,
+    ask: 1.0852,
+    spread: 0.0004,
+  },
+  {
+    symbol: "GBPUSD",
+    name: "British Pound vs US Dollar",
+    price: 1.265,
+    vol: 0.012,
+    bid: 1.2648,
+    ask: 1.2652,
+    spread: 0.0004,
+  },
+  {
+    symbol: "USDJPY",
+    name: "US Dollar vs Japanese Yen",
+    price: 149.5,
+    vol: 0.03,
+    bid: 149.48,
+    ask: 149.52,
+    spread: 0.04,
+  },
+  {
+    symbol: "AUDUSD",
+    name: "Australian Dollar vs US Dollar",
+    price: 0.654,
+    vol: 0.02,
+    bid: 0.6538,
+    ask: 0.6542,
+    spread: 0.0004,
+  },
+  {
+    symbol: "USDCAD",
+    name: "US Dollar vs Canadian Dollar",
+    price: 1.352,
+    vol: 0.04,
+    bid: 1.3518,
+    ask: 1.3522,
+    spread: 0.0004,
+  },
 ];
 
 const STRATEGIES: Record<StrategyKey, Strategy> = {
@@ -109,7 +134,9 @@ const seededRng = (seed: number) => {
 };
 
 const fmt = (n: number, decimals: number = 2) =>
-  `${(Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toLocaleString(undefined, {
+  `${(
+    Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)
+  ).toLocaleString(undefined, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   })}`;
@@ -126,7 +153,7 @@ export default function DemoStocksPage() {
   const [timeframe, setTimeframe] = useState<string>("M15");
   const selectedStock = useMemo(
     () => STOCKS.find((s) => s.symbol === selected)!,
-    [selected]
+    [selected],
   );
 
   const [running, setRunning] = useState(false);
@@ -144,9 +171,18 @@ export default function DemoStocksPage() {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [priceSeries, setPriceSeries] = useState<
     { name: string; price: number; bid: number; ask: number }[]
-  >([{ name: "0s", price: selectedStock.price, bid: selectedStock.bid, ask: selectedStock.ask }]);
-  
-  const [terminalTab, setTerminalTab] = useState<"trade" | "history" | "news">("trade");
+  >([
+    {
+      name: "0s",
+      price: selectedStock.price,
+      bid: selectedStock.bid,
+      ask: selectedStock.ask,
+    },
+  ]);
+
+  const [terminalTab, setTerminalTab] = useState<"trade" | "history" | "news">(
+    "trade",
+  );
   const [showMarketWatch, setShowMarketWatch] = useState(true);
   const [showNavigator, setShowNavigator] = useState(false);
   const [showTerminal, setShowTerminal] = useState(true);
@@ -160,7 +196,9 @@ export default function DemoStocksPage() {
   /* ---------------------- Helpers ---------------------- */
   const pushLog = (text: string, kind: LogItem["kind"] = "info") => {
     setLogs((prev) =>
-      [...prev, { ts: new Date().toLocaleTimeString(), text, kind }].slice(-1000)
+      [...prev, { ts: new Date().toLocaleTimeString(), text, kind }].slice(
+        -1000,
+      ),
     );
   };
 
@@ -170,7 +208,14 @@ export default function DemoStocksPage() {
     livePriceRef.current = selectedStock.price;
     liveBidRef.current = selectedStock.bid;
     liveAskRef.current = selectedStock.ask;
-    setPriceSeries([{ name: "0s", price: selectedStock.price, bid: selectedStock.bid, ask: selectedStock.ask }]);
+    setPriceSeries([
+      {
+        name: "0s",
+        price: selectedStock.price,
+        bid: selectedStock.bid,
+        ask: selectedStock.ask,
+      },
+    ]);
     setPositions([]);
     setOrders([]);
     setBalance(10000);
@@ -192,7 +237,7 @@ export default function DemoStocksPage() {
     const meanRevert = (s.price - last) * 0.005;
     const next = Math.max(
       0.01,
-      Math.round((last + drift + noise + meanRevert) * 10000) / 10000
+      Math.round((last + drift + noise + meanRevert) * 10000) / 10000,
     );
     livePriceRef.current = next;
     const spread = s.spread;
@@ -215,7 +260,9 @@ export default function DemoStocksPage() {
       const { price, bid, ask } = nextPriceTick(selectedStock);
       const label = `${tick}s`;
 
-      setPriceSeries((prev) => [...prev, { name: label, price, bid, ask }].slice(-200));
+      setPriceSeries((prev) =>
+        [...prev, { name: label, price, bid, ask }].slice(-200),
+      );
       evaluatePositions(price);
       updateEquity(price);
 
@@ -255,7 +302,9 @@ export default function DemoStocksPage() {
       prev.map((p) => {
         if (p.closed) return p;
         const dir = p.side === "BUY" ? 1 : -1;
-        const pnl = Math.round((currentPrice - p.entryPrice) * p.shares * dir * 100) / 100;
+        const pnl =
+          Math.round((currentPrice - p.entryPrice) * p.shares * dir * 100) /
+          100;
         let hit = false;
         if (
           p.target !== undefined &&
@@ -273,7 +322,7 @@ export default function DemoStocksPage() {
         if (hit) {
           pushLog(
             `${p.symbol} ${p.side} ${p.shares} closed — P/L ${fmt(pnl)}`,
-            pnl >= 0 ? "success" : "error"
+            pnl >= 0 ? "success" : "error",
           );
           applyPnlToBalance(pnl);
           return {
@@ -285,7 +334,7 @@ export default function DemoStocksPage() {
           };
         }
         return { ...p, pnl };
-      })
+      }),
     );
   };
 
@@ -297,16 +346,19 @@ export default function DemoStocksPage() {
   const placeOrder = () => {
     if (!running) return pushLog("Start market feed first", "error");
     const price = side === "BUY" ? liveAskRef.current : liveBidRef.current;
-    if (!price || lotSize <= 0) return pushLog("Invalid order parameters", "error");
+    if (!price || lotSize <= 0)
+      return pushLog("Invalid order parameters", "error");
 
     const shares = Math.round(lotSize * 100); // 0.01 lot = 1 share
     const dir = side === "BUY" ? 1 : -1;
-    const target = side === "BUY" 
-      ? Math.round((price + tpValue / 10000) * 10000) / 10000
-      : Math.round((price - tpValue / 10000) * 10000) / 10000;
-    const stop = side === "BUY"
-      ? Math.round((price - slValue / 10000) * 10000) / 10000
-      : Math.round((price + slValue / 10000) * 10000) / 10000;
+    const target =
+      side === "BUY"
+        ? Math.round((price + tpValue / 10000) * 10000) / 10000
+        : Math.round((price - tpValue / 10000) * 10000) / 10000;
+    const stop =
+      side === "BUY"
+        ? Math.round((price - slValue / 10000) * 10000) / 10000
+        : Math.round((price + slValue / 10000) * 10000) / 10000;
 
     const pos: Position = {
       id: `POS-${Date.now()}`,
@@ -340,10 +392,11 @@ export default function DemoStocksPage() {
       prev.map((p) => {
         if (p.id !== id || p.closed) return p;
         const dir = p.side === "BUY" ? 1 : -1;
-        const pnl = Math.round((price - p.entryPrice) * p.shares * dir * 100) / 100;
+        const pnl =
+          Math.round((price - p.entryPrice) * p.shares * dir * 100) / 100;
         pushLog(
           `${p.symbol} ${p.side} ${p.shares} closed — P/L ${fmt(pnl)}`,
-          pnl >= 0 ? "success" : "error"
+          pnl >= 0 ? "success" : "error",
         );
         applyPnlToBalance(pnl);
         const marginRequired = p.entryPrice * p.shares * 0.01;
@@ -355,7 +408,7 @@ export default function DemoStocksPage() {
           exitTime: new Date().toLocaleTimeString(),
           pnl,
         };
-      })
+      }),
     );
   };
 
@@ -372,7 +425,14 @@ export default function DemoStocksPage() {
     livePriceRef.current = selectedStock.price;
     liveBidRef.current = selectedStock.bid;
     liveAskRef.current = selectedStock.ask;
-    setPriceSeries([{ name: "0s", price: selectedStock.price, bid: selectedStock.bid, ask: selectedStock.ask }]);
+    setPriceSeries([
+      {
+        name: "0s",
+        price: selectedStock.price,
+        bid: selectedStock.bid,
+        ask: selectedStock.ask,
+      },
+    ]);
     pushLog(`Switched to ${selectedStock.symbol}`, "info");
   }, [selected]);
 
@@ -388,7 +448,11 @@ export default function DemoStocksPage() {
               className="p-1 hover:bg-[#3A3E49] rounded"
               title={running ? (paused ? "Resume" : "Pause") : "Start"}
             >
-              {running && !paused ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {running && !paused ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
             </button>
             <button
               onClick={stopFeed}
@@ -440,7 +504,9 @@ export default function DemoStocksPage() {
           </div>
           <div>
             <span className="text-gray-400">Equity: </span>
-            <span className={`font-semibold ${equity >= balance ? "text-emerald-400" : "text-red-400"}`}>
+            <span
+              className={`font-semibold ${equity >= balance ? "text-emerald-400" : "text-red-400"}`}
+            >
               {fmt(equity)}
             </span>
           </div>
@@ -461,7 +527,9 @@ export default function DemoStocksPage() {
         {showMarketWatch && (
           <div className="w-64 bg-[#1E2329] border-r border-[#3A3E49] flex flex-col flex-shrink-0">
             <div className="h-8 bg-[#2A2E39] border-b border-[#3A3E49] flex items-center justify-between px-3">
-              <span className="text-xs font-semibold text-gray-300">Market Watch</span>
+              <span className="text-xs font-semibold text-gray-300">
+                Market Watch
+              </span>
               <button
                 onClick={() => setShowMarketWatch(false)}
                 className="text-gray-400 hover:text-white"
@@ -473,17 +541,29 @@ export default function DemoStocksPage() {
               <table className="w-full text-xs">
                 <thead className="bg-[#2A2E39] sticky top-0">
                   <tr className="border-b border-[#3A3E49]">
-                    <th className="px-2 py-1 text-left text-gray-400 font-normal">Symbol</th>
-                    <th className="px-2 py-1 text-right text-gray-400 font-normal">Bid</th>
-                    <th className="px-2 py-1 text-right text-gray-400 font-normal">Ask</th>
-                    <th className="px-2 py-1 text-right text-gray-400 font-normal">Spread</th>
+                    <th className="px-2 py-1 text-left text-gray-400 font-normal">
+                      Symbol
+                    </th>
+                    <th className="px-2 py-1 text-right text-gray-400 font-normal">
+                      Bid
+                    </th>
+                    <th className="px-2 py-1 text-right text-gray-400 font-normal">
+                      Ask
+                    </th>
+                    <th className="px-2 py-1 text-right text-gray-400 font-normal">
+                      Spread
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {STOCKS.map((stock) => {
                     const isSelected = stock.symbol === selected;
-                    const currentBid = isSelected ? liveBidRef.current : stock.bid;
-                    const currentAsk = isSelected ? liveAskRef.current : stock.ask;
+                    const currentBid = isSelected
+                      ? liveBidRef.current
+                      : stock.bid;
+                    const currentAsk = isSelected
+                      ? liveAskRef.current
+                      : stock.ask;
                     const currentSpread = currentAsk - currentBid;
                     return (
                       <tr
@@ -493,12 +573,20 @@ export default function DemoStocksPage() {
                           isSelected ? "bg-[#2A2E39]" : ""
                         }`}
                       >
-                        <td className={`px-2 py-1 ${isSelected ? "text-emerald-400 font-semibold" : "text-white"}`}>
+                        <td
+                          className={`px-2 py-1 ${isSelected ? "text-emerald-400 font-semibold" : "text-white"}`}
+                        >
                           {stock.symbol}
                         </td>
-                        <td className="px-2 py-1 text-right text-gray-300">{fmt(currentBid, 4)}</td>
-                        <td className="px-2 py-1 text-right text-gray-300">{fmt(currentAsk, 4)}</td>
-                        <td className="px-2 py-1 text-right text-gray-500">{fmt(currentSpread, 4)}</td>
+                        <td className="px-2 py-1 text-right text-gray-300">
+                          {fmt(currentBid, 4)}
+                        </td>
+                        <td className="px-2 py-1 text-right text-gray-300">
+                          {fmt(currentAsk, 4)}
+                        </td>
+                        <td className="px-2 py-1 text-right text-gray-500">
+                          {fmt(currentSpread, 4)}
+                        </td>
                       </tr>
                     );
                   })}
@@ -513,13 +601,21 @@ export default function DemoStocksPage() {
           {/* Chart Header */}
           <div className="h-10 bg-[#2A2E39] border-b border-[#3A3E49] flex items-center justify-between px-4">
             <div className="flex items-center gap-4">
-              <span className="text-sm font-semibold text-white">{selected}</span>
-              <span className="text-xs text-gray-400">{selectedStock.name}</span>
+              <span className="text-sm font-semibold text-white">
+                {selected}
+              </span>
+              <span className="text-xs text-gray-400">
+                {selectedStock.name}
+              </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">Bid:</span>
-                <span className="text-xs text-red-400 font-mono">{fmt(liveBidRef.current, 4)}</span>
+                <span className="text-xs text-red-400 font-mono">
+                  {fmt(liveBidRef.current, 4)}
+                </span>
                 <span className="text-xs text-gray-400">Ask:</span>
-                <span className="text-xs text-emerald-400 font-mono">{fmt(liveAskRef.current, 4)}</span>
+                <span className="text-xs text-emerald-400 font-mono">
+                  {fmt(liveAskRef.current, 4)}
+                </span>
                 <span className="text-xs text-gray-400">Spread:</span>
                 <span className="text-xs text-gray-300 font-mono">
                   {fmt(liveAskRef.current - liveBidRef.current, 4)}
@@ -551,13 +647,22 @@ export default function DemoStocksPage() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={priceSeries}>
                 <defs>
-                  <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="priceGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop offset="0%" stopColor="#34d399" stopOpacity={0.3} />
                     <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1A1F26" />
-                <XAxis dataKey="name" tick={{ fill: "#6B7280", fontSize: 11 }} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "#6B7280", fontSize: 11 }}
+                />
                 <YAxis
                   tick={{ fill: "#6B7280", fontSize: 11 }}
                   width={80}
@@ -565,7 +670,11 @@ export default function DemoStocksPage() {
                 />
                 <Tooltip
                   formatter={(v: any) => fmt(Number(v), 4)}
-                  contentStyle={{ backgroundColor: "#2A2E39", border: "1px solid #3A3E49", borderRadius: "4px" }}
+                  contentStyle={{
+                    backgroundColor: "#2A2E39",
+                    border: "1px solid #3A3E49",
+                    borderRadius: "4px",
+                  }}
                 />
                 <Area
                   type="monotone"
@@ -610,19 +719,25 @@ export default function DemoStocksPage() {
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Volume (lots)</label>
+              <label className="text-xs text-gray-400 mb-1 block">
+                Volume (lots)
+              </label>
               <Input
                 type="number"
                 min="0.01"
                 step="0.01"
                 value={lotSize}
-                onChange={(e) => setLotSize(Math.max(0.01, Number(e.target.value)))}
+                onChange={(e) =>
+                  setLotSize(Math.max(0.01, Number(e.target.value)))
+                }
                 className="bg-[#0F1419] border-[#3A3E49] text-white text-sm h-8"
               />
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Take Profit (pips)</label>
+              <label className="text-xs text-gray-400 mb-1 block">
+                Take Profit (pips)
+              </label>
               <Input
                 type="number"
                 value={tpValue}
@@ -632,7 +747,9 @@ export default function DemoStocksPage() {
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Stop Loss (pips)</label>
+              <label className="text-xs text-gray-400 mb-1 block">
+                Stop Loss (pips)
+              </label>
               <Input
                 type="number"
                 value={slValue}
@@ -656,7 +773,9 @@ export default function DemoStocksPage() {
               <div className="text-xs text-gray-400 mb-2">Open Positions</div>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {positions.filter((p) => !p.closed).length === 0 ? (
-                  <div className="text-xs text-gray-500 text-center py-4">No open positions</div>
+                  <div className="text-xs text-gray-500 text-center py-4">
+                    No open positions
+                  </div>
                 ) : (
                   positions
                     .filter((p) => !p.closed)
@@ -666,15 +785,20 @@ export default function DemoStocksPage() {
                         className="bg-[#0F1419] border border-[#3A3E49] rounded p-2 text-xs"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`font-semibold ${pos.side === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
+                          <span
+                            className={`font-semibold ${pos.side === "BUY" ? "text-emerald-400" : "text-red-400"}`}
+                          >
                             {pos.symbol} {pos.side}
                           </span>
-                          <span className={`font-semibold ${pos.pnl && pos.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          <span
+                            className={`font-semibold ${pos.pnl && pos.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                          >
                             {pos.pnl !== undefined ? fmt(pos.pnl) : "0.00"}
                           </span>
                         </div>
                         <div className="text-gray-500 text-[10px]">
-                          {fmt(pos.entryPrice, 4)} • {pos.shares} • TP: {pos.target ? fmt(pos.target, 4) : "—"} • SL:{" "}
+                          {fmt(pos.entryPrice, 4)} • {pos.shares} • TP:{" "}
+                          {pos.target ? fmt(pos.target, 4) : "—"} • SL:{" "}
                           {pos.stop ? fmt(pos.stop, 4) : "—"}
                         </div>
                         <button
@@ -744,8 +868,8 @@ export default function DemoStocksPage() {
                       log.kind === "success"
                         ? "text-emerald-400"
                         : log.kind === "error"
-                        ? "text-red-400"
-                        : "text-gray-300"
+                          ? "text-red-400"
+                          : "text-gray-300"
                     }`}
                   >
                     <span className="text-gray-500">{log.ts}</span> {log.text}
@@ -761,16 +885,32 @@ export default function DemoStocksPage() {
                   positions
                     .filter((p) => p.closed)
                     .map((pos) => (
-                      <div key={pos.id} className="flex items-center justify-between py-1 border-b border-[#3A3E49]">
+                      <div
+                        key={pos.id}
+                        className="flex items-center justify-between py-1 border-b border-[#3A3E49]"
+                      >
                         <div>
-                          <span className={pos.side === "BUY" ? "text-emerald-400" : "text-red-400"}>
+                          <span
+                            className={
+                              pos.side === "BUY"
+                                ? "text-emerald-400"
+                                : "text-red-400"
+                            }
+                          >
                             {pos.symbol} {pos.side}
                           </span>
                           <span className="text-gray-500 ml-2">
-                            {fmt(pos.entryPrice, 4)} → {fmt(pos.exitPrice || 0, 4)}
+                            {fmt(pos.entryPrice, 4)} →{" "}
+                            {fmt(pos.exitPrice || 0, 4)}
                           </span>
                         </div>
-                        <span className={pos.pnl && pos.pnl >= 0 ? "text-emerald-400" : "text-red-400"}>
+                        <span
+                          className={
+                            pos.pnl && pos.pnl >= 0
+                              ? "text-emerald-400"
+                              : "text-red-400"
+                          }
+                        >
                           {pos.pnl !== undefined ? fmt(pos.pnl) : "0.00"}
                         </span>
                       </div>
