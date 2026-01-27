@@ -1,29 +1,65 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+import { sanitizeInput, validateEmail } from "@/lib/utils";
+import { NotificationData } from "@/lib/types";
+
+// Validate environment variables
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = process.env.SMTP_PORT;
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const notifyEmail = process.env.NOTIFY_EMAIL;
+
+if (!smtpHost || !smtpUser || !smtpPass || !notifyEmail) {
+  console.warn(
+    "SMTP configuration incomplete. Email notifications will not work."
+  );
+}
 
 // Create transporter
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
+  host: smtpHost,
+  port: Number(smtpPort) || 587,
   secure: false,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: smtpUser,
+    pass: smtpPass,
   },
 });
 
 export async function POST(req: Request) {
   try {
-    const data = await req.json();
+    // Validate SMTP configuration
+    if (!smtpHost || !smtpUser || !smtpPass || !notifyEmail) {
+      return NextResponse.json(
+        { message: "Email service is not configured" },
+        { status: 503 }
+      );
+    }
+
+    const data: NotificationData = await req.json();
     const { type, name, email, phone, depositAmount, withdrawalAmount, file } =
       data;
 
+    // Validation
     if (!type || !name || !email) {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "Missing required fields: type, name, and email are required" },
         { status: 400 }
       );
     }
+
+    if (!validateEmail(email)) {
+      return NextResponse.json(
+        { message: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize inputs
+    const sanitizedName = sanitizeInput(name);
+    const sanitizedEmail = sanitizeInput(email);
+    const sanitizedPhone = phone ? sanitizeInput(phone) : undefined;
 
     let subject = "";
     let html = "";
@@ -32,7 +68,7 @@ export async function POST(req: Request) {
 
     // ✅ New user registration
     if (type === "registration") {
-      subject = `🎉 New User Registration: ${name}`;
+      subject = `🎉 New User Registration: ${sanitizedName}`;
       html = `
       <div style="font-family:Arial,sans-serif;color:#333;">
         <div style="background:#f0fdf4;padding:20px;border-radius:10px;text-align:center;">
@@ -40,9 +76,9 @@ export async function POST(req: Request) {
           <p>A new user has just registered on Forex Managed Investments.</p>
         </div>
         <div style="margin-top:20px;padding:20px;border:1px solid #d1fae5;border-radius:10px;">
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone Number:</strong> ${phone || "N/A"}</p>
+          <p><strong>Name:</strong> ${sanitizedName}</p>
+          <p><strong>Email:</strong> ${sanitizedEmail}</p>
+          <p><strong>Phone Number:</strong> ${sanitizedPhone || "N/A"}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
@@ -57,7 +93,7 @@ export async function POST(req: Request) {
         );
       }
 
-      subject = `💰 New Deposit by ${name}`;
+      subject = `💰 New Deposit by ${sanitizedName}`;
       html = `
       <div style="font-family:Arial,sans-serif;color:#333;">
         <div style="background:#f0fdf4;padding:20px;border-radius:10px;text-align:center;">
@@ -65,16 +101,24 @@ export async function POST(req: Request) {
           <p>A user has made a deposit. Details below:</p>
         </div>
         <div style="margin-top:20px;padding:20px;border:1px solid #d1fae5;border-radius:10px;">
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Deposit Amount:</strong> ${depositAmount}</p>
+          <p><strong>Name:</strong> ${sanitizedName}</p>
+          <p><strong>Email:</strong> ${sanitizedEmail}</p>
+          <p><strong>Deposit Amount:</strong> ${sanitizeInput(depositAmount)}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
 
       if (file && file.base64 && file.filename && file.mimetype) {
+        // Validate file size (max 10MB)
+        const fileSize = Buffer.from(file.base64, "base64").length;
+        if (fileSize > 10 * 1024 * 1024) {
+          return NextResponse.json(
+            { message: "File size exceeds 10MB limit" },
+            { status: 400 }
+          );
+        }
         attachments.push({
-          filename: file.filename,
+          filename: sanitizeInput(file.filename),
           content: file.base64,
           encoding: "base64",
         });
@@ -93,7 +137,7 @@ export async function POST(req: Request) {
         );
       }
 
-      subject = `💸 Withdrawal Request from ${name}`;
+      subject = `💸 Withdrawal Request from ${sanitizedName}`;
       html = `
       <div style="font-family:Arial,sans-serif;color:#333;">
         <div style="background:#fef3c7;padding:20px;border-radius:10px;text-align:center;">
@@ -101,9 +145,9 @@ export async function POST(req: Request) {
           <p>An investor has requested a crypto withdrawal. Details below:</p>
         </div>
         <div style="margin-top:20px;padding:20px;border:1px solid #fde68a;border-radius:10px;">
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Requested Amount:</strong> ${withdrawalAmount}</p>
+          <p><strong>Name:</strong> ${sanitizedName}</p>
+          <p><strong>Email:</strong> ${sanitizedEmail}</p>
+          <p><strong>Requested Amount:</strong> ${sanitizeInput(withdrawalAmount)}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
@@ -111,7 +155,14 @@ export async function POST(req: Request) {
 
     // ✅ Withdrawal completed notification (optional future use)
     else if (type === "withdrawal_complete") {
-      subject = `✅ Withdrawal Completed for ${name}`;
+      if (!withdrawalAmount) {
+        return NextResponse.json(
+          { message: "Withdrawal amount is required" },
+          { status: 400 }
+        );
+      }
+
+      subject = `✅ Withdrawal Completed for ${sanitizedName}`;
       html = `
       <div style="font-family:Arial,sans-serif;color:#333;">
         <div style="background:#dcfce7;padding:20px;border-radius:10px;text-align:center;">
@@ -119,22 +170,22 @@ export async function POST(req: Request) {
           <p>The following withdrawal has been successfully processed:</p>
         </div>
         <div style="margin-top:20px;padding:20px;border:1px solid #bbf7d0;border-radius:10px;">
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Amount:</strong> ${withdrawalAmount}</p>
+          <p><strong>Name:</strong> ${sanitizedName}</p>
+          <p><strong>Email:</strong> ${sanitizedEmail}</p>
+          <p><strong>Amount:</strong> ${sanitizeInput(withdrawalAmount)}</p>
         </div>
         <p style="margin-top:20px;font-size:12px;color:#777;">This is an automated notification from Forex Managed Investments.</p>
       </div>`;
     } else {
       return NextResponse.json(
-        { message: "Invalid notification type" },
+        { message: "Invalid notification type. Must be one of: registration, deposit, withdrawal, withdrawal_complete" },
         { status: 400 }
       );
     }
 
     await transporter.sendMail({
-      from: `"Forex Managed Investments" <${process.env.SMTP_USER}>`,
-      to: process.env.NOTIFY_EMAIL,
+      from: `"Forex Managed Investments" <${smtpUser}>`,
+      to: notifyEmail,
       subject,
       html,
       attachments,
@@ -142,9 +193,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "Email sent successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("Error sending notification email:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to send email";
     return NextResponse.json(
-      { message: "Failed to send email" },
+      { message: errorMessage },
       { status: 500 }
     );
   }

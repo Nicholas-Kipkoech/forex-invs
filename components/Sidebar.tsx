@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Wallet, BarChart3, User, Menu, X } from "lucide-react";
+import { Home, Wallet, BarChart3, User, Menu, X, Copy, History, Settings, Calculator, HelpCircle } from "lucide-react";
 
 export default function Sidebar() {
   const path = usePathname();
@@ -12,7 +12,12 @@ export default function Sidebar() {
 
   const items = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/dashboard/copy-trading", label: "Copy Trading", icon: Copy },
+    { href: "/dashboard/transactions", label: "Transactions", icon: History },
+    { href: "/dashboard/tools", label: "Trading Tools", icon: Calculator },
     { href: "/dashboard/deposit", label: "Deposit", icon: Wallet },
+    { href: "/dashboard/settings", label: "Settings", icon: Settings },
+    { href: "/dashboard/support", label: "Support", icon: HelpCircle },
     { href: "/dashboard/profile", label: "Profile", icon: User },
   ];
 
@@ -100,7 +105,7 @@ export default function Sidebar() {
               </div>
 
               <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B2340]">
-                <p className="text-gray-600">v1.0 • OKX</p>
+                <p className="text-gray-600">v1.0 • Afroxen</p>
                 <p className="text-gray-500 mt-1">
                   © {new Date().getFullYear()} All Rights Reserved
                 </p>
@@ -149,7 +154,7 @@ export default function Sidebar() {
         </nav>
 
         <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B2340]">
-          <p className="text-gray-600">v1.0 • OKX</p>
+          <p className="text-gray-600">v1.0 • Afroxen</p>
           <p className="text-gray-500 mt-1">
             © {new Date().getFullYear()} All Rights Reserved
           </p>

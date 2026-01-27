@@ -75,7 +75,7 @@ export default function WithdrawalPage() {
       <header className="max-w-3xl mx-auto mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center font-bold text-black">
-            OKX
+            Afroxen
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-white">

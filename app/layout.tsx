@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OKX - Meta Trader",
+  title: "Afroxen - Meta Trader",
   description: "Trade with confidence",
 };
 

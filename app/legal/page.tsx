@@ -126,10 +126,10 @@ export default function LegalPage() {
               <li>
                 📧 Email:{" "}
                 <a
-                  href="mailto:forexpromanage@gmail.com"
+                  href="mailto:Afroxenmanage@gmail.com"
                   className="text-emerald-700 hover:underline"
                 >
-                  forexpromanage@gmail.com
+                  Afroxenmanage@gmail.com
                 </a>
               </li>
               <li>📅 Support Hours: Monday – Friday, 9:00 AM – 6:00 PM</li>

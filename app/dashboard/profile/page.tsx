@@ -69,104 +69,127 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-black rounded-3xl shadow-xl p-8 border border-gray-800 text-white">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <Button
-          variant="outline"
-          onClick={handleLogout}
-          className="flex items-center gap-2 border-white text-black hover:bg-white hover:text-black"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-gray-100 p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto">
+        <header className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Profile</h1>
+            <p className="text-gray-400">Manage your account information</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2 border-white/20 bg-white/5 hover:bg-white/10 text-white"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </header>
 
       {user ? (
-        <div className="flex flex-col gap-6">
-          {/* Avatar */}
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-gray-900 flex items-center justify-center text-3xl font-bold text-white shadow-inner">
-              {name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || (
-                <User className="h-10 w-10 text-white" />
-              )}
-            </div>
+        <div className="space-y-6">
+          {/* Profile Card */}
+          <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+            <div className="flex items-center gap-6">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-4xl font-bold text-slate-900 shadow-lg">
+                {name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || (
+                  <User className="h-12 w-12 text-slate-900" />
+                )}
+              </div>
 
-            <div className="flex-1">
-              {editing ? (
-                <div className="flex flex-col gap-3">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full Name"
-                    className="border border-white rounded-xl px-3 py-2 bg-black text-white focus:ring-2 focus:ring-white focus:outline-none"
-                  />
-                  <PhoneInput
-                    country={"us"}
-                    value={phone}
-                    onChange={(value) => setPhone(value)}
-                    inputClass="!w-full !border !border-white !rounded-xl !px-3 !py-2 !bg-black !text-white focus:!ring-2 focus:!ring-white"
-                  />
-                  <Button
-                    onClick={handleSave}
-                    className="bg-white text-black font-medium rounded-xl hover:bg-gray-200"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-semibold">{name || "N/A"}</h2>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditing(true)}
-                      className="flex items-center gap-1 border-white hover:bg-gray-900 rounded-xl text-black"
-                    >
-                      <Edit2 className="h-4 w-4" /> Edit
-                    </Button>
+              <div className="flex-1">
+                {editing ? (
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Full Name"
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                    />
+                    <PhoneInput
+                      country={"us"}
+                      value={phone}
+                      onChange={(value) => setPhone(value)}
+                      containerClass="w-full"
+                      inputClass="!w-full !h-[42px] !bg-white/5 !border !border-white/10 !text-white !rounded-lg !pl-14 focus:!border-emerald-500/50 focus:!ring-2 outline-none"
+                      buttonClass="!bg-white/10 !border-white/10 !rounded-l-lg"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleSave}
+                        className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white"
+                      >
+                        Save Changes
+                      </Button>
+                      <Button
+                        onClick={() => setEditing(false)}
+                        variant="outline"
+                        className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
-                  {phone && (
-                    <p className="text-sm text-gray-400">📞 +{phone}</p>
-                  )}
-                </div>
-              )}
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h2 className="text-2xl font-bold text-white">
+                        {name || "User"}
+                      </h2>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditing(true)}
+                        className="flex items-center gap-1 border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                      >
+                        <Edit2 className="h-4 w-4" /> Edit
+                      </Button>
+                    </div>
+                    {phone && (
+                      <p className="text-sm text-gray-400">📞 +{phone}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Email */}
-          <div className="bg-gray-900 border border-gray-700 p-4 rounded-2xl shadow-sm">
-            <span className="text-sm text-gray-400">Email</span>
-            <p className="font-medium mt-1">{user.email}</p>
-          </div>
+          {/* Account Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+              <span className="text-sm text-gray-400 mb-2 block">Email</span>
+              <p className="font-medium text-white">{user.email}</p>
+            </div>
 
-          {/* Account ID */}
-          <div className="bg-gray-900 border border-gray-700 p-4 rounded-2xl shadow-sm">
-            <span className="text-sm text-gray-400">Account ID</span>
-            <p className="font-mono mt-1 text-sm truncate">{user.id}</p>
-          </div>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+              <span className="text-sm text-gray-400 mb-2 block">Account ID</span>
+              <p className="font-mono text-sm text-white truncate">{user.id}</p>
+            </div>
 
-          {/* Account Info */}
-          <div className="bg-gray-900 border border-gray-700 p-4 rounded-2xl shadow-sm">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-400">Account Status</span>
-                <p className="font-medium mt-1">Active</p>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+              <span className="text-sm text-gray-400 mb-2 block">Account Status</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                <p className="font-medium text-white">Active</p>
               </div>
-              <div>
-                <span className="text-gray-400">Member Since</span>
-                <p className="font-medium mt-1">
-                  {new Date(user.created_at).toDateString()}
-                </p>
-              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+              <span className="text-sm text-gray-400 mb-2 block">Member Since</span>
+              <p className="font-medium text-white">
+                {new Date(user.created_at).toLocaleDateString()}
+              </p>
             </div>
           </div>
         </div>
       ) : (
-        <p className="text-center text-gray-500">Loading profile...</p>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading profile...</p>
+        </div>
       )}
+      </div>
     </div>
   );
 }

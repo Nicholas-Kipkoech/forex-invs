@@ -20,7 +20,7 @@ export default function Topbar() {
           href="/"
           className="font-bold text-white hover:text-[#33CFFF] transition-colors"
         >
-          OKX
+          Afroxen
         </Link>
         {email && (
           <div className="text-sm text-gray-400 truncate max-w-xs text-right">
