@@ -4,7 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Wallet, BarChart3, User, Menu, X, Copy, History, Settings, Calculator, HelpCircle } from "lucide-react";
+import {
+  Home,
+  Wallet,
+  BarChart3,
+  User,
+  Menu,
+  X,
+  Copy,
+  History,
+  Settings,
+  Calculator,
+  HelpCircle,
+} from "lucide-react";
 
 export default function Sidebar() {
   const path = usePathname();
@@ -13,7 +25,7 @@ export default function Sidebar() {
   const items = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/dashboard/copy-trading", label: "Copy Trading", icon: Copy },
-    { href: "/dashboard/transactions", label: "Transactions", icon: History },
+    // { href: "/dashboard/transactions", label: "Transactions", icon: History },
     { href: "/dashboard/tools", label: "Trading Tools", icon: Calculator },
     { href: "/dashboard/deposit", label: "Deposit", icon: Wallet },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },

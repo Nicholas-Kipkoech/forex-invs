@@ -81,12 +81,13 @@ export default function SupportPage() {
   });
 
   const filteredFAQs = FAQ_ITEMS.filter((category) => {
-    if (selectedCategory && category.category !== selectedCategory) return false;
+    if (selectedCategory && category.category !== selectedCategory)
+      return false;
     if (!searchQuery) return true;
     return category.questions.some(
       (q) =>
         q.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        q.a.toLowerCase().includes(searchQuery.toLowerCase())
+        q.a.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   });
 
@@ -146,7 +147,11 @@ export default function SupportPage() {
                   onClick={() => setSelectedCategory(null)}
                   variant={selectedCategory === null ? "default" : "outline"}
                   size="sm"
-                  className={selectedCategory === null ? "bg-emerald-500" : "border-white/20"}
+                  className={
+                    selectedCategory === null
+                      ? "bg-emerald-500"
+                      : "border-white/20"
+                  }
                 >
                   All
                 </Button>
@@ -154,9 +159,15 @@ export default function SupportPage() {
                   <Button
                     key={cat.category}
                     onClick={() => setSelectedCategory(cat.category)}
-                    variant={selectedCategory === cat.category ? "default" : "outline"}
+                    variant={
+                      selectedCategory === cat.category ? "default" : "outline"
+                    }
                     size="sm"
-                    className={selectedCategory === cat.category ? "bg-emerald-500" : "border-white/20"}
+                    className={
+                      selectedCategory === cat.category
+                        ? "bg-emerald-500"
+                        : "border-white/20"
+                    }
                   >
                     {cat.category}
                   </Button>
@@ -187,7 +198,7 @@ export default function SupportPage() {
                           setOpenQuestion(
                             openQuestion === `${category.category}-${index}`
                               ? null
-                              : `${category.category}-${index}`
+                              : `${category.category}-${index}`,
                           )
                         }
                         className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
@@ -225,12 +236,16 @@ export default function SupportPage() {
             <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
               <div className="flex items-center gap-3 mb-4">
                 <MessageSquare className="h-6 w-6 text-emerald-400" />
-                <h2 className="text-xl font-semibold text-white">Contact Support</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Contact Support
+                </h2>
               </div>
               {ticketSubmitted ? (
                 <div className="text-center py-8">
                   <CheckCircle className="h-12 w-12 text-emerald-400 mx-auto mb-3" />
-                  <p className="text-white font-medium mb-1">Ticket Submitted!</p>
+                  <p className="text-white font-medium mb-1">
+                    Ticket Submitted!
+                  </p>
                   <p className="text-sm text-gray-400">
                     We'll get back to you within 24 hours
                   </p>
@@ -246,7 +261,10 @@ export default function SupportPage() {
                       required
                       value={ticketForm.subject}
                       onChange={(e) =>
-                        setTicketForm({ ...ticketForm, subject: e.target.value })
+                        setTicketForm({
+                          ...ticketForm,
+                          subject: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none"
                       placeholder="What can we help with?"
@@ -259,7 +277,10 @@ export default function SupportPage() {
                     <select
                       value={ticketForm.priority}
                       onChange={(e) =>
-                        setTicketForm({ ...ticketForm, priority: e.target.value })
+                        setTicketForm({
+                          ...ticketForm,
+                          priority: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none"
                     >
@@ -277,7 +298,10 @@ export default function SupportPage() {
                       required
                       value={ticketForm.message}
                       onChange={(e) =>
-                        setTicketForm({ ...ticketForm, message: e.target.value })
+                        setTicketForm({
+                          ...ticketForm,
+                          message: e.target.value,
+                        })
                       }
                       rows={6}
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none resize-none"
@@ -297,7 +321,9 @@ export default function SupportPage() {
 
             {/* Quick Links */}
             <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Quick Links
+              </h3>
               <div className="space-y-2">
                 <a
                   href="/learning"
@@ -314,11 +340,11 @@ export default function SupportPage() {
                   Terms & Privacy
                 </a>
                 <a
-                  href="mailto:forexpromanage@gmail.com"
+                  href="mailto:support@afroxenintl.com"
                   className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300"
                 >
                   <Mail className="h-4 w-4" />
-                  forexpromanage@gmail.com
+                  support@afroxenintl.com
                 </a>
               </div>
             </div>
@@ -328,4 +354,3 @@ export default function SupportPage() {
     </div>
   );
 }
-

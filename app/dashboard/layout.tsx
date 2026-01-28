@@ -43,7 +43,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-white">
       {/* Topbar */}
-      <Topbar />
+      {/* <Topbar />/ */}
 
       <div className="flex flex-1">
         {/* Desktop Sidebar */}
