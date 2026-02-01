@@ -124,25 +124,29 @@ const HOW_IT_WORKS = [
   {
     step: "1",
     title: "Create Account",
-    description: "Sign up in minutes with just your email. No credit card required.",
+    description:
+      "Sign up in minutes with just your email. No credit card required.",
     icon: <Users className="h-8 w-8" />,
   },
   {
     step: "2",
     title: "Deposit Funds",
-    description: "Fund your account with BTC or USDT. Instant deposits, no waiting.",
+    description:
+      "Fund your account with BTC or USDT. Instant deposits, no waiting.",
     icon: <CreditCard className="h-8 w-8" />,
   },
   {
     step: "3",
     title: "Choose Traders",
-    description: "Browse verified traders, check their stats, and select the best ones.",
+    description:
+      "Browse verified traders, check their stats, and select the best ones.",
     icon: <Copy className="h-8 w-8" />,
   },
   {
     step: "4",
     title: "Start Trading",
-    description: "Copy trades automatically or trade manually. Withdraw profits anytime.",
+    description:
+      "Copy trades automatically or trade manually. Withdraw profits anytime.",
     icon: <TrendingUp className="h-8 w-8" />,
   },
 ];
@@ -188,25 +192,42 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-slate-900" />
               </div>
-              <span className="text-xl font-bold text-white">Afroxen</span>
+              <span className="text-xl font-bold text-white">
+                DRW trading group
+              </span>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">
-              <Link href="#features" className="text-gray-300 hover:text-white transition">
+              <Link
+                href="#features"
+                className="text-gray-300 hover:text-white transition"
+              >
                 Features
               </Link>
-              <Link href="#copy-trading" className="text-gray-300 hover:text-white transition">
+              <Link
+                href="#copy-trading"
+                className="text-gray-300 hover:text-white transition"
+              >
                 Copy Trading
               </Link>
-              <Link href="#testimonials" className="text-gray-300 hover:text-white transition">
+              <Link
+                href="#testimonials"
+                className="text-gray-300 hover:text-white transition"
+              >
                 Reviews
               </Link>
-              <Link href="#faq" className="text-gray-300 hover:text-white transition">
+              <Link
+                href="#faq"
+                className="text-gray-300 hover:text-white transition"
+              >
                 FAQ
               </Link>
               <Link href="/login">
-                <Button variant="outline" className="border-white/20 bg-white/5 hover:bg-white/10 text-white">
+                <Button
+                  variant="outline"
+                  className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                >
                   Sign In
                 </Button>
               </Link>
@@ -222,28 +243,47 @@ export default function LandingPage() {
               className="md:hidden p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 space-y-2">
-              <Link href="#features" className="block px-3 py-2 text-gray-300 hover:text-white">
+              <Link
+                href="#features"
+                className="block px-3 py-2 text-gray-300 hover:text-white"
+              >
                 Features
               </Link>
-              <Link href="#copy-trading" className="block px-3 py-2 text-gray-300 hover:text-white">
+              <Link
+                href="#copy-trading"
+                className="block px-3 py-2 text-gray-300 hover:text-white"
+              >
                 Copy Trading
               </Link>
-              <Link href="#testimonials" className="block px-3 py-2 text-gray-300 hover:text-white">
+              <Link
+                href="#testimonials"
+                className="block px-3 py-2 text-gray-300 hover:text-white"
+              >
                 Reviews
               </Link>
-              <Link href="#faq" className="block px-3 py-2 text-gray-300 hover:text-white">
+              <Link
+                href="#faq"
+                className="block px-3 py-2 text-gray-300 hover:text-white"
+              >
                 FAQ
               </Link>
               <div className="pt-2 space-y-2">
                 <Link href="/login" className="block">
-                  <Button variant="outline" className="w-full border-white/20 bg-white/5 text-white">
+                  <Button
+                    variant="outline"
+                    className="w-full border-white/20 bg-white/5 text-white"
+                  >
                     Sign In
                   </Button>
                 </Link>
@@ -279,9 +319,9 @@ export default function LandingPage() {
           transition={{ delay: 0.2 }}
           className="max-w-2xl mt-6 text-gray-300 text-lg"
         >
-          Trade forex with ultra-low spreads, copy top traders automatically, and
-          withdraw profits instantly. Professional MT5 platform with fast execution
-          and transparent pricing.
+          Trade forex with ultra-low spreads, copy top traders automatically,
+          and withdraw profits instantly. Professional MT5 platform with fast
+          execution and transparent pricing.
         </motion.p>
 
         <motion.div
@@ -295,7 +335,6 @@ export default function LandingPage() {
               Start Trading Free
             </Button>
           </Link>
-          
         </motion.div>
 
         <div className="mt-10 flex flex-wrap gap-4 text-gray-400 text-sm justify-center">
@@ -357,7 +396,9 @@ export default function LandingPage() {
                 <h3 className="text-xl font-semibold mt-4 text-white mb-3">
                   {f.title}
                 </h3>
-                <p className="text-gray-300 text-sm leading-relaxed">{f.text}</p>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {f.text}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -371,8 +412,10 @@ export default function LandingPage() {
                   <h3 className="text-xl font-bold text-white">Low Fees</h3>
                 </div>
                 <p className="text-gray-300">
-                  Spreads from <span className="text-emerald-400 font-bold">0.0 pips</span> on major pairs.
-                  No commission, no hidden fees. Transparent pricing you can trust.
+                  Spreads from{" "}
+                  <span className="text-emerald-400 font-bold">0.0 pips</span>{" "}
+                  on major pairs. No commission, no hidden fees. Transparent
+                  pricing you can trust.
                 </p>
               </div>
               <div>
@@ -381,8 +424,10 @@ export default function LandingPage() {
                   <h3 className="text-xl font-bold text-white">Fast Payouts</h3>
                 </div>
                 <p className="text-gray-300">
-                  Withdraw your profits in <span className="text-cyan-400 font-bold">minutes</span>.
-                  Same-day processing for bank transfers, instant for crypto. Get paid fast.
+                  Withdraw your profits in{" "}
+                  <span className="text-cyan-400 font-bold">minutes</span>.
+                  Same-day processing for bank transfers, instant for crypto.
+                  Get paid fast.
                 </p>
               </div>
             </div>
@@ -412,9 +457,7 @@ export default function LandingPage() {
       <section className="py-24 px-6 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-white">
-              How It Works
-            </h2>
+            <h2 className="text-4xl font-bold mb-4 text-white">How It Works</h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
               Get started in 4 simple steps. No experience needed.
             </p>
@@ -452,14 +495,18 @@ export default function LandingPage() {
       </section>
 
       {/* COPY TRADING SECTION */}
-      <section id="copy-trading" className="py-24 px-6 bg-gradient-to-b from-gray-900 to-black">
+      <section
+        id="copy-trading"
+        className="py-24 px-6 bg-gradient-to-b from-gray-900 to-black"
+      >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-white">
               Copy Trading Made Simple
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              Follow successful traders and automatically copy their trades. No experience needed.
+              Follow successful traders and automatically copy their trades. No
+              experience needed.
             </p>
           </div>
 
@@ -474,11 +521,14 @@ export default function LandingPage() {
                 <div className="p-2 rounded-lg bg-emerald-500/10">
                   <Users className="h-6 w-6 text-emerald-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Choose Top Traders</h3>
+                <h3 className="text-xl font-bold text-white">
+                  Choose Top Traders
+                </h3>
               </div>
               <p className="text-gray-300 mb-4">
-                Browse our network of verified traders. View their performance stats,
-                win rates, and risk levels. Choose traders that match your style.
+                Browse our network of verified traders. View their performance
+                stats, win rates, and risk levels. Choose traders that match
+                your style.
               </p>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li className="flex items-center gap-2">
@@ -506,11 +556,14 @@ export default function LandingPage() {
                 <div className="p-2 rounded-lg bg-cyan-500/10">
                   <Copy className="h-6 w-6 text-cyan-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Auto-Copy Trades</h3>
+                <h3 className="text-xl font-bold text-white">
+                  Auto-Copy Trades
+                </h3>
               </div>
               <p className="text-gray-300 mb-4">
-                Set your copy amount and risk level. Every trade from your chosen
-                traders is automatically replicated in your account in real-time.
+                Set your copy amount and risk level. Every trade from your
+                chosen traders is automatically replicated in your account in
+                real-time.
               </p>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li className="flex items-center gap-2">
@@ -558,13 +611,20 @@ export default function LandingPage() {
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold text-white">{testimonial.name}</div>
-                    <div className="text-xs text-gray-400">{testimonial.role}</div>
+                    <div className="font-semibold text-white">
+                      {testimonial.name}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {testimonial.role}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-1 mb-3">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <p className="text-sm text-gray-300 mb-4">{testimonial.text}</p>
@@ -591,7 +651,9 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/10">
                 <Lock className="h-6 w-6 text-cyan-400" />
-                <span className="text-sm text-gray-300">Bank-Level Security</span>
+                <span className="text-sm text-gray-300">
+                  Bank-Level Security
+                </span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/10">
                 <Award className="h-6 w-6 text-blue-400" />
@@ -599,7 +661,9 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/10">
                 <CheckCircle className="h-6 w-6 text-emerald-400" />
-                <span className="text-sm text-gray-300">Segregated Accounts</span>
+                <span className="text-sm text-gray-300">
+                  Segregated Accounts
+                </span>
               </div>
             </div>
           </div>
@@ -679,8 +743,8 @@ export default function LandingPage() {
               Ready to Start Trading?
             </h2>
             <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
-              Join thousands of traders making profits with our professional platform.
-              Start with as little as $100.
+              Join thousands of traders making profits with our professional
+              platform. Start with as little as $100.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
@@ -690,7 +754,10 @@ export default function LandingPage() {
                 </Button>
               </Link>
               <Link href="/dashboard/demo">
-                <Button variant="outline" className="border-white/20 bg-white/5 hover:bg-white/10 text-white px-8 py-6 rounded-2xl text-lg">
+                <Button
+                  variant="outline"
+                  className="border-white/20 bg-white/5 hover:bg-white/10 text-white px-8 py-6 rounded-2xl text-lg"
+                >
                   Try Demo Account
                 </Button>
               </Link>
@@ -708,10 +775,13 @@ export default function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-slate-900" />
                 </div>
-                <span className="text-xl font-bold text-white">Afroxen</span>
+                <span className="text-xl font-bold text-white">
+                  DRW trading group
+                </span>
               </div>
               <p className="text-sm text-gray-400">
-                Professional forex trading platform with copy trading, ultra-low spreads, and fast payouts.
+                Professional forex trading platform with copy trading, ultra-low
+                spreads, and fast payouts.
               </p>
             </div>
 
@@ -719,22 +789,34 @@ export default function LandingPage() {
               <h4 className="font-semibold text-white mb-4">Platform</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/dashboard" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard"
+                    className="hover:text-white transition"
+                  >
                     Dashboard
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/copy-trading" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/copy-trading"
+                    className="hover:text-white transition"
+                  >
                     Copy Trading
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/tools" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/tools"
+                    className="hover:text-white transition"
+                  >
                     Trading Tools
                   </Link>
                 </li>
                 <li>
-                  <Link href="/learning" className="hover:text-white transition">
+                  <Link
+                    href="/learning"
+                    className="hover:text-white transition"
+                  >
                     Learning Center
                   </Link>
                 </li>
@@ -745,7 +827,10 @@ export default function LandingPage() {
               <h4 className="font-semibold text-white mb-4">Company</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/dashboard/support" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/support"
+                    className="hover:text-white transition"
+                  >
                     Support
                   </Link>
                 </li>
@@ -755,12 +840,18 @@ export default function LandingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/support#faq" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/support#faq"
+                    className="hover:text-white transition"
+                  >
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/profile" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/profile"
+                    className="hover:text-white transition"
+                  >
                     About Us
                   </Link>
                 </li>
@@ -771,7 +862,10 @@ export default function LandingPage() {
               <h4 className="font-semibold text-white mb-4">Get Started</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/register" className="hover:text-white transition">
+                  <Link
+                    href="/register"
+                    className="hover:text-white transition"
+                  >
                     Create Account
                   </Link>
                 </li>
@@ -781,12 +875,18 @@ export default function LandingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/deposit" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/deposit"
+                    className="hover:text-white transition"
+                  >
                     Deposit Funds
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/demo" className="hover:text-white transition">
+                  <Link
+                    href="/dashboard/demo"
+                    className="hover:text-white transition"
+                  >
                     Demo Account
                   </Link>
                 </li>
@@ -796,7 +896,8 @@ export default function LandingPage() {
 
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-400">
-              © {new Date().getFullYear()} Afroxen. All rights reserved.
+              © {new Date().getFullYear()} DRW trading group. All rights
+              reserved.
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <div className="flex items-center gap-2">

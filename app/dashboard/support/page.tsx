@@ -340,11 +340,11 @@ export default function SupportPage() {
                   Terms & Privacy
                 </a>
                 <a
-                  href="mailto:support@afroxenintl.com"
+                  href="mailto:forexpromanage@gmail.com"
                   className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300"
                 >
                   <Mail className="h-4 w-4" />
-                  support@afroxenintl.com
+                  forexpromanage@gmail.com
                 </a>
               </div>
             </div>

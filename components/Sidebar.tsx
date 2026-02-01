@@ -117,7 +117,7 @@ export default function Sidebar() {
               </div>
 
               <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B2340]">
-                <p className="text-gray-600">v1.0 • Afroxen</p>
+                <p className="text-gray-600">v1.0 • DRW trading group</p>
                 <p className="text-gray-500 mt-1">
                   © {new Date().getFullYear()} All Rights Reserved
                 </p>
@@ -166,7 +166,7 @@ export default function Sidebar() {
         </nav>
 
         <div className="text-xs text-gray-500 text-center pt-4 border-t border-[#1B2340]">
-          <p className="text-gray-600">v1.0 • Afroxen</p>
+          <p className="text-gray-600">v1.0 • DRW trading group</p>
           <p className="text-gray-500 mt-1">
             © {new Date().getFullYear()} All Rights Reserved
           </p>
