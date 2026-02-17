@@ -91,7 +91,7 @@ export const CATEGORIES: Record<string, Category> = {
 export const DEFAULT_CATEGORY = "Stocks";
 export const DEFAULT_SYMBOL = CATEGORIES[DEFAULT_CATEGORY].list[0].id;
 export const START_BALANCE = 0;
-export const MIN_WITHDRAWAL_AMOUNT = 5000;
+export const MIN_WITHDRAWAL_AMOUNT = 100;
 export const PRICE_UPDATE_INTERVAL = 2000; // 2 seconds
 export const PRICE_JITTER_PERCENT = 0.003; // 0.3%
 export const MAX_NOTIFICATIONS = 6;
@@ -105,7 +105,10 @@ export function findTvSymbol(id: string): string {
   return `NASDAQ:${id}`;
 }
 
-export function mockSeries(len = 30, base = 5000): Array<{ name: string; value: number }> {
+export function mockSeries(
+  len = 30,
+  base = 5000,
+): Array<{ name: string; value: number }> {
   let val = base;
   return Array.from({ length: len }).map((_, i) => {
     const change = (Math.random() - 0.45) * (base * 0.01);
@@ -117,4 +120,3 @@ export function mockSeries(len = 30, base = 5000): Array<{ name: string; value: 
 function roundToDecimal(value: number, decimals: number = 2): number {
   return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
 }
-
