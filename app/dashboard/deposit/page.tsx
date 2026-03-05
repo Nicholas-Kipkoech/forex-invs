@@ -25,9 +25,11 @@ export default function DepositPageContent() {
   const [submitted, setSubmitted] = useState(false);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedCoin, setSelectedCoin] = useState<"BTC" | "USDT">("BTC");
+  const [selectedCoin, setSelectedCoin] = useState<"BTC" | "USDT" | "SOL">(
+    "BTC",
+  );
   const [user, setUser] = useState<{ email: string; name?: string } | null>(
-    null
+    null,
   );
 
   const wallets = {
@@ -46,6 +48,14 @@ export default function DepositPageContent() {
       icon: "₮",
       color: "from-emerald-500 to-emerald-600",
       name: "Tether",
+    },
+    SOL: {
+      address: "FccqzvJYxa8tfvhFiyYfYEr19QP3vA4kmew1agAMRtnz",
+      qr: "/sol-qrcode.png",
+      network: "Solana Network",
+      icon: "◎",
+      color: "from-purple-500 to-indigo-600",
+      name: "Solana",
     },
   };
 
@@ -153,7 +163,7 @@ export default function DepositPageContent() {
                 Select Cryptocurrency
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                {(["BTC", "USDT"] as const).map((coin) => (
+                {(["BTC", "USDT", "SOL"] as const).map((coin) => (
                   <button
                     key={coin}
                     onClick={() => setSelectedCoin(coin)}
@@ -176,7 +186,9 @@ export default function DepositPageContent() {
                       <div className="text-left">
                         <div
                           className={`font-semibold ${
-                            selectedCoin === coin ? "text-white" : "text-gray-300"
+                            selectedCoin === coin
+                              ? "text-white"
+                              : "text-gray-300"
                           }`}
                         >
                           {coin}
@@ -236,9 +248,6 @@ export default function DepositPageContent() {
                   </Button>
                 </div>
               </div>
-
-              
-              
             </motion.div>
 
             {/* Deposit Form */}
@@ -347,11 +356,14 @@ export default function DepositPageContent() {
                 </h3>
                 <p className="text-gray-300 mb-4">
                   Your {selectedCoin} deposit of{" "}
-                  <span className="font-bold text-white">{formatMoney(Number(amount))}</span>{" "}
+                  <span className="font-bold text-white">
+                    {formatMoney(Number(amount))}
+                  </span>{" "}
                   on {network} is being processed.
                 </p>
                 <p className="text-sm text-gray-400">
-                  You'll receive confirmation via email once verified (usually within 1-3 hours).
+                  You'll receive confirmation via email once verified (usually
+                  within 1-3 hours).
                 </p>
               </motion.div>
             )}
@@ -375,47 +387,63 @@ export default function DepositPageContent() {
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-emerald-400 text-xs font-bold">1</span>
+                    <span className="text-emerald-400 text-xs font-bold">
+                      1
+                    </span>
                   </div>
                   <div>
                     <p className="text-white font-medium">
                       Send only {selectedCoin}
                     </p>
                     <p className="text-gray-400">
-                      Use the {network} network only. Sending other coins or using wrong network may result in permanent loss.
+                      Use the {network} network only. Sending other coins or
+                      using wrong network may result in permanent loss.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-emerald-400 text-xs font-bold">2</span>
+                    <span className="text-emerald-400 text-xs font-bold">
+                      2
+                    </span>
                   </div>
                   <div>
-                    <p className="text-white font-medium">Double-check address</p>
+                    <p className="text-white font-medium">
+                      Double-check address
+                    </p>
                     <p className="text-gray-400">
-                      Always verify the wallet address before sending. Copy it directly from this page.
+                      Always verify the wallet address before sending. Copy it
+                      directly from this page.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-emerald-400 text-xs font-bold">3</span>
+                    <span className="text-emerald-400 text-xs font-bold">
+                      3
+                    </span>
                   </div>
                   <div>
                     <p className="text-white font-medium">Upload proof</p>
                     <p className="text-gray-400">
-                      After sending, upload your transaction proof immediately to speed up processing.
+                      After sending, upload your transaction proof immediately
+                      to speed up processing.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-emerald-400 text-xs font-bold">4</span>
+                    <span className="text-emerald-400 text-xs font-bold">
+                      4
+                    </span>
                   </div>
                   <div>
-                    <p className="text-white font-medium">Wait for confirmation</p>
+                    <p className="text-white font-medium">
+                      Wait for confirmation
+                    </p>
                     <p className="text-gray-400">
-                      Deposits are credited after blockchain confirmation (usually 1-3 confirmations).
+                      Deposits are credited after blockchain confirmation
+                      (usually 1-3 confirmations).
                     </p>
                   </div>
                 </div>
