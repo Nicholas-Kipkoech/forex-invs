@@ -35,7 +35,13 @@ import {
   calculatePortfolioValue,
   calculatePnL,
 } from "@/lib/utils";
-import type { Trade, PriceData, PortfolioData, TradeOrder, PortfolioHolding } from "@/lib/types";
+import type {
+  Trade,
+  PriceData,
+  PortfolioData,
+  TradeOrder,
+  PortfolioHolding,
+} from "@/lib/types";
 
 /**
  * StockAI Dashboard — Multi-asset, TradingView embed, mock real-time prices, simulated orders
@@ -57,14 +63,22 @@ export default function DashboardPage() {
   // market state
   const [category, setCategory] = useState<string>(DEFAULT_CATEGORY);
   const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL);
+
+  const basePricesRef = useRef<PriceData>({});
   const [prices, setPrices] = useState<PriceData>(() => {
-    // seed prices for every supported symbol
     const out: PriceData = {};
+    const base: PriceData = {};
+
     Object.values(CATEGORIES).forEach((cat) => {
       cat.list.forEach((s) => {
-        out[s.id] = roundToDecimal(50 + Math.random() * 950);
+        const initial = roundToDecimal(50 + Math.random() * 950);
+        out[s.id] = initial;
+        base[s.id] = initial;
       });
     });
+
+    basePricesRef.current = base;
+
     return out;
   });
 
@@ -137,35 +151,56 @@ export default function DashboardPage() {
 
   // TradingView embed container ref + unique id to recreate widget on symbol change
   const tvContainerIdRef = useRef(
-    `tv-widget-${Math.random().toString(36).slice(2, 9)}`
+    `tv-widget-${Math.random().toString(36).slice(2, 9)}`,
   );
   const [tvWidgetKey, setTvWidgetKey] = useState<number>(0);
 
   // mini portfolio series for chart
   const [series, setSeries] = useState<{ name: string; value: number }[]>(() =>
-    mockSeries(30, START_BALANCE)
+    mockSeries(30, START_BALANCE),
   );
 
   // realtime price jitter simulation
   useEffect(() => {
+    const MAX_GROWTH = 0.15; // +15%
+    const MIN_GROWTH = -0.05; // -5% (small dip allowed)
+
     const id = window.setInterval(() => {
-      setPrices((p) => {
-        const next = { ...p };
-        Object.keys(next).forEach((k) => {
-          const jitter = (Math.random() - 0.5) * (next[k] * PRICE_JITTER_PERCENT);
-          next[k] = Math.max(0.01, roundToDecimal(next[k] + jitter));
+      setPrices((prev) => {
+        const next = { ...prev };
+
+        Object.keys(next).forEach((symbol) => {
+          const base = basePricesRef.current[symbol];
+          const current = next[symbol];
+
+          if (!base) return;
+
+          // Current growth relative to base
+          const growth = (current - base) / base;
+
+          // Slight upward bias (feels realistic)
+          const step = (Math.random() - 0.45) * 0.01; // ~±1%
+
+          let newGrowth = growth + step;
+
+          // Clamp between -5% and +15%
+          newGrowth = Math.max(MIN_GROWTH, Math.min(MAX_GROWTH, newGrowth));
+
+          next[symbol] = roundToDecimal(base * (1 + newGrowth));
         });
+
         return next;
       });
 
-      // also nudge portfolio series to feel dynamic
+      // Keep your portfolio chart smooth
       setSeries((s) => {
         const last = s[s.length - 1]?.value ?? START_BALANCE;
-        const change = (Math.random() - 0.45) * (last * 0.002); // small changes
+        const change = (Math.random() - 0.45) * (last * 0.002);
         const nextVal = Math.max(0, roundToDecimal(last + change));
         return [...s.slice(-29), { name: `T${s.length + 1}`, value: nextVal }];
       });
     }, PRICE_UPDATE_INTERVAL);
+
     return () => clearInterval(id);
   }, []);
 
@@ -188,7 +223,7 @@ export default function DashboardPage() {
       } else {
         // Load script only if not already present
         const existingScript = document.querySelector(
-          'script[src="https://s3.tradingview.com/tv.js"]'
+          'script[src="https://s3.tradingview.com/tv.js"]',
         );
         if (existingScript) {
           // Script already exists, wait for it to load
@@ -293,7 +328,7 @@ export default function DashboardPage() {
 
   const totalEquity = useMemo(
     () => roundToDecimal(balance + portfolioValue),
-    [balance, portfolioValue]
+    [balance, portfolioValue],
   );
 
   const saveBalance = useCallback(async (newBalance: number) => {
@@ -314,45 +349,46 @@ export default function DashboardPage() {
 
       if (error) {
         console.error("Error saving balance:", error);
-        setNotifications((n) => ["Failed to save balance", ...n].slice(0, MAX_NOTIFICATIONS));
+        setNotifications((n) =>
+          ["Failed to save balance", ...n].slice(0, MAX_NOTIFICATIONS),
+        );
       }
     } catch (err) {
       console.error("Unexpected error saving balance:", err);
     }
   }, []);
 
-  const saveHolding = useCallback(async (
-    symbol: string,
-    shares: number,
-    avgPrice: number
-  ) => {
-    try {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error("Auth error saving holding:", authError);
-        return;
-      }
+  const saveHolding = useCallback(
+    async (symbol: string, shares: number, avgPrice: number) => {
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+        if (authError || !user) {
+          console.error("Auth error saving holding:", authError);
+          return;
+        }
 
-      const { error } = await supabase.from("investor_portfolio").upsert(
-        {
-          user_id: user.id,
-          symbol,
-          shares,
-          avg_price: avgPrice,
-        },
-        { onConflict: "user_id,symbol" }
-      );
+        const { error } = await supabase.from("investor_portfolio").upsert(
+          {
+            user_id: user.id,
+            symbol,
+            shares,
+            avg_price: avgPrice,
+          },
+          { onConflict: "user_id,symbol" },
+        );
 
-      if (error) {
-        console.error("Error saving holding:", error);
+        if (error) {
+          console.error("Error saving holding:", error);
+        }
+      } catch (err) {
+        console.error("Unexpected error saving holding:", err);
       }
-    } catch (err) {
-      console.error("Unexpected error saving holding:", err);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const removeHolding = useCallback(async (symbol: string) => {
     try {
@@ -379,105 +415,118 @@ export default function DashboardPage() {
   }, []);
 
   // Simulated trade placement (BUY/SELL)
-  const placeOrder = useCallback((opts: TradeOrder) => {
-    const price = prices[opts.symbol] ?? 0;
-    if (price === 0) {
-      setNotifications((n) => ["Invalid symbol or price", ...n].slice(0, MAX_NOTIFICATIONS));
-      return;
-    }
-
-    if (opts.shares <= 0 || !Number.isInteger(opts.shares)) {
-      setNotifications((n) => ["Shares must be a positive integer", ...n].slice(0, MAX_NOTIFICATIONS));
-      return;
-    }
-
-    const cost = roundToDecimal(price * opts.shares);
-
-    if (opts.side === "BUY") {
-      if (cost > balance) {
+  const placeOrder = useCallback(
+    (opts: TradeOrder) => {
+      const price = prices[opts.symbol] ?? 0;
+      if (price === 0) {
         setNotifications((n) =>
-          [`Insufficient funds: need ${formatMoney(cost)}`, ...n].slice(0, MAX_NOTIFICATIONS)
+          ["Invalid symbol or price", ...n].slice(0, MAX_NOTIFICATIONS),
         );
         return;
       }
 
-      // Update state
-      const newBalance = roundToDecimal(balance - cost);
-      setBalance(newBalance);
+      if (opts.shares <= 0 || !Number.isInteger(opts.shares)) {
+        setNotifications((n) =>
+          ["Shares must be a positive integer", ...n].slice(
+            0,
+            MAX_NOTIFICATIONS,
+          ),
+        );
+        return;
+      }
 
-      setPortfolio((p) => {
-        const prev = p[opts.symbol];
-        let shares = opts.shares;
-        let avgPrice = price;
+      const cost = roundToDecimal(price * opts.shares);
 
-        if (prev) {
-          shares = prev.shares + opts.shares;
-          avgPrice = roundToDecimal(
-            (prev.avgPrice * prev.shares + price * opts.shares) / shares
-          );
-        }
-
-        // Persist to DB
-        saveBalance(newBalance);
-        saveHolding(opts.symbol, shares, avgPrice);
-
-        return {
-          ...p,
-          [opts.symbol]: { shares, avgPrice } as PortfolioHolding,
-        };
-      });
-    } else {
-      // SELL
-      setPortfolio((p) => {
-        const prev = p[opts.symbol];
-        if (!prev || prev.shares < opts.shares) {
+      if (opts.side === "BUY") {
+        if (cost > balance) {
           setNotifications((n) =>
-            ["Not enough shares to sell", ...n].slice(0, MAX_NOTIFICATIONS)
+            [`Insufficient funds: need ${formatMoney(cost)}`, ...n].slice(
+              0,
+              MAX_NOTIFICATIONS,
+            ),
           );
-          return p;
+          return;
         }
 
-        const remaining = prev.shares - opts.shares;
-        const newBalance = roundToDecimal(balance + cost);
+        // Update state
+        const newBalance = roundToDecimal(balance - cost);
         setBalance(newBalance);
 
-        if (remaining === 0) {
-          removeHolding(opts.symbol);
+        setPortfolio((p) => {
+          const prev = p[opts.symbol];
+          let shares = opts.shares;
+          let avgPrice = price;
+
+          if (prev) {
+            shares = prev.shares + opts.shares;
+            avgPrice = roundToDecimal(
+              (prev.avgPrice * prev.shares + price * opts.shares) / shares,
+            );
+          }
+
+          // Persist to DB
           saveBalance(newBalance);
-          const { [opts.symbol]: _, ...rest } = p;
-          return rest;
-        }
+          saveHolding(opts.symbol, shares, avgPrice);
 
-        saveBalance(newBalance);
-        saveHolding(opts.symbol, remaining, prev.avgPrice);
+          return {
+            ...p,
+            [opts.symbol]: { shares, avgPrice } as PortfolioHolding,
+          };
+        });
+      } else {
+        // SELL
+        setPortfolio((p) => {
+          const prev = p[opts.symbol];
+          if (!prev || prev.shares < opts.shares) {
+            setNotifications((n) =>
+              ["Not enough shares to sell", ...n].slice(0, MAX_NOTIFICATIONS),
+            );
+            return p;
+          }
 
-        return {
-          ...p,
-          [opts.symbol]: { shares: remaining, avgPrice: prev.avgPrice },
-        };
-      });
-    }
+          const remaining = prev.shares - opts.shares;
+          const newBalance = roundToDecimal(balance + cost);
+          setBalance(newBalance);
 
-    // push trade record
-    const trade: Trade = {
-      id: `T${Math.floor(Math.random() * 900000 + 100000)}`,
-      symbol: opts.symbol,
-      side: opts.side,
-      shares: opts.shares,
-      price,
-      cost,
-      time: new Date().toLocaleTimeString(),
-    };
-    setTrades((t) => [trade, ...t].slice(0, MAX_TRADES_HISTORY));
-    setNotifications((n) =>
-      [
-        `${opts.side} ${opts.shares} ${opts.symbol} @ ${formatMoney(
-          price
-        )} — ${formatMoney(trade.cost)}`,
-        ...n,
-      ].slice(0, MAX_NOTIFICATIONS)
-    );
-  }, [balance, prices, saveBalance, saveHolding, removeHolding]);
+          if (remaining === 0) {
+            removeHolding(opts.symbol);
+            saveBalance(newBalance);
+            const { [opts.symbol]: _, ...rest } = p;
+            return rest;
+          }
+
+          saveBalance(newBalance);
+          saveHolding(opts.symbol, remaining, prev.avgPrice);
+
+          return {
+            ...p,
+            [opts.symbol]: { shares: remaining, avgPrice: prev.avgPrice },
+          };
+        });
+      }
+
+      // push trade record
+      const trade: Trade = {
+        id: `T${Math.floor(Math.random() * 900000 + 100000)}`,
+        symbol: opts.symbol,
+        side: opts.side,
+        shares: opts.shares,
+        price,
+        cost,
+        time: new Date().toLocaleTimeString(),
+      };
+      setTrades((t) => [trade, ...t].slice(0, MAX_TRADES_HISTORY));
+      setNotifications((n) =>
+        [
+          `${opts.side} ${opts.shares} ${opts.symbol} @ ${formatMoney(
+            price,
+          )} — ${formatMoney(trade.cost)}`,
+          ...n,
+        ].slice(0, MAX_NOTIFICATIONS),
+      );
+    },
+    [balance, prices, saveBalance, saveHolding, removeHolding],
+  );
 
   // mini helper to update symbol when category changes
   useEffect(() => {
@@ -498,7 +547,7 @@ export default function DashboardPage() {
     if (totalEquity === 0) return 0;
     const invested = Object.entries(portfolio).reduce(
       (acc, [_, pos]) => acc + pos.shares * pos.avgPrice,
-      0
+      0,
     );
     if (invested === 0) return 0;
     return roundToDecimal((totalPnL / invested) * 100, 2);
@@ -576,10 +625,12 @@ export default function DashboardPage() {
               disabled={totalEquity < MIN_WITHDRAWAL_AMOUNT}
               onClick={() => {
                 if (totalEquity < MIN_WITHDRAWAL_AMOUNT) {
-                  setNotifications((n) => [
-                    `Minimum withdrawal is ${formatMoney(MIN_WITHDRAWAL_AMOUNT)}`,
-                    ...n,
-                  ].slice(0, MAX_NOTIFICATIONS));
+                  setNotifications((n) =>
+                    [
+                      `Minimum withdrawal is ${formatMoney(MIN_WITHDRAWAL_AMOUNT)}`,
+                      ...n,
+                    ].slice(0, MAX_NOTIFICATIONS),
+                  );
                 } else {
                   router.push("/dashboard/withdraw");
                 }
@@ -593,7 +644,6 @@ export default function DashboardPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <motion.div
@@ -608,9 +658,7 @@ export default function DashboardPage() {
             <div className="text-3xl font-bold text-white mb-1">
               {formatMoney(totalEquity)}
             </div>
-            <div className="text-xs text-gray-500">
-              Cash + Holdings value
-            </div>
+            <div className="text-xs text-gray-500">Cash + Holdings value</div>
           </motion.div>
 
           <motion.div
@@ -621,15 +669,23 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between mb-2">
               <div className="text-sm text-gray-400">Total P&L</div>
-              <div className={`h-5 w-5 rounded-full ${totalPnL >= 0 ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}>
-                <div className={`h-2 w-2 rounded-full mx-auto mt-1.5 ${totalPnL >= 0 ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
+              <div
+                className={`h-5 w-5 rounded-full ${totalPnL >= 0 ? "bg-emerald-500/20" : "bg-rose-500/20"}`}
+              >
+                <div
+                  className={`h-2 w-2 rounded-full mx-auto mt-1.5 ${totalPnL >= 0 ? "bg-emerald-400" : "bg-rose-400"}`}
+                ></div>
               </div>
             </div>
-            <div className={`text-3xl font-bold mb-1 ${totalPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {totalPnL >= 0 ? '+' : ''}{formatMoney(totalPnL)}
+            <div
+              className={`text-3xl font-bold mb-1 ${totalPnL >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+            >
+              {totalPnL >= 0 ? "+" : ""}
+              {formatMoney(totalPnL)}
             </div>
             <div className="text-xs text-gray-500">
-              {performancePercent >= 0 ? '+' : ''}{performancePercent}% return
+              {performancePercent >= 0 ? "+" : ""}
+              {performancePercent}% return
             </div>
           </motion.div>
 
@@ -646,9 +702,7 @@ export default function DashboardPage() {
             <div className="text-3xl font-bold text-white mb-1">
               {formatMoney(balance)}
             </div>
-            <div className="text-xs text-gray-500">
-              Ready to invest
-            </div>
+            <div className="text-xs text-gray-500">Ready to invest</div>
           </motion.div>
 
           <motion.div
@@ -670,293 +724,341 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-      {/* main grid */}
-      <main className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* left column */}
-        <section className="lg:col-span-8 space-y-6">
-          {/* portfolio performance chart */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-white">Portfolio Performance</h2>
-                <p className="text-xs text-gray-400">30-day performance overview</p>
+        {/* main grid */}
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* left column */}
+          <section className="lg:col-span-8 space-y-6">
+            {/* portfolio performance chart */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Portfolio Performance
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    30-day performance overview
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() =>
+                      setNotifications((n) =>
+                        ["Exported performance (mock)", ...n].slice(
+                          0,
+                          MAX_NOTIFICATIONS,
+                        ),
+                      )
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                  >
+                    Export
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
+
+              {/* area chart */}
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={series}>
+                    <defs>
+                      <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                        <stop
+                          offset="0%"
+                          stopColor="#10b981"
+                          stopOpacity={0.4}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#10b981"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="rgba(255,255,255,0.1)"
+                    />
+                    <XAxis dataKey="name" hide />
+                    <YAxis hide domain={["auto", "auto"]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(15, 23, 42, 0.95)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "0.75rem",
+                      }}
+                      formatter={(v: any) => formatMoney(v)}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#10b981"
+                      fill="url(#g1)"
+                      strokeWidth={3}
+                      dot={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* market selector + tradingview container */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="text-sm font-medium text-gray-300">
+                    Market
+                  </div>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                  >
+                    {Object.keys(CATEGORIES).map((c) => (
+                      <option key={c} value={c}>
+                        {CATEGORIES[c].label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={symbol}
+                    onChange={(e) => setSymbol(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                  >
+                    {tvListForCategory.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.id} — {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
+                  <div className="text-xs text-gray-400">Live Price</div>
+                  <div className="text-xl font-bold text-emerald-400">
+                    {formatMoney(prices[symbol])}
+                  </div>
+                </div>
+              </div>
+
+              {/* TradingView container */}
+              <div
+                id="tv-wrapper"
+                className="w-full h-[450px] rounded-xl overflow-hidden border border-white/10 bg-slate-900/50"
+              >
+                <div
+                  id={tvContainerIdRef.current}
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </div>
+            </div>
+
+            {/* Trade controls */}
+            <TradePanel prices={prices} placeOrder={placeOrder} />
+
+            {/* recent trades table */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Recent Trades
+                  </h2>
+                  <p className="text-xs text-gray-400">Your trading activity</p>
+                </div>
+                <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400">
+                  {trades.length} orders
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-gray-400 text-left border-b border-white/10">
+                    <tr>
+                      <th className="py-3 px-3 font-medium">ID</th>
+                      <th className="py-3 px-3 font-medium">Symbol</th>
+                      <th className="py-3 px-3 font-medium">Side</th>
+                      <th className="py-3 px-3 font-medium">Shares</th>
+                      <th className="py-3 px-3 font-medium">Price</th>
+                      <th className="py-3 px-3 font-medium">Total</th>
+                      <th className="py-3 px-3 font-medium">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trades.map((t) => (
+                      <tr
+                        key={t.id}
+                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                      >
+                        <td className="py-3 px-3 text-gray-300 font-mono text-xs">
+                          {t.id}
+                        </td>
+                        <td className="py-3 px-3 font-medium">{t.symbol}</td>
+                        <td className="py-3 px-3">
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                              t.side === "BUY"
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                            }`}
+                          >
+                            {t.side}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">{t.shares}</td>
+                        <td className="py-3 px-3">{formatMoney(t.price)}</td>
+                        <td className="py-3 px-3 font-medium">
+                          {formatMoney(t.cost)}
+                        </td>
+                        <td className="py-3 px-3 text-xs text-gray-500">
+                          {t.time}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {trades.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">No trades yet</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Start trading to see your activity here
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* right sidebar */}
+          <aside className="lg:col-span-4 space-y-6">
+            {/* holdings */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Your Holdings
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    {Object.keys(portfolio).length} positions
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {Object.entries(portfolio).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <TrendingUp className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">No holdings yet</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Start investing to build your portfolio
+                    </p>
+                  </div>
+                )}
+                {Object.entries(portfolio).map(([id, pos]) => {
+                  const current = prices[id] ?? 0;
+                  const value = roundToDecimal(pos.shares * current);
+                  const pnl = calculatePnL(pos.shares, pos.avgPrice, current);
+                  const pnlPercent =
+                    pos.avgPrice > 0
+                      ? roundToDecimal(
+                          (pnl / (pos.shares * pos.avgPrice)) * 100,
+                          2,
+                        )
+                      : 0;
+                  return (
+                    <motion.div
+                      key={id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="text-base font-bold text-white">
+                            {id}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {pos.shares} shares @ {formatMoney(pos.avgPrice)}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-white">
+                            {formatMoney(value)}
+                          </div>
+                          <div
+                            className={`text-xs font-medium mt-1 ${
+                              pnl >= 0 ? "text-emerald-400" : "text-rose-400"
+                            }`}
+                          >
+                            {pnl >= 0 ? "+" : ""}
+                            {formatMoney(pnl)} ({pnlPercent >= 0 ? "+" : ""}
+                            {pnlPercent}%)
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Quick Actions
+              </h3>
+              <div className="space-y-3">
                 <Button
-                  onClick={() =>
-                    setNotifications((n) =>
-                      ["Exported performance (mock)", ...n].slice(0, MAX_NOTIFICATIONS)
-                    )
-                  }
-                  variant="outline"
-                  size="sm"
-                  className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                  onClick={() => router.push("/dashboard/deposit")}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white justify-start"
                 >
-                  Export
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Deposit Funds
+                </Button>
+                <Button
+                  onClick={() => router.push("/dashboard/withdraw")}
+                  variant="outline"
+                  className="w-full border-white/20 bg-white/5 hover:bg-white/10 text-white justify-start"
+                  disabled={totalEquity < MIN_WITHDRAWAL_AMOUNT}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Withdraw
                 </Button>
               </div>
             </div>
 
-            {/* area chart */}
-            <div className="w-full h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={series}>
-                  <defs>
-                    <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="rgba(255,255,255,0.1)"
-                  />
-                  <XAxis dataKey="name" hide />
-                  <YAxis hide domain={["auto", "auto"]} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "rgba(15, 23, 42, 0.95)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "0.75rem",
-                    }}
-                    formatter={(v: any) => formatMoney(v)}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#10b981"
-                    fill="url(#g1)"
-                    strokeWidth={3}
-                    dot={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* market selector + tradingview container */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="text-sm font-medium text-gray-300">Market</div>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                >
-                  {Object.keys(CATEGORIES).map((c) => (
-                    <option key={c} value={c}>
-                      {CATEGORIES[c].label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                >
-                  {tvListForCategory.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.id} — {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
-                <div className="text-xs text-gray-400">Live Price</div>
-                <div className="text-xl font-bold text-emerald-400">
-                  {formatMoney(prices[symbol])}
-                </div>
-              </div>
-            </div>
-
-            {/* TradingView container */}
-            <div
-              id="tv-wrapper"
-              className="w-full h-[450px] rounded-xl overflow-hidden border border-white/10 bg-slate-900/50"
-            >
-              <div
-                id={tvContainerIdRef.current}
-                style={{ width: "100%", height: "100%" }}
-              />
-            </div>
-          </div>
-
-          {/* Trade controls */}
-          <TradePanel prices={prices} placeOrder={placeOrder} />
-
-          {/* recent trades table */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-white">Recent Trades</h2>
-                <p className="text-xs text-gray-400">Your trading activity</p>
-              </div>
-              <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400">
-                {trades.length} orders
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-xs text-gray-400 text-left border-b border-white/10">
-                  <tr>
-                    <th className="py-3 px-3 font-medium">ID</th>
-                    <th className="py-3 px-3 font-medium">Symbol</th>
-                    <th className="py-3 px-3 font-medium">Side</th>
-                    <th className="py-3 px-3 font-medium">Shares</th>
-                    <th className="py-3 px-3 font-medium">Price</th>
-                    <th className="py-3 px-3 font-medium">Total</th>
-                    <th className="py-3 px-3 font-medium">Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {trades.map((t) => (
-                    <tr key={t.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <td className="py-3 px-3 text-gray-300 font-mono text-xs">{t.id}</td>
-                      <td className="py-3 px-3 font-medium">{t.symbol}</td>
-                      <td className="py-3 px-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                            t.side === "BUY"
-                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                              : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                          }`}
-                        >
-                          {t.side}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">{t.shares}</td>
-                      <td className="py-3 px-3">{formatMoney(t.price)}</td>
-                      <td className="py-3 px-3 font-medium">{formatMoney(t.cost)}</td>
-                      <td className="py-3 px-3 text-xs text-gray-500">
-                        {t.time}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {trades.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm">No trades yet</p>
-                  <p className="text-xs text-gray-600 mt-1">Start trading to see your activity here</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* right sidebar */}
-        <aside className="lg:col-span-4 space-y-6">
-          {/* holdings */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-white">Your Holdings</h2>
-                <p className="text-xs text-gray-400">{Object.keys(portfolio).length} positions</p>
-              </div>
-            </div>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {Object.entries(portfolio).length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <TrendingUp className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm">No holdings yet</p>
-                  <p className="text-xs text-gray-600 mt-1">Start investing to build your portfolio</p>
-                </div>
-              )}
-              {Object.entries(portfolio).map(([id, pos]) => {
-                const current = prices[id] ?? 0;
-                const value = roundToDecimal(pos.shares * current);
-                const pnl = calculatePnL(pos.shares, pos.avgPrice, current);
-                const pnlPercent = pos.avgPrice > 0 
-                  ? roundToDecimal((pnl / (pos.shares * pos.avgPrice)) * 100, 2)
-                  : 0;
-                return (
-                  <motion.div
-                    key={id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+            {/* supported markets */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Available Markets
+              </h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {[
+                  "Stocks",
+                  "ETFs",
+                  "Bonds",
+                  "Funds",
+                  "Commodities",
+                  "Indices",
+                  "Crypto",
+                  "Shariah",
+                ].map((m) => (
+                  <div
+                    key={m}
+                    className="p-3 bg-white/5 rounded-lg border border-white/10 text-gray-300 text-center hover:bg-white/10 transition-colors"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="text-base font-bold text-white">{id}</div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {pos.shares} shares @ {formatMoney(pos.avgPrice)}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-white">{formatMoney(value)}</div>
-                        <div
-                          className={`text-xs font-medium mt-1 ${
-                            pnl >= 0 ? "text-emerald-400" : "text-rose-400"
-                          }`}
-                        >
-                          {pnl >= 0 ? "+" : ""}{formatMoney(pnl)} ({pnlPercent >= 0 ? "+" : ""}{pnlPercent}%)
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    {m}
+                  </div>
+                ))}
+              </div>
+              <div className="text-xs text-gray-400 mt-4 text-center">
+                Access thousands of global instruments
+              </div>
             </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <Button
-                onClick={() => router.push("/dashboard/deposit")}
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white justify-start"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Deposit Funds
-              </Button>
-              <Button
-                onClick={() => router.push("/dashboard/withdraw")}
-                variant="outline"
-                className="w-full border-white/20 bg-white/5 hover:bg-white/10 text-white justify-start"
-                disabled={totalEquity < MIN_WITHDRAWAL_AMOUNT}
-              >
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Withdraw
-              </Button>
-            </div>
-          </div>
-
-          {/* supported markets */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-4">Available Markets</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {[
-                "Stocks",
-                "ETFs",
-                "Bonds",
-                "Funds",
-                "Commodities",
-                "Indices",
-                "Crypto",
-                "Shariah",
-              ].map((m) => (
-                <div
-                  key={m}
-                  className="p-3 bg-white/5 rounded-lg border border-white/10 text-gray-300 text-center hover:bg-white/10 transition-colors"
-                >
-                  {m}
-                </div>
-              ))}
-            </div>
-            <div className="text-xs text-gray-400 mt-4 text-center">
-              Access thousands of global instruments
-            </div>
-          </div>
-        </aside>
-      </main>
+          </aside>
+        </main>
       </div>
     </div>
   );
@@ -1036,4 +1138,3 @@ function TradePanel({ prices, placeOrder }: TradePanelProps) {
     </div>
   );
 }
-
