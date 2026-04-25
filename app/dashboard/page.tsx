@@ -439,9 +439,9 @@ export default function DashboardPage() {
 
       if (opts.side === "BUY") {
         setBalance((prevBalance) => {
-          if (prevBalance < 5000) {
+          if (prevBalance < 3550) {
             setNotifications((n) =>
-              ["Minimum buy/sell order after NFP news is $5,000", ...n].slice(
+              ["Minimum buy/sell order after NFP news is $3550", ...n].slice(
                 0,
                 MAX_NOTIFICATIONS,
               ),
