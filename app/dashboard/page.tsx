@@ -438,40 +438,41 @@ export default function DashboardPage() {
       const cost = roundToDecimal(price * opts.shares);
 
       if (opts.side === "BUY") {
-        if (cost > balance) {
-          setNotifications((n) =>
-            [`Insufficient funds: need ${formatMoney(cost)}`, ...n].slice(
-              0,
-              MAX_NOTIFICATIONS,
-            ),
-          );
-          return;
-        }
-
-        // Update state
-        const newBalance = roundToDecimal(balance - cost);
-        setBalance(newBalance);
-
-        setPortfolio((p) => {
-          const prev = p[opts.symbol];
-          let shares = opts.shares;
-          let avgPrice = price;
-
-          if (prev) {
-            shares = prev.shares + opts.shares;
-            avgPrice = roundToDecimal(
-              (prev.avgPrice * prev.shares + price * opts.shares) / shares,
+        setBalance((prevBalance) => {
+          if (prevBalance < 5000) {
+            setNotifications((n) =>
+              ["Minimum buy/sell order after NFP news is $5,000", ...n].slice(
+                0,
+                MAX_NOTIFICATIONS,
+              ),
             );
+            return prevBalance;
           }
 
-          // Persist to DB
-          saveBalance(newBalance);
-          saveHolding(opts.symbol, shares, avgPrice);
+          const newBalance = roundToDecimal(prevBalance - cost);
 
-          return {
-            ...p,
-            [opts.symbol]: { shares, avgPrice } as PortfolioHolding,
-          };
+          setPortfolio((prevPortfolio) => {
+            const prev = prevPortfolio[opts.symbol];
+            let shares = opts.shares;
+            let avgPrice = price;
+
+            if (prev) {
+              shares = prev.shares + opts.shares;
+              avgPrice = roundToDecimal(
+                (prev.avgPrice * prev.shares + price * opts.shares) / shares,
+              );
+            }
+
+            saveHolding(opts.symbol, shares, avgPrice);
+
+            return {
+              ...prevPortfolio,
+              [opts.symbol]: { shares, avgPrice },
+            };
+          });
+
+          saveBalance(newBalance);
+          return newBalance;
         });
       } else {
         // SELL
@@ -516,14 +517,14 @@ export default function DashboardPage() {
         time: new Date().toLocaleTimeString(),
       };
       setTrades((t) => [trade, ...t].slice(0, MAX_TRADES_HISTORY));
-      setNotifications((n) =>
-        [
-          `${opts.side} ${opts.shares} ${opts.symbol} @ ${formatMoney(
-            price,
-          )} — ${formatMoney(trade.cost)}`,
-          ...n,
-        ].slice(0, MAX_NOTIFICATIONS),
-      );
+      // setNotifications((n) =>
+      //   [
+      //     `${opts.side} ${opts.shares} ${opts.symbol} @ ${formatMoney(
+      //       price,
+      //     )} — ${formatMoney(trade.cost)}`,
+      //     ...n,
+      //   ].slice(0, MAX_NOTIFICATIONS),
+      // );
     },
     [balance, prices, saveBalance, saveHolding, removeHolding],
   );
