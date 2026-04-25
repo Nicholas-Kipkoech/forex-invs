@@ -623,7 +623,6 @@ export default function DashboardPage() {
             </Button>
             <Button
               variant="outline"
-              disabled={totalEquity < MIN_WITHDRAWAL_AMOUNT}
               onClick={() => {
                 if (totalEquity < MIN_WITHDRAWAL_AMOUNT) {
                   setNotifications((n) =>
