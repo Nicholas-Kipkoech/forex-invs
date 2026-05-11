@@ -28,6 +28,7 @@ import {
   MAX_TRADES_HISTORY,
   findTvSymbol,
   mockSeries,
+  generateNextPrice,
 } from "@/lib/constants";
 import {
   formatMoney,
@@ -171,22 +172,8 @@ export default function DashboardPage() {
 
         Object.keys(next).forEach((symbol) => {
           const base = basePricesRef.current[symbol];
-          const current = next[symbol];
 
-          if (!base) return;
-
-          // Current growth relative to base
-          const growth = (current - base) / base;
-
-          // Slight upward bias (feels realistic)
-          const step = (Math.random() - 0.45) * 0.01; // ~±1%
-
-          let newGrowth = growth + step;
-
-          // Clamp between -5% and +15%
-          newGrowth = Math.max(MIN_GROWTH, Math.min(MAX_GROWTH, newGrowth));
-
-          next[symbol] = roundToDecimal(base * (1 + newGrowth));
+          next[symbol] = generateNextPrice(next[symbol], base);
         });
 
         return next;
@@ -729,80 +716,6 @@ export default function DashboardPage() {
           {/* left column */}
           <section className="lg:col-span-8 space-y-6">
             {/* portfolio performance chart */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">
-                    Portfolio Performance
-                  </h2>
-                  <p className="text-xs text-gray-400">
-                    30-day performance overview
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() =>
-                      setNotifications((n) =>
-                        ["Exported performance (mock)", ...n].slice(
-                          0,
-                          MAX_NOTIFICATIONS,
-                        ),
-                      )
-                    }
-                    variant="outline"
-                    size="sm"
-                    className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
-                  >
-                    Export
-                  </Button>
-                </div>
-              </div>
-
-              {/* area chart */}
-              <div className="w-full h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={series}>
-                    <defs>
-                      <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-                        <stop
-                          offset="0%"
-                          stopColor="#10b981"
-                          stopOpacity={0.4}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#10b981"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="rgba(255,255,255,0.1)"
-                    />
-                    <XAxis dataKey="name" hide />
-                    <YAxis hide domain={["auto", "auto"]} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "rgba(15, 23, 42, 0.95)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "0.75rem",
-                      }}
-                      formatter={(v: any) => formatMoney(v)}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#10b981"
-                      fill="url(#g1)"
-                      strokeWidth={3}
-                      dot={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
             {/* market selector + tradingview container */}
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
@@ -1128,10 +1041,7 @@ function TradePanel({ prices, placeOrder }: TradePanelProps) {
           Place Order
         </Button>
       </div>
-      <div className="text-xs text-gray-500 mt-3">
-        Orders are simulated locally — connect a brokerage API for real
-        execution.
-      </div>
+
       <div className="mt-3 text-xs text-gray-400">
         Current price: {formatMoney(prices[symbol])}
       </div>
