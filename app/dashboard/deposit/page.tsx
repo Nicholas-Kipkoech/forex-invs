@@ -50,7 +50,7 @@ export default function DepositPageContent() {
       name: "Tether",
     },
     SOL: {
-      address: "FccqzvJYxa8tfvhFiyYfYEr19QP3vA4kmew1agAMRtnz"
+      address: "FccqzvJYxa8tfvhFiyYfYEr19QP3vA4kmew1agAMRtnz",
       qr: "/sol-qrcode.png",
       network: "Solana Network",
       icon: "◎",
