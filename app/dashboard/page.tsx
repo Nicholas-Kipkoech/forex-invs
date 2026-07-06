@@ -1,55 +1,46 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { TrendingUp, CreditCard, BarChart3 } from "lucide-react";
+import { TrendingUp, CreditCard, BarChart3, RotateCcw } from "lucide-react";
 import {
   CATEGORIES,
   DEFAULT_CATEGORY,
   DEFAULT_SYMBOL,
   START_BALANCE,
-  MIN_WITHDRAWAL_AMOUNT,
+  ADD_FUNDS_AMOUNT,
   PRICE_UPDATE_INTERVAL,
-  PRICE_JITTER_PERCENT,
   MAX_NOTIFICATIONS,
   MAX_TRADES_HISTORY,
   findTvSymbol,
-  mockSeries,
   generateNextPrice,
 } from "@/lib/constants";
+import { CategoryDropdown, SymbolDropdown } from "@/components/MarketDropdowns";
 import {
   formatMoney,
   roundToDecimal,
   calculatePortfolioValue,
   calculatePnL,
 } from "@/lib/utils";
-import type {
-  Trade,
-  PriceData,
-  PortfolioData,
-  TradeOrder,
-  PortfolioHolding,
-} from "@/lib/types";
+import type { Trade, PriceData, PortfolioData, TradeOrder } from "@/lib/types";
 
 /**
- * StockAI Dashboard — Multi-asset, TradingView embed, mock real-time prices, simulated orders
+ * StockAI Dashboard — Paper trading simulator
  *
- * Notes:
- * - TradingView widget script is used (official embed). Ensure CSP allows s3.tradingview.com if deploying.
- * - All trading is simulated locally (no real execution). Replace with broker/brokerage API for production.
+ * IMPORTANT: This is a simulated trading experience. No real money, real
+ * brokerage, or real order execution is involved anywhere in this file.
+ * "Balance" is virtual, "Deposit"/"Withdraw" only affect the virtual
+ * balance in Supabase, and prices are a simulated random walk seeded from
+ * a starting value — NOT a live feed, even though the TradingView chart
+ * shown alongside it is real market data. Keep that distinction visible
+ * to users (see the banner in the header) so nobody mistakes this for a
+ * real account.
+ *
+ * - TradingView widget script is the official embed. Ensure CSP allows
+ *   s3.tradingview.com if deploying.
  */
 
 export default function DashboardPage() {
@@ -57,11 +48,23 @@ export default function DashboardPage() {
   const [balance, setBalance] = useState<number>(START_BALANCE);
   const [portfolio, setPortfolio] = useState<PortfolioData>({});
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<
+    { id: number; text: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const notifIdRef = useRef(0);
 
-  // market state
+  const pushNotification = useCallback((text: string) => {
+    const id = notifIdRef.current++;
+    setNotifications((n) => [{ id, text }, ...n].slice(0, MAX_NOTIFICATIONS));
+    // auto-dismiss so the stack doesn't grow forever
+    window.setTimeout(() => {
+      setNotifications((n) => n.filter((item) => item.id !== id));
+    }, 4000);
+  }, []);
+
+  // market state — single source of truth, shared by chart + trade panel
   const [category, setCategory] = useState<string>(DEFAULT_CATEGORY);
   const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL);
 
@@ -79,10 +82,10 @@ export default function DashboardPage() {
     });
 
     basePricesRef.current = base;
-
     return out;
   });
 
+  // ---------------- load account (paper balance + paper holdings) ----------------
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -99,13 +102,11 @@ export default function DashboardPage() {
           router.push("/login");
           return;
         }
-
         if (!user) {
           router.push("/login");
           return;
         }
 
-        // Get balance
         const { data: investor, error: investorError } = await supabase
           .from("investors")
           .select("balance")
@@ -113,14 +114,12 @@ export default function DashboardPage() {
           .single();
 
         if (investorError && investorError.code !== "PGRST116") {
-          // PGRST116 is "not found" which is OK for new users
           console.error("Error fetching investor:", investorError);
           setError("Failed to load account data");
         } else {
-          setBalance(investor?.balance ?? 0);
+          setBalance(investor?.balance ?? START_BALANCE);
         }
 
-        // Get portfolio
         const { data: holdings, error: holdingsError } = await supabase
           .from("investor_portfolio")
           .select("symbol, shares, avg_price")
@@ -135,7 +134,7 @@ export default function DashboardPage() {
             formatted[h.symbol] = {
               shares: Number(h.shares),
               avgPrice: Number(h.avg_price),
-            } as PortfolioHolding;
+            };
           });
           setPortfolio(formatted);
         }
@@ -150,119 +149,44 @@ export default function DashboardPage() {
     fetchData();
   }, [router]);
 
-  // TradingView embed container ref + unique id to recreate widget on symbol change
-  const tvContainerIdRef = useRef(
-    `tv-widget-${Math.random().toString(36).slice(2, 9)}`,
-  );
-  const [tvWidgetKey, setTvWidgetKey] = useState<number>(0);
-
-  // mini portfolio series for chart
-  const [series, setSeries] = useState<{ name: string; value: number }[]>(() =>
-    mockSeries(30, START_BALANCE),
-  );
-
-  // realtime price jitter simulation
+  // ---------------- simulated price random walk (symmetric, no upward bias) ----------------
   useEffect(() => {
-    const MAX_GROWTH = 0.15; // +15%
-    const MIN_GROWTH = -0.05; // -5% (small dip allowed)
-
     const id = window.setInterval(() => {
       setPrices((prev) => {
         const next = { ...prev };
-
-        Object.keys(next).forEach((symbol) => {
-          const base = basePricesRef.current[symbol];
-
-          next[symbol] = generateNextPrice(next[symbol], base);
+        Object.keys(next).forEach((sym) => {
+          const base = basePricesRef.current[sym];
+          next[sym] = generateNextPrice(next[sym], base);
         });
-
         return next;
-      });
-
-      // Keep your portfolio chart smooth
-      setSeries((s) => {
-        const last = s[s.length - 1]?.value ?? START_BALANCE;
-        const change = (Math.random() - 0.45) * (last * 0.002);
-        const nextVal = Math.max(0, roundToDecimal(last + change));
-        return [...s.slice(-29), { name: `T${s.length + 1}`, value: nextVal }];
       });
     }, PRICE_UPDATE_INTERVAL);
 
     return () => clearInterval(id);
   }, []);
 
-  // handle tradingview embed lifecycle (lazy load and recreate on symbol change)
+  // ---------------- TradingView widget lifecycle ----------------
+  const tvContainerIdRef = useRef(
+    `tv-widget-${Math.random().toString(36).slice(2, 9)}`,
+  );
+  const tvWidgetRef = useRef<any>(null);
+  const tvScriptLoadedRef = useRef(false);
+
   useEffect(() => {
-    const containerId = tvContainerIdRef.current;
-    let scriptElement: HTMLScriptElement | null = null;
-    let widgetInstance: any = null;
+    let cancelled = false;
 
-    const loadWidget = () => {
-      // Clear previous widget
-      const container = document.getElementById(containerId);
-      if (container) {
-        container.innerHTML = "";
-      }
+    function createWidget() {
+      if (cancelled) return;
+      const TradingView = (window as any).TradingView;
+      const container = document.getElementById(tvContainerIdRef.current);
+      if (!TradingView || !container) return;
 
-      // Check if TradingView is already loaded
-      if ((window as any).TradingView) {
-        createWidget();
-      } else {
-        // Load script only if not already present
-        const existingScript = document.querySelector(
-          'script[src="https://s3.tradingview.com/tv.js"]',
-        );
-        if (existingScript) {
-          // Script already exists, wait for it to load
-          const checkInterval = setInterval(() => {
-            if ((window as any).TradingView) {
-              clearInterval(checkInterval);
-              createWidget();
-            }
-          }, 100);
-          return () => clearInterval(checkInterval);
-        } else {
-          // Create and load script
-          scriptElement = document.createElement("script");
-          scriptElement.src = "https://s3.tradingview.com/tv.js";
-          scriptElement.async = true;
-          scriptElement.onload = createWidget;
-          scriptElement.onerror = () => {
-            console.error("Failed to load TradingView script");
-            setError("Failed to load trading chart");
-          };
-          document.body.appendChild(scriptElement);
-        }
-      }
-    };
-
-    const createWidget = () => {
+      container.innerHTML = "";
       try {
-        const container = document.getElementById(containerId);
-        if (!container) {
-          const wrapper = document.getElementById("tv-wrapper");
-          if (wrapper) {
-            const div = document.createElement("div");
-            div.id = containerId;
-            div.style.width = "100%";
-            div.style.height = "100%";
-            wrapper.appendChild(div);
-          } else {
-            return;
-          }
-        }
-
-        const tvSymbol = findTvSymbol(symbol);
-        const TradingView = (window as any).TradingView;
-        if (!TradingView) {
-          console.error("TradingView not available");
-          return;
-        }
-
-        widgetInstance = new TradingView.widget({
-          container_id: containerId,
+        tvWidgetRef.current = new TradingView.widget({
+          container_id: tvContainerIdRef.current,
           autosize: true,
-          symbol: tvSymbol,
+          symbol: findTvSymbol(symbol),
           interval: "D",
           timezone: "Etc/UTC",
           theme: "dark",
@@ -270,106 +194,89 @@ export default function DashboardPage() {
           locale: "en",
           toolbar_bg: "#1b2430",
           enable_publishing: false,
-          allow_symbol_change: true,
+          allow_symbol_change: false, // keep chart in sync with app-level symbol
           hide_side_toolbar: false,
         });
       } catch (err) {
         console.error("TradingView widget error:", err);
         setError("Failed to initialize trading chart");
       }
-    };
+    }
 
-    loadWidget();
-    setTvWidgetKey((k) => k + 1);
+    if ((window as any).TradingView) {
+      createWidget();
+    } else if (!tvScriptLoadedRef.current) {
+      tvScriptLoadedRef.current = true;
+      const script = document.createElement("script");
+      script.src = "https://s3.tradingview.com/tv.js";
+      script.async = true;
+      script.onload = createWidget;
+      script.onerror = () => {
+        console.error("Failed to load TradingView script");
+        setError("Failed to load trading chart");
+      };
+      document.body.appendChild(script);
+    } else {
+      // script tag exists but window.TradingView isn't ready yet
+      const check = window.setInterval(() => {
+        if ((window as any).TradingView) {
+          clearInterval(check);
+          createWidget();
+        }
+      }, 100);
+      return () => clearInterval(check);
+    }
 
     return () => {
-      // Cleanup widget instance
-      if (widgetInstance && typeof widgetInstance.remove === "function") {
-        try {
-          widgetInstance.remove();
-        } catch (err) {
-          console.error("Error removing widget:", err);
-        }
-      }
-
-      // Clear container
-      const container = document.getElementById(containerId);
-      if (container) {
-        container.innerHTML = "";
-      }
-
-      // Note: We don't remove the script tag as it might be reused
-      // and removing it could break other widgets on the page
+      cancelled = true;
+      const container = document.getElementById(tvContainerIdRef.current);
+      if (container) container.innerHTML = "";
+      tvWidgetRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol]);
 
-  // helpers
-  const tvListForCategory = CATEGORIES[category]?.list ?? [];
-  const tvSymbol = findTvSymbol(symbol);
-
-  // portfolio metrics
-  const portfolioValue = useMemo(() => {
-    return calculatePortfolioValue(portfolio, prices);
-  }, [portfolio, prices]);
-
-  const totalEquity = useMemo(
-    () => roundToDecimal(balance + portfolioValue),
-    [balance, portfolioValue],
-  );
-
-  const saveBalance = useCallback(async (newBalance: number) => {
-    try {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error("Auth error saving balance:", authError);
-        return;
-      }
-
-      const { error } = await supabase
-        .from("investors")
-        .update({ balance: newBalance })
-        .eq("user_id", user.id);
-
-      if (error) {
-        console.error("Error saving balance:", error);
-        setNotifications((n) =>
-          ["Failed to save balance", ...n].slice(0, MAX_NOTIFICATIONS),
-        );
-      }
-    } catch (err) {
-      console.error("Unexpected error saving balance:", err);
-    }
-  }, []);
-
-  const saveHolding = useCallback(
-    async (symbol: string, shares: number, avgPrice: number) => {
+  // ---------------- persistence helpers (paper balance / paper holdings only) ----------------
+  const saveBalance = useCallback(
+    async (newBalance: number) => {
       try {
         const {
           data: { user },
           error: authError,
         } = await supabase.auth.getUser();
-        if (authError || !user) {
-          console.error("Auth error saving holding:", authError);
-          return;
-        }
+        if (authError || !user) return;
 
-        const { error } = await supabase.from("investor_portfolio").upsert(
-          {
-            user_id: user.id,
-            symbol,
-            shares,
-            avg_price: avgPrice,
-          },
-          { onConflict: "user_id,symbol" },
-        );
+        const { error } = await supabase
+          .from("investors")
+          .update({ balance: newBalance })
+          .eq("user_id", user.id);
 
         if (error) {
-          console.error("Error saving holding:", error);
+          console.error("Error saving balance:", error);
+          pushNotification("Couldn't save your balance — try again");
         }
+      } catch (err) {
+        console.error("Unexpected error saving balance:", err);
+      }
+    },
+    [pushNotification],
+  );
+
+  const saveHolding = useCallback(
+    async (sym: string, shares: number, avgPrice: number) => {
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+        if (authError || !user) return;
+
+        const { error } = await supabase
+          .from("investor_portfolio")
+          .upsert(
+            { user_id: user.id, symbol: sym, shares, avg_price: avgPrice },
+            { onConflict: "user_id,symbol" },
+          );
+        if (error) console.error("Error saving holding:", error);
       } catch (err) {
         console.error("Unexpected error saving holding:", err);
       }
@@ -377,48 +284,34 @@ export default function DashboardPage() {
     [],
   );
 
-  const removeHolding = useCallback(async (symbol: string) => {
+  const removeHolding = useCallback(async (sym: string) => {
     try {
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error("Auth error removing holding:", authError);
-        return;
-      }
+      if (authError || !user) return;
 
       const { error } = await supabase
         .from("investor_portfolio")
         .delete()
-        .match({ user_id: user.id, symbol });
-
-      if (error) {
-        console.error("Error removing holding:", error);
-      }
+        .match({ user_id: user.id, symbol: sym });
+      if (error) console.error("Error removing holding:", error);
     } catch (err) {
       console.error("Unexpected error removing holding:", err);
     }
   }, []);
 
-  // Simulated trade placement (BUY/SELL)
+  // ---------------- simulated order placement ----------------
   const placeOrder = useCallback(
     (opts: TradeOrder) => {
       const price = prices[opts.symbol] ?? 0;
       if (price === 0) {
-        setNotifications((n) =>
-          ["Invalid symbol or price", ...n].slice(0, MAX_NOTIFICATIONS),
-        );
+        pushNotification("Invalid symbol or price");
         return;
       }
-
       if (opts.shares <= 0 || !Number.isInteger(opts.shares)) {
-        setNotifications((n) =>
-          ["Shares must be a positive integer", ...n].slice(
-            0,
-            MAX_NOTIFICATIONS,
-          ),
-        );
+        pushNotification("Shares must be a positive whole number");
         return;
       }
 
@@ -426,12 +319,9 @@ export default function DashboardPage() {
 
       if (opts.side === "BUY") {
         setBalance((prevBalance) => {
-          if (prevBalance < 1000) {
-            setNotifications((n) =>
-              ["Minimum buy/sell order after NFP news is $1000", ...n].slice(
-                0,
-                MAX_NOTIFICATIONS,
-              ),
+          if (prevBalance < cost) {
+            pushNotification(
+              `Not enough virtual cash — need ${formatMoney(cost)}, you have ${formatMoney(prevBalance)}`,
             );
             return prevBalance;
           }
@@ -449,51 +339,50 @@ export default function DashboardPage() {
                 (prev.avgPrice * prev.shares + price * opts.shares) / shares,
               );
             }
-
             saveHolding(opts.symbol, shares, avgPrice);
-
-            return {
-              ...prevPortfolio,
-              [opts.symbol]: { shares, avgPrice },
-            };
+            return { ...prevPortfolio, [opts.symbol]: { shares, avgPrice } };
           });
 
           saveBalance(newBalance);
+          pushNotification(
+            `Bought ${opts.shares} ${opts.symbol} @ ${formatMoney(price)} — ${formatMoney(cost)}`,
+          );
           return newBalance;
         });
       } else {
-        // SELL
-        setPortfolio((p) => {
-          const prev = p[opts.symbol];
+        // SELL — compute the new balance from the current state, not a stale closure
+        setPortfolio((prevPortfolio) => {
+          const prev = prevPortfolio[opts.symbol];
           if (!prev || prev.shares < opts.shares) {
-            setNotifications((n) =>
-              ["Not enough shares to sell", ...n].slice(0, MAX_NOTIFICATIONS),
-            );
-            return p;
+            pushNotification("Not enough shares to sell");
+            return prevPortfolio;
           }
 
+          setBalance((prevBalance) => {
+            const newBalance = roundToDecimal(prevBalance + cost);
+            saveBalance(newBalance);
+            return newBalance;
+          });
+
           const remaining = prev.shares - opts.shares;
-          const newBalance = roundToDecimal(balance + cost);
-          setBalance(newBalance);
+          pushNotification(
+            `Sold ${opts.shares} ${opts.symbol} @ ${formatMoney(price)} — ${formatMoney(cost)}`,
+          );
 
           if (remaining === 0) {
             removeHolding(opts.symbol);
-            saveBalance(newBalance);
-            const { [opts.symbol]: _, ...rest } = p;
+            const { [opts.symbol]: _removed, ...rest } = prevPortfolio;
             return rest;
           }
 
-          saveBalance(newBalance);
           saveHolding(opts.symbol, remaining, prev.avgPrice);
-
           return {
-            ...p,
+            ...prevPortfolio,
             [opts.symbol]: { shares: remaining, avgPrice: prev.avgPrice },
           };
         });
       }
 
-      // push trade record
       const trade: Trade = {
         id: `T${Math.floor(Math.random() * 900000 + 100000)}`,
         symbol: opts.symbol,
@@ -504,42 +393,76 @@ export default function DashboardPage() {
         time: new Date().toLocaleTimeString(),
       };
       setTrades((t) => [trade, ...t].slice(0, MAX_TRADES_HISTORY));
-      // setNotifications((n) =>
-      //   [
-      //     `${opts.side} ${opts.shares} ${opts.symbol} @ ${formatMoney(
-      //       price,
-      //     )} — ${formatMoney(trade.cost)}`,
-      //     ...n,
-      //   ].slice(0, MAX_NOTIFICATIONS),
-      // );
     },
-    [balance, prices, saveBalance, saveHolding, removeHolding],
+    [prices, saveBalance, saveHolding, removeHolding, pushNotification],
   );
 
-  // mini helper to update symbol when category changes
+  // ---------------- virtual funds controls (paper money only — no payment processor) ----------------
+  const addVirtualFunds = useCallback(() => {
+    setBalance((prev) => {
+      const next = roundToDecimal(prev + ADD_FUNDS_AMOUNT);
+      saveBalance(next);
+      return next;
+    });
+    pushNotification(`Added ${formatMoney(ADD_FUNDS_AMOUNT)} in virtual funds`);
+  }, [saveBalance, pushNotification]);
+
+  const resetPaperAccount = useCallback(async () => {
+    const confirmed = window.confirm(
+      "Reset your paper account? This clears your virtual balance, holdings, and trade history back to the starting amount.",
+    );
+    if (!confirmed) return;
+
+    setBalance(START_BALANCE);
+    setPortfolio({});
+    setTrades([]);
+    saveBalance(START_BALANCE);
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("investor_portfolio")
+          .delete()
+          .match({ user_id: user.id });
+      }
+    } catch (err) {
+      console.error("Error clearing holdings on reset:", err);
+    }
+
+    pushNotification("Paper account reset");
+  }, [saveBalance, pushNotification]);
+
+  // keep symbol valid when category changes
   useEffect(() => {
     const first = CATEGORIES[category]?.list[0]?.id;
     if (first) setSymbol(first);
   }, [category]);
 
-  // Calculate performance metrics (must be before conditional returns)
+  const portfolioValue = useMemo(
+    () => calculatePortfolioValue(portfolio, prices),
+    [portfolio, prices],
+  );
+  const totalEquity = useMemo(
+    () => roundToDecimal(balance + portfolioValue),
+    [balance, portfolioValue],
+  );
   const totalPnL = useMemo(() => {
     return Object.entries(portfolio).reduce((acc, [id, pos]) => {
       const current = prices[id] ?? 0;
-      const pnl = calculatePnL(pos.shares, pos.avgPrice, current);
-      return acc + pnl;
+      return acc + calculatePnL(pos.shares, pos.avgPrice, current);
     }, 0);
   }, [portfolio, prices]);
-
   const performancePercent = useMemo(() => {
-    if (totalEquity === 0) return 0;
-    const invested = Object.entries(portfolio).reduce(
-      (acc, [_, pos]) => acc + pos.shares * pos.avgPrice,
+    const invested = Object.values(portfolio).reduce(
+      (acc, pos) => acc + pos.shares * pos.avgPrice,
       0,
     );
     if (invested === 0) return 0;
     return roundToDecimal((totalPnL / invested) * 100, 2);
-  }, [portfolio, totalPnL, totalEquity]);
+  }, [portfolio, totalPnL]);
 
   if (loading) {
     return (
@@ -568,17 +491,19 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-gray-100">
       {/* notifications */}
       <div className="fixed top-4 right-4 z-50 w-[320px] max-w-[90vw] flex flex-col gap-2">
-        {notifications.map((n, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className="bg-white/10 backdrop-blur-xl border border-white/20 px-4 py-3 rounded-xl text-sm shadow-lg"
-          >
-            {n}
-          </motion.div>
-        ))}
+        <AnimatePresence>
+          {notifications.map((n) => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="bg-white/10 backdrop-blur-xl border border-white/20 px-4 py-3 rounded-xl text-sm shadow-lg"
+            >
+              {n.text}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {/* header */}
@@ -590,41 +515,29 @@ export default function DashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Investment Portfolio
+                Paper Trading Simulator
               </h1>
               <div className="text-xs text-gray-400">
-                Professional trading & investment platform
+                Practice with virtual funds — no real money, no real orders
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Button
-              onClick={() => {
-                router.push("/dashboard/deposit");
-              }}
+              onClick={addVirtualFunds}
               className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              Deposit
+              Add {formatMoney(ADD_FUNDS_AMOUNT)} virtual funds
             </Button>
             <Button
               variant="outline"
-              onClick={() => {
-                if (totalEquity < MIN_WITHDRAWAL_AMOUNT) {
-                  setNotifications((n) =>
-                    [
-                      `Minimum withdrawal is ${formatMoney(MIN_WITHDRAWAL_AMOUNT)}`,
-                      ...n,
-                    ].slice(0, MAX_NOTIFICATIONS),
-                  );
-                } else {
-                  router.push("/dashboard/withdraw");
-                }
-              }}
+              onClick={resetPaperAccount}
               className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
             >
-              Withdraw
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset account
             </Button>
           </div>
         </div>
@@ -645,7 +558,9 @@ export default function DashboardPage() {
             <div className="text-3xl font-bold text-white mb-1">
               {formatMoney(totalEquity)}
             </div>
-            <div className="text-xs text-gray-500">Cash + Holdings value</div>
+            <div className="text-xs text-gray-500">
+              Virtual cash + holdings value
+            </div>
           </motion.div>
 
           <motion.div
@@ -683,13 +598,15 @@ export default function DashboardPage() {
             className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-400">Available Cash</div>
+              <div className="text-sm text-gray-400">Virtual Cash</div>
               <CreditCard className="h-5 w-5 text-cyan-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-1">
               {formatMoney(balance)}
             </div>
-            <div className="text-xs text-gray-500">Ready to invest</div>
+            <div className="text-xs text-gray-500">
+              Ready to invest (simulated)
+            </div>
           </motion.div>
 
           <motion.div
@@ -715,8 +632,6 @@ export default function DashboardPage() {
         <main className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* left column */}
           <section className="lg:col-span-8 space-y-6">
-            {/* portfolio performance chart */}
-
             {/* market selector + tradingview container */}
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
@@ -724,53 +639,42 @@ export default function DashboardPage() {
                   <div className="text-sm font-medium text-gray-300">
                     Market
                   </div>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                  >
-                    {Object.keys(CATEGORIES).map((c) => (
-                      <option key={c} value={c}>
-                        {CATEGORIES[c].label}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
+                  <CategoryDropdown value={category} onChange={setCategory} />
+                  <SymbolDropdown
+                    category={category}
                     value={symbol}
-                    onChange={(e) => setSymbol(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                  >
-                    {tvListForCategory.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.id} — {s.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSymbol}
+                    prices={prices}
+                    basePrices={basePricesRef.current}
+                  />
                 </div>
 
                 <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
-                  <div className="text-xs text-gray-400">Live Price</div>
+                  <div className="text-xs text-gray-400">Simulated Price</div>
                   <div className="text-xl font-bold text-emerald-400">
                     {formatMoney(prices[symbol])}
                   </div>
                 </div>
               </div>
 
-              {/* TradingView container */}
-              <div
-                id="tv-wrapper"
-                className="w-full h-[450px] rounded-xl overflow-hidden border border-white/10 bg-slate-900/50"
-              >
+              <div className="w-full h-[450px] rounded-xl overflow-hidden border border-white/10 bg-slate-900/50">
                 <div
                   id={tvContainerIdRef.current}
                   style={{ width: "100%", height: "100%" }}
                 />
               </div>
+              <div className="text-[11px] text-gray-500 mt-2">
+                Chart reflects real market data from TradingView. Your balance,
+                holdings, and order prices above are simulated for practice.
+              </div>
             </div>
 
             {/* Trade controls */}
-            <TradePanel prices={prices} placeOrder={placeOrder} />
+            <TradePanel
+              symbol={symbol}
+              price={prices[symbol]}
+              placeOrder={placeOrder}
+            />
 
             {/* recent trades table */}
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
@@ -779,7 +683,9 @@ export default function DashboardPage() {
                   <h2 className="text-lg font-semibold text-white">
                     Recent Trades
                   </h2>
-                  <p className="text-xs text-gray-400">Your trading activity</p>
+                  <p className="text-xs text-gray-400">
+                    Your simulated trading activity
+                  </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400">
                   {trades.length} orders
@@ -847,7 +753,6 @@ export default function DashboardPage() {
 
           {/* right sidebar */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* holdings */}
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -917,57 +822,22 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Quick Actions
-              </h3>
-              <div className="space-y-3">
-                <Button
-                  onClick={() => router.push("/dashboard/deposit")}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white justify-start"
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Deposit Funds
-                </Button>
-                <Button
-                  onClick={() => router.push("/dashboard/withdraw")}
-                  variant="outline"
-                  className="w-full border-white/20 bg-white/5 hover:bg-white/10 text-white justify-start"
-                  disabled={totalEquity < MIN_WITHDRAWAL_AMOUNT}
-                >
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Withdraw
-                </Button>
-              </div>
-            </div>
-
-            {/* supported markets */}
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-4">
                 Available Markets
               </h3>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                {[
-                  "Stocks",
-                  "ETFs",
-                  "Bonds",
-                  "Funds",
-                  "Commodities",
-                  "Indices",
-                  "Crypto",
-                  "Shariah",
-                ].map((m) => (
+                {Object.values(CATEGORIES).map((cat) => (
                   <div
-                    key={m}
+                    key={cat.label}
                     className="p-3 bg-white/5 rounded-lg border border-white/10 text-gray-300 text-center hover:bg-white/10 transition-colors"
                   >
-                    {m}
+                    {cat.label}
                   </div>
                 ))}
               </div>
               <div className="text-xs text-gray-400 mt-4 text-center">
-                Access thousands of global instruments
+                Practice across thousands of simulated instruments
               </div>
             </div>
           </aside>
@@ -980,35 +850,25 @@ export default function DashboardPage() {
 /* -------------------- TradePanel -------------------- */
 
 interface TradePanelProps {
-  prices: PriceData;
+  symbol: string;
+  price: number;
   placeOrder: (order: TradeOrder) => void;
 }
 
-function TradePanel({ prices, placeOrder }: TradePanelProps) {
+function TradePanel({ symbol, price, placeOrder }: TradePanelProps) {
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
-  const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL);
   const [shares, setShares] = useState<number | "">("");
 
   return (
     <div className="bg-[#081018] rounded-2xl p-4 shadow border border-gray-800">
-      <div className="text-sm text-gray-300 mb-3">Quick Trade</div>
-      <div className="grid sm:grid-cols-4 gap-3">
-        <select
-          value={symbol}
-          onChange={(e) => setSymbol(e.target.value)}
-          className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
-        >
-          {Object.values(CATEGORIES)
-            .flatMap((c) => c.list)
-            .map((s: any) => (
-              <option key={s.id} value={s.id}>
-                {s.id} • {s.name}
-              </option>
-            ))}
-        </select>
+      <div className="text-sm text-gray-300 mb-3">
+        Quick Trade — <span className="font-semibold text-white">{symbol}</span>
+      </div>
+      <div className="grid sm:grid-cols-3 gap-3">
         <input
           type="number"
-          min={0}
+          min={1}
+          step={1}
           placeholder="Shares"
           value={shares as any}
           onChange={(e) =>
@@ -1018,7 +878,7 @@ function TradePanel({ prices, placeOrder }: TradePanelProps) {
         />
         <select
           value={side}
-          onChange={(e) => setSide(e.target.value as any)}
+          onChange={(e) => setSide(e.target.value as "BUY" | "SELL")}
           className="bg-[#0b1220] border border-gray-700 rounded p-2 text-sm"
         >
           <option value="BUY">BUY</option>
@@ -1026,13 +886,9 @@ function TradePanel({ prices, placeOrder }: TradePanelProps) {
         </select>
         <Button
           onClick={() => {
-            if (!symbol || !shares || Number(shares) <= 0) {
-              return;
-            }
             const sharesNum = Number(shares);
-            if (!Number.isInteger(sharesNum) || sharesNum <= 0) {
+            if (!shares || !Number.isInteger(sharesNum) || sharesNum <= 0)
               return;
-            }
             placeOrder({ side, symbol, shares: sharesNum });
             setShares("");
           }}
@@ -1043,7 +899,8 @@ function TradePanel({ prices, placeOrder }: TradePanelProps) {
       </div>
 
       <div className="mt-3 text-xs text-gray-400">
-        Current price: {formatMoney(prices[symbol])}
+        Simulated price: {formatMoney(price)} · trading {symbol} — change symbol
+        above to trade something else
       </div>
     </div>
   );

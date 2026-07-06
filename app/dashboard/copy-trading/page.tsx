@@ -47,6 +47,29 @@ interface Trader {
 
 const TRADERS: Trader[] = [
   {
+    id: "0",
+    name: "Oliver Tod",
+    avatar: "OT",
+    strategy: "Scalping",
+    strategyDescription:
+      "High-frequency scalping on major forex pairs. Focuses on 1-5 minute timeframes with tight stop losses. Uses RSI and MACD for entry signals.",
+    totalReturn: 307.5,
+    monthlyReturn: 15.2,
+    winRate: 87.5,
+    totalTrades: 2308,
+    followers: 9821,
+    riskLevel: "Low",
+    riskScore: 2,
+    minCopyAmount: 10000,
+    assets: ["EUR/USD", "GBP/USD", "USD/JPY", "XAUUSD"],
+    verified: true,
+    joinedDate: "2013-01-15",
+    maxDrawdown: -7.9,
+    avgTradeDuration: "15 min",
+    profitFactor: 1.85,
+    sharpeRatio: 2.1,
+  },
+  {
     id: "1",
     name: "Alex Chen",
     avatar: "AC",
@@ -244,7 +267,7 @@ export default function CopyTradingPage() {
         trader.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         trader.strategy.toLowerCase().includes(searchQuery.toLowerCase()) ||
         trader.assets.some((asset) =>
-          asset.toLowerCase().includes(searchQuery.toLowerCase())
+          asset.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
       const matchesRisk =
@@ -406,7 +429,7 @@ export default function CopyTradingPage() {
                 </div>
                 <div
                   className={`px-2 py-1 rounded-lg text-xs font-medium border ${getRiskColor(
-                    trader.riskLevel
+                    trader.riskLevel,
                   )}`}
                 >
                   {trader.riskLevel}
@@ -522,13 +545,12 @@ export default function CopyTradingPage() {
         {filteredTraders.length === 0 && (
           <div className="text-center py-12">
             <Search className="h-12 w-12 mx-auto mb-4 text-gray-500 opacity-50" />
-            <p className="text-gray-400">No traders found matching your criteria</p>
+            <p className="text-gray-400">
+              No traders found matching your criteria
+            </p>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-
-
