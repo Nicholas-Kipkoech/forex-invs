@@ -5,7 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { TrendingUp, CreditCard, BarChart3, RotateCcw } from "lucide-react";
+import {
+  TrendingUp,
+  CreditCard,
+  BarChart3,
+  RotateCcw,
+  Wallet2Icon,
+} from "lucide-react";
 import {
   CATEGORIES,
   DEFAULT_CATEGORY,
@@ -26,6 +32,7 @@ import {
   calculatePnL,
 } from "@/lib/utils";
 import type { Trade, PriceData, PortfolioData, TradeOrder } from "@/lib/types";
+import Link from "next/link";
 
 /**
  * StockAI Dashboard — Paper trading simulator
@@ -515,30 +522,39 @@ export default function DashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Paper Trading Simulator
+                My Portfolio
               </h1>
               <div className="text-xs text-gray-400">
-                Practice with virtual funds — no real money, no real orders
+                Trade with confidence - this is a live account.
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              onClick={addVirtualFunds}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
+            <Link
+              href="/dashboard/deposit"
+              className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium
+               bg-gradient-to-r from-emerald-500 to-emerald-600 text-white
+               shadow-lg shadow-emerald-500/25
+               hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/40
+               active:scale-[0.98] transition-all duration-150
+               focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-transparent"
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              Add {formatMoney(ADD_FUNDS_AMOUNT)} virtual funds
-            </Button>
-            <Button
-              variant="outline"
-              onClick={resetPaperAccount}
-              className="border-white/20 bg-white/5 hover:bg-white/10 text-white"
+              Deposit
+            </Link>
+
+            <Link
+              href="/dashboard/withdraw"
+              className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium
+               border border-white/20 bg-white/5 text-white backdrop-blur-sm
+               hover:bg-white/10 hover:border-white/30
+               active:scale-[0.98] transition-all duration-150
+               focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent"
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset account
-            </Button>
+              <Wallet2Icon className="h-4 w-4 mr-2" />
+              Withdraw
+            </Link>
           </div>
         </div>
       </header>
@@ -558,9 +574,7 @@ export default function DashboardPage() {
             <div className="text-3xl font-bold text-white mb-1">
               {formatMoney(totalEquity)}
             </div>
-            <div className="text-xs text-gray-500">
-              Virtual cash + holdings value
-            </div>
+            <div className="text-xs text-gray-500">Cash + holdings value</div>
           </motion.div>
 
           <motion.div
@@ -598,15 +612,13 @@ export default function DashboardPage() {
             className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-400">Virtual Cash</div>
+              <div className="text-sm text-gray-400">Cash</div>
               <CreditCard className="h-5 w-5 text-cyan-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-1">
               {formatMoney(balance)}
             </div>
-            <div className="text-xs text-gray-500">
-              Ready to invest (simulated)
-            </div>
+            <div className="text-xs text-gray-500">Ready to invest</div>
           </motion.div>
 
           <motion.div
@@ -650,7 +662,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
-                  <div className="text-xs text-gray-400">Simulated Price</div>
+                  <div className="text-xs text-gray-400">Market Price</div>
                   <div className="text-xl font-bold text-emerald-400">
                     {formatMoney(prices[symbol])}
                   </div>
@@ -665,7 +677,7 @@ export default function DashboardPage() {
               </div>
               <div className="text-[11px] text-gray-500 mt-2">
                 Chart reflects real market data from TradingView. Your balance,
-                holdings, and order prices above are simulated for practice.
+                holdings, and order prices.
               </div>
             </div>
 
@@ -683,9 +695,7 @@ export default function DashboardPage() {
                   <h2 className="text-lg font-semibold text-white">
                     Recent Trades
                   </h2>
-                  <p className="text-xs text-gray-400">
-                    Your simulated trading activity
-                  </p>
+                  <p className="text-xs text-gray-400">Your trading activity</p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400">
                   {trades.length} orders
@@ -899,7 +909,7 @@ function TradePanel({ symbol, price, placeOrder }: TradePanelProps) {
       </div>
 
       <div className="mt-3 text-xs text-gray-400">
-        Simulated price: {formatMoney(price)} · trading {symbol} — change symbol
+        Market price: {formatMoney(price)} · trading {symbol} — change symbol
         above to trade something else
       </div>
     </div>
