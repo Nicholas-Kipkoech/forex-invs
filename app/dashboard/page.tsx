@@ -326,9 +326,9 @@ export default function DashboardPage() {
 
       if (opts.side === "BUY") {
         setBalance((prevBalance) => {
-          if (prevBalance < cost) {
+          if (prevBalance < 500) {
             pushNotification(
-              `Not enough virtual cash — need ${formatMoney(cost)}, you have ${formatMoney(prevBalance)}`,
+              `Not enough  cash — need ${formatMoney(cost)}, you have ${formatMoney(prevBalance)}`,
             );
             return prevBalance;
           }
@@ -862,6 +862,7 @@ export default function DashboardPage() {
 interface TradePanelProps {
   symbol: string;
   price: number;
+  balance?: number;
   placeOrder: (order: TradeOrder) => void;
 }
 
