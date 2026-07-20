@@ -313,12 +313,22 @@ export default function DashboardPage() {
   const placeOrder = useCallback(
     (opts: TradeOrder) => {
       const price = prices[opts.symbol] ?? 0;
+
       if (price === 0) {
         pushNotification("Invalid symbol or price");
         return;
       }
+
       if (opts.shares <= 0 || !Number.isInteger(opts.shares)) {
         pushNotification("Shares must be a positive whole number");
+        return;
+      }
+
+      // Require at least $500 available before any trade
+      if (balance < 500) {
+        pushNotification(
+          "A minimum available balance of $500 is required before placing trades.",
+        );
         return;
       }
 
@@ -326,9 +336,9 @@ export default function DashboardPage() {
 
       if (opts.side === "BUY") {
         setBalance((prevBalance) => {
-          if (prevBalance < 500) {
+          if (prevBalance < cost) {
             pushNotification(
-              `Not enough  cash — need ${formatMoney(cost)}, you have ${formatMoney(prevBalance)}`,
+              `Insufficient funds. Need ${formatMoney(cost)}, available ${formatMoney(prevBalance)}`,
             );
             return prevBalance;
           }
@@ -337,6 +347,7 @@ export default function DashboardPage() {
 
           setPortfolio((prevPortfolio) => {
             const prev = prevPortfolio[opts.symbol];
+
             let shares = opts.shares;
             let avgPrice = price;
 
@@ -346,20 +357,30 @@ export default function DashboardPage() {
                 (prev.avgPrice * prev.shares + price * opts.shares) / shares,
               );
             }
+
             saveHolding(opts.symbol, shares, avgPrice);
-            return { ...prevPortfolio, [opts.symbol]: { shares, avgPrice } };
+
+            return {
+              ...prevPortfolio,
+              [opts.symbol]: {
+                shares,
+                avgPrice,
+              },
+            };
           });
 
           saveBalance(newBalance);
+
           pushNotification(
             `Bought ${opts.shares} ${opts.symbol} @ ${formatMoney(price)} — ${formatMoney(cost)}`,
           );
+
           return newBalance;
         });
       } else {
-        // SELL — compute the new balance from the current state, not a stale closure
         setPortfolio((prevPortfolio) => {
           const prev = prevPortfolio[opts.symbol];
+
           if (!prev || prev.shares < opts.shares) {
             pushNotification("Not enough shares to sell");
             return prevPortfolio;
@@ -372,20 +393,25 @@ export default function DashboardPage() {
           });
 
           const remaining = prev.shares - opts.shares;
+
           pushNotification(
             `Sold ${opts.shares} ${opts.symbol} @ ${formatMoney(price)} — ${formatMoney(cost)}`,
           );
 
           if (remaining === 0) {
             removeHolding(opts.symbol);
-            const { [opts.symbol]: _removed, ...rest } = prevPortfolio;
+            const { [opts.symbol]: _, ...rest } = prevPortfolio;
             return rest;
           }
 
           saveHolding(opts.symbol, remaining, prev.avgPrice);
+
           return {
             ...prevPortfolio,
-            [opts.symbol]: { shares: remaining, avgPrice: prev.avgPrice },
+            [opts.symbol]: {
+              shares: remaining,
+              avgPrice: prev.avgPrice,
+            },
           };
         });
       }
@@ -399,9 +425,17 @@ export default function DashboardPage() {
         cost,
         time: new Date().toLocaleTimeString(),
       };
+
       setTrades((t) => [trade, ...t].slice(0, MAX_TRADES_HISTORY));
     },
-    [prices, saveBalance, saveHolding, removeHolding, pushNotification],
+    [
+      balance,
+      prices,
+      saveBalance,
+      saveHolding,
+      removeHolding,
+      pushNotification,
+    ],
   );
 
   // ---------------- virtual funds controls (paper money only — no payment processor) ----------------
