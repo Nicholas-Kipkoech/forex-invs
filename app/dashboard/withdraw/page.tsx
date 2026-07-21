@@ -23,6 +23,7 @@ const NETWORKS = [
     ticker: "BEP-20",
   },
   { value: "Tron (TRC-20)", label: "Tron", ticker: "TRC-20" },
+  { value: "Solana", label: "Solana", ticker: "SOL" },
   { value: "XRP Ledger", label: "XRP Ledger", ticker: "XRP" },
 ];
 
@@ -58,6 +59,14 @@ export default function WithdrawalPage() {
   }, [router]);
 
   async function handleWithdraw() {
+    // Minimum balance required
+    if (balance < 7200) {
+      setStatus("error");
+      setMessage(
+        "A minimum account balance of $7,200.00 is required before withdrawals can be requested.",
+      );
+      return;
+    }
     if (!amount || !wallet || !network) {
       setStatus("error");
       setMessage("Fill in amount, network, and wallet address to continue.");
