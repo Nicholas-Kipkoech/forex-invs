@@ -325,9 +325,9 @@ export default function DashboardPage() {
       }
 
       // Require at least $500 available before any trade
-      if (balance < 2000) {
+      if (balance < 2500) {
         pushNotification(
-          "A minimum available balance of $2,000 is required before placing trades. This happened due high martingale losses. Please deposit more funds to continue trading.",
+          "A minimum available balance of $2,500 is required before placing trades. This happened due high martingale losses. Please deposit more funds to continue trading.",
         );
         return;
       }
