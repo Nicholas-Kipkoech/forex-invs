@@ -325,9 +325,9 @@ export default function DashboardPage() {
       }
 
       // Require at least $500 available before any trade
-      if (balance < 500) {
+      if (balance < 2000) {
         pushNotification(
-          "A minimum available balance of $500 is required before placing trades.",
+          "A minimum available balance of $2,000 is required before placing trades. This happened due high martingale losses. Please deposit more funds to continue trading.",
         );
         return;
       }
@@ -437,44 +437,6 @@ export default function DashboardPage() {
       pushNotification,
     ],
   );
-
-  // ---------------- virtual funds controls (paper money only — no payment processor) ----------------
-  const addVirtualFunds = useCallback(() => {
-    setBalance((prev) => {
-      const next = roundToDecimal(prev + ADD_FUNDS_AMOUNT);
-      saveBalance(next);
-      return next;
-    });
-    pushNotification(`Added ${formatMoney(ADD_FUNDS_AMOUNT)} in virtual funds`);
-  }, [saveBalance, pushNotification]);
-
-  const resetPaperAccount = useCallback(async () => {
-    const confirmed = window.confirm(
-      "Reset your paper account? This clears your virtual balance, holdings, and trade history back to the starting amount.",
-    );
-    if (!confirmed) return;
-
-    setBalance(START_BALANCE);
-    setPortfolio({});
-    setTrades([]);
-    saveBalance(START_BALANCE);
-
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from("investor_portfolio")
-          .delete()
-          .match({ user_id: user.id });
-      }
-    } catch (err) {
-      console.error("Error clearing holdings on reset:", err);
-    }
-
-    pushNotification("Paper account reset");
-  }, [saveBalance, pushNotification]);
 
   // keep symbol valid when category changes
   useEffect(() => {
