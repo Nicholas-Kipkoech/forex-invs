@@ -48,7 +48,7 @@ interface Trader {
 const TRADERS: Trader[] = [
   {
     id: "0",
-    name: "Oliver Tod",
+    name: "Marcus Roth",
     avatar: "OT",
     strategy: "Scalping",
     strategyDescription:
