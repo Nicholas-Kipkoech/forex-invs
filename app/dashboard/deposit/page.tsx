@@ -34,7 +34,7 @@ export default function DepositPageContent() {
 
   const wallets = {
     BTC: {
-      address: "1CDYEta833Bd4uLNTpPRQhwDtjzb7cvFAa",
+      address: "12LJXkp5sg6vMNcrvavQci4Ad7yaRkQoLa",
       qr: "/btc-qrcode.png",
       network: "Bitcoin Network",
       icon: "₿",
@@ -42,7 +42,7 @@ export default function DepositPageContent() {
       name: "Bitcoin",
     },
     USDT: {
-      address: "TPDrmoEkGiYkGuQQY5r6DvVrriqAbSicWf",
+      address: "TBZutJbkV42dtZqFJqJPC45hTbCkUGiqFk",
       qr: "/usdt-qrcode.png",
       network: "TRC20 (USDT)",
       icon: "₮",
@@ -50,7 +50,7 @@ export default function DepositPageContent() {
       name: "Tether",
     },
     SOL: {
-      address: "FccqzvJYxa8tfvhFiyYfYEr19QP3vA4kmew1agAMRtnz",
+      address: "2wQtMA74d796P32SF2x1gYLZQHajLwGfdyzzCsxTi8QN",
       qr: "/sol-qrcode.png",
       network: "Solana Network",
       icon: "◎",
