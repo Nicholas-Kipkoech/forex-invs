@@ -5,46 +5,66 @@ import Link from "next/link";
 import { CheckCircle, BookOpen, Compass } from "lucide-react";
 
 export default function TradingBasics() {
-  const sections = [
+      const sections = [
     {
       title: "Understand Order Types",
       icon: Compass,
       content: [
-        "Market Order – Buy/sell immediately at current price",
-        "Limit Order – Buy/sell at a specific price",
-        "Stop-Loss Order – Automatically exit to limit losses",
+        "Market Order – Buy/sell immediately at current market price",
+        "Limit Order – Buy/sell at a specific price or better",
+        "Stop-Loss Order – Automatically close position to limit losses",
+        "Take-Profit Order – Automatically close position to lock in profits",
+        "Pending Orders – Buy Limit, Sell Limit, Buy Stop, Sell Stop",
       ],
     },
     {
-      title: "Choose a Broker",
+      title: "Choose a Forex Broker",
       icon: BookOpen,
       content: [
-        "Look for low fees, good execution speed, and reliability.",
-        "Examples: Interactive Brokers, eToro, Saxo Bank",
+        "Look for low spreads, fast execution, and reliable platform (MT5).",
+        "Check regulation, deposit/withdrawal options, and customer support.",
+        "Compare spreads on major pairs (EUR/USD should be under 2 pips).",
+        "Test with demo account before depositing real money.",
       ],
     },
     {
-      title: "Read Charts",
+      title: "Read Forex Charts",
       icon: Compass,
       content: [
-        "Learn candlestick patterns, support/resistance, and trend lines.",
-        "Use TradingView or broker charts.",
+        "Learn candlestick patterns, support/resistance levels, and trend lines.",
+        "Use MetaTrader 5 (MT5) or TradingView for professional charts.",
+        "Understand bid/ask prices and spreads.",
+        "Practice identifying trends and chart patterns.",
       ],
     },
     {
-      title: "Timeframes",
+      title: "Forex Timeframes",
       icon: Compass,
       content: [
-        "Short-term (day trading) vs long-term (investing).",
-        "Pick the timeframes that match your strategy.",
+        "M1, M5, M15 – For scalping and day trading",
+        "H1, H4 – For swing trading and medium-term positions",
+        "D1, W1 – For position trading and long-term analysis",
+        "Choose timeframes that match your trading style and schedule.",
       ],
     },
     {
-      title: "Practice",
+      title: "Risk Management Basics",
       icon: CheckCircle,
       content: [
-        "Start with demo accounts or paper trading.",
-        "Focus on learning and consistency first.",
+        "Never risk more than 1-2% of account per trade.",
+        "Always use stop-loss orders to limit losses.",
+        "Maintain proper risk/reward ratio (aim for 2:1 or better).",
+        "Don't trade with money you can't afford to lose.",
+      ],
+    },
+    {
+      title: "Practice on Demo",
+      icon: CheckCircle,
+      content: [
+        "Start with demo account to practice without risk.",
+        "Focus on learning and developing consistency first.",
+        "Treat demo trading seriously - it builds real habits.",
+        "Only go live after consistent profitability on demo.",
       ],
     },
   ];
@@ -59,11 +79,11 @@ export default function TradingBasics() {
         className="text-center max-w-3xl mx-auto"
       >
         <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent">
-          Trading Basics
+          Forex Trading Basics
         </h1>
         <p className="mt-4 text-slate-300 text-lg">
-          Learn how markets work, order types, charting, and strategies to start
-          trading with confidence.
+          Learn how forex markets work, order types, charting, and essential concepts to start
+          trading currencies with confidence.
         </p>
       </motion.div>
 
