@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
