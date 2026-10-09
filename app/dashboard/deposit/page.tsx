@@ -372,6 +372,146 @@ export default function DepositPageContent() {
           {/* Sidebar - Instructions & Info */}
           <div className="space-y-6">
             {/* Important Instructions */}
+            {/* How to Buy Solana with Phantom */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25 }}
+              className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-emerald-400 flex items-center justify-center">
+                  <span className="text-white text-xl font-bold">◎</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    How to Buy Solana
+                  </h3>
+                  <p className="text-xs text-gray-400">Using Phantom Wallet</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-400 mb-5">
+                Follow these steps to get SOL into your Phantom wallet and
+                transfer it to your deposit address.
+              </p>
+
+              <div className="space-y-5">
+                {/* Step 1 */}
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-bold">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">
+                      Install Phantom
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Visit the official Phantom website and install the wallet
+                      app or browser extension.
+                    </p>
+                    <a
+                      href="https://phantom.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 text-sm text-purple-300 hover:text-purple-200 underline underline-offset-4"
+                    >
+                      Visit Phantom →
+                    </a>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-bold">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">
+                      Create or unlock your wallet
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Follow Phantom&apos;s setup instructions. Secure your
+                      recovery phrase offline and never share it with anyone.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-bold">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">
+                      Get SOL
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Open Phantom and select Solana. If a purchase option is
+                      available in your country, follow the provider&apos;s
+                      instructions to buy SOL. Alternatively, transfer SOL from
+                      a supported exchange or another wallet.
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Availability, payment methods, fees, and minimums vary by
+                      provider and location.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-bold">
+                    4
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">
+                      Open your SOL balance
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Once your SOL arrives in Phantom, select Solana and tap
+                      Send. Copy the receiving address from the SOL section on
+                      this deposit page.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-bold">
+                    5
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">
+                      Verify and send
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Check every character of the receiving address, confirm
+                      the Solana network, and review the amount and transaction
+                      fee before approving the transfer.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 6 */}
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-bold">
+                    6
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">
+                      Submit your deposit proof
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      After the transaction is confirmed, return to the deposit
+                      form, select SOL, enter the amount in USD, attach your
+                      transaction receipt or screenshot, and submit it for
+                      verification.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -449,7 +589,6 @@ export default function DepositPageContent() {
                 </div>
               </div>
             </motion.div>
-
             {/* Security Features */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -480,7 +619,6 @@ export default function DepositPageContent() {
                 </div>
               </div>
             </motion.div>
-
             {/* Processing Time */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
