@@ -192,7 +192,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-slate-900" />
               </div>
-              <span className="text-xl font-bold text-white">Afroxen</span>
+              <span className="text-xl font-bold text-white"></span>
             </div>
 
             {/* Desktop Navigation */}
@@ -892,7 +892,7 @@ export default function LandingPage() {
 
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-400">
-              © {new Date().getFullYear()} Afroxen. All rights reserved.
+              © {new Date().getFullYear()} . All rights reserved.
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <div className="flex items-center gap-2">
