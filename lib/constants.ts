@@ -198,6 +198,51 @@ export const CATEGORIES: Record<string, MarketCategory> = {
       },
     ],
   },
+
+  uk_stocks: {
+    label: "UK Stocks (LSE)",
+    color: "blue",
+    list: [
+      { id: "UK_HSBA", name: "HSBC Holdings", tv: "LSE:HSBA" },
+      { id: "UK_SHEL", name: "Shell plc", tv: "LSE:SHEL" },
+      { id: "UK_AZN", name: "AstraZeneca plc", tv: "LSE:AZN" },
+      { id: "UK_RR", name: "Rolls-Royce Holdings", tv: "LSE:RR." },
+      { id: "UK_BP", name: "BP plc", tv: "LSE:BP." },
+      { id: "UK_BARCLAYS", name: "Barclays plc", tv: "LSE:BARC" },
+      { id: "UK_LLOY", name: "Lloyds Banking Group", tv: "LSE:LLOY" },
+      { id: "UK_VOD", name: "Vodafone Group", tv: "LSE:VOD" },
+      { id: "UK_ULVR", name: "Unilever plc", tv: "LSE:ULVR" },
+      { id: "UK_GLEN", name: "Glencore plc", tv: "LSE:GLEN" },
+    ],
+  },
+
+  uk_funds: {
+    label: "UK ETFs & Index Funds",
+    color: "cyan",
+    list: [
+      { id: "UK_ISF", name: "iShares Core FTSE 100 UCITS ETF", tv: "LSE:ISF" },
+      {
+        id: "UK_VWRP",
+        name: "Vanguard FTSE All-World UCITS ETF (Acc)",
+        tv: "LSE:VWRP",
+      },
+      {
+        id: "UK_VUAG",
+        name: "Vanguard S&P 500 UCITS ETF (Acc)",
+        tv: "LSE:VUAG",
+      },
+      {
+        id: "UK_VUSA",
+        name: "Vanguard S&P 500 UCITS ETF (Dist)",
+        tv: "LSE:VUSA",
+      },
+      {
+        id: "UK_INRG",
+        name: "iShares Global Clean Energy UCITS ETF",
+        tv: "LSE:INRG",
+      },
+    ],
+  },
 };
 
 export const DEFAULT_CATEGORY = "stocks";

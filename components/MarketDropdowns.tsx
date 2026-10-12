@@ -40,6 +40,8 @@ const CATEGORY_ICONS: Record<string, any> = {
   indices: Activity,
   crypto: Bitcoin,
   shariah: Moon,
+  UK_stocks: BarChart3,
+  UK_funds: Layers,
 };
 
 const COLOR_MAP: Record<
@@ -106,19 +108,20 @@ export function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
 
   const current = CATEGORIES[value];
   const CurrentIcon = CATEGORY_ICONS[value] ?? BarChart3;
-  const colors = COLOR_MAP[current?.color ?? "emerald"];
+  // const colors = COLOR_MAP[current?.color ?? "emerald"];
+  const colors = COLOR_MAP[current?.color] ?? COLOR_MAP.emerald;
 
   return (
     <div className="relative" ref={rootRef}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-2 pl-3 pr-2.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-sm text-white outline-none focus:ring-2 ${colors.ring}`}
+        className={`flex items-center gap-2 pl-3 pr-2.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-sm text-white outline-none focus:ring-2 ${colors?.ring}`}
       >
         <span
-          className={`flex items-center justify-center w-6 h-6 rounded-lg ${colors.bg}`}
+          className={`flex items-center justify-center w-6 h-6 rounded-lg ${colors?.bg}`}
         >
-          <CurrentIcon className={`h-3.5 w-3.5 ${colors.text}`} />
+          <CurrentIcon className={`h-3.5 w-3.5 ${colors?.text}`} />
         </span>
         <span className="font-medium">{current?.label ?? "Select"}</span>
         <ChevronDown
@@ -131,7 +134,7 @@ export function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
           <div className="p-1.5 max-h-80 overflow-y-auto">
             {Object.entries(CATEGORIES).map(([key, cat]) => {
               const Icon = CATEGORY_ICONS[key] ?? BarChart3;
-              const c = COLOR_MAP[cat.color];
+              const c = COLOR_MAP[cat?.color];
               const active = key === value;
               return (
                 <button
@@ -145,13 +148,13 @@ export function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
                   }`}
                 >
                   <span
-                    className={`flex items-center justify-center w-7 h-7 rounded-lg ${c.bg}`}
+                    className={`flex items-center justify-center w-7 h-7 rounded-lg ${c?.bg}`}
                   >
-                    <Icon className={`h-4 w-4 ${c.text}`} />
+                    <Icon className={`h-4 w-4 ${c?.text}`} />
                   </span>
                   <span className="flex-1">
                     <div
-                      className={`text-sm font-medium ${active ? c.text : "text-white"}`}
+                      className={`text-sm font-medium ${active ? c?.text : "text-white"}`}
                     >
                       {cat.label}
                     </div>
@@ -159,7 +162,7 @@ export function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
                       {cat.list.length} instruments
                     </div>
                   </span>
-                  {active && <Check className={`h-4 w-4 ${c.text}`} />}
+                  {active && <Check className={`h-4 w-4 ${c?.text}`} />}
                 </button>
               );
             })}
@@ -222,7 +225,7 @@ export function SymbolDropdown({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-2.5 pl-3 pr-2.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all outline-none focus:ring-2 ${colors.ring} min-w-[190px]`}
+        className={`flex items-center gap-2.5 pl-3 pr-2.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all outline-none focus:ring-2 ${colors?.ring} min-w-[190px]`}
       >
         <span className="flex flex-col items-start text-left leading-tight">
           <span className="text-sm font-semibold text-white font-mono">
@@ -269,18 +272,18 @@ export function SymbolDropdown({
                     setOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
-                    active ? colors.bg : "hover:bg-white/5"
+                    active ? colors?.bg : "hover:bg-white/5"
                   }`}
                 >
                   <span className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-sm font-semibold font-mono ${active ? colors.text : "text-white"}`}
+                        className={`text-sm font-semibold font-mono ${active ? colors?.text : "text-white"}`}
                       >
                         {s.id}
                       </span>
                       {active && (
-                        <Check className={`h-3.5 w-3.5 ${colors.text}`} />
+                        <Check className={`h-3.5 w-3.5 ${colors?.text}`} />
                       )}
                     </div>
                     <div className="text-[11px] text-gray-500 truncate">
