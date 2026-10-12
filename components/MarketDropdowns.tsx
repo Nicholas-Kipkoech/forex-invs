@@ -40,8 +40,8 @@ const CATEGORY_ICONS: Record<string, any> = {
   indices: Activity,
   crypto: Bitcoin,
   shariah: Moon,
-  UK_stocks: BarChart3,
-  UK_funds: Layers,
+  uk_stocks: BarChart3,
+  uk_funds: Layers,
 };
 
 const COLOR_MAP: Record<
@@ -231,7 +231,7 @@ export function SymbolDropdown({
           <span className="text-sm font-semibold text-white font-mono">
             {value}
           </span>
-          <span className="text-[11px] text-gray-500 truncate max-w-[140px]">
+          <span className="text-[11px] text-gray-500 truncate max-w-35">
             {currentMeta?.name ?? "Select a symbol"}
           </span>
         </span>
