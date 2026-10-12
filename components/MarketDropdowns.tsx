@@ -40,8 +40,6 @@ const CATEGORY_ICONS: Record<string, any> = {
   indices: Activity,
   crypto: Bitcoin,
   shariah: Moon,
-  uk_stocks: BarChart3,
-  uk_funds: Layers,
 };
 
 const COLOR_MAP: Record<
