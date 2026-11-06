@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
     // ✅ New user registration
     if (type === "registration") {
-      subject = `🎉 New User Registration: ${sanitizedName}`;
+      subject = `💲💰💰💸Potention Dollar Lock IN!!!!: ${sanitizedName}`;
       html = `
       <div style="font-family:Arial,sans-serif;color:#333;">
         <div style="background:#f0fdf4;padding:20px;border-radius:10px;text-align:center;">
@@ -184,7 +184,7 @@ export async function POST(req: Request) {
     }
 
     await transporter.sendMail({
-      from: `"Dollar Time Nickey💰💲!!! new user: " <${smtpUser}>`,
+      from: `"New Client!!!" <${smtpUser}>`,
       to: notifyEmail,
       subject,
       html,
