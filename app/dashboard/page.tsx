@@ -11,6 +11,10 @@ import {
   BarChart3,
   RotateCcw,
   Wallet2Icon,
+  Sparkles,
+  Bot,
+  Power,
+  Activity,
 } from "lucide-react";
 import {
   CATEGORIES,
@@ -62,6 +66,36 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const notifIdRef = useRef(0);
 
+  // Paper-trading automation only. These controls never connect to a broker.
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiStatus, setAiStatus] = useState("Automation is disabled");
+  const previousAiPriceRef = useRef<Record<string, number>>({});
+  const lastAiTradeAtRef = useRef(0);
+
+  const [aiSaving, setAiSaving] = useState(false);
+
+  const saveAISetting = useCallback(async (enabled: boolean) => {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      throw new Error("User authentication failed");
+    }
+
+    const { error } = await supabase.from("investor_ai_settings").upsert(
+      {
+        user_id: user.id,
+        enabled,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
+
+    if (error) throw error;
+  }, []);
+
   const pushNotification = useCallback((text: string) => {
     const id = notifIdRef.current++;
     setNotifications((n) => [{ id, text }, ...n].slice(0, MAX_NOTIFICATIONS));
@@ -99,21 +133,19 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
 
+        // Get authenticated user
         const {
           data: { user },
           error: authError,
         } = await supabase.auth.getUser();
 
-        if (authError) {
+        if (authError || !user) {
           setError("Authentication error. Please log in again.");
           router.push("/login");
           return;
         }
-        if (!user) {
-          router.push("/login");
-          return;
-        }
 
+        // 1. Fetch investor balance
         const { data: investor, error: investorError } = await supabase
           .from("investors")
           .select("balance")
@@ -127,6 +159,7 @@ export default function DashboardPage() {
           setBalance(investor?.balance ?? START_BALANCE);
         }
 
+        // 2. Fetch portfolio holdings
         const { data: holdings, error: holdingsError } = await supabase
           .from("investor_portfolio")
           .select("symbol, shares, avg_price")
@@ -137,13 +170,38 @@ export default function DashboardPage() {
           setError("Failed to load portfolio");
         } else {
           const formatted: PortfolioData = {};
+
           holdings?.forEach((h) => {
             formatted[h.symbol] = {
               shares: Number(h.shares),
               avgPrice: Number(h.avg_price),
             };
           });
+
           setPortfolio(formatted);
+        }
+
+        // 3. Fetch persisted AI settings
+        const { data: aiSettings, error: aiSettingsError } = await supabase
+          .from("investor_ai_settings")
+          .select("enabled")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (aiSettingsError) {
+          console.error("AI settings error:", aiSettingsError);
+          setAiEnabled(false);
+          setAiStatus("Could not restore AI settings.");
+        } else {
+          const enabled = aiSettings?.enabled ?? false;
+
+          setAiEnabled(enabled);
+
+          if (enabled) {
+            setAiStatus("AI automation restored from your saved settings.");
+          } else {
+            setAiStatus("Automation is disabled");
+          }
         }
       } catch (err) {
         console.error("Unexpected error fetching data:", err);
@@ -324,10 +382,10 @@ export default function DashboardPage() {
         return;
       }
 
-      // Require at least $500 available before any trade
-      if (balance < 2500) {
+      // Require the balance to be strictly greater than $100 before any trade.
+      if (balance <= 100) {
         pushNotification(
-          "A minimum available balance of $2,500 is required before placing trades. This happened due high martingale losses. Please deposit more funds to continue trading.",
+          "Your balance must be more than $100 before placing trades.",
         );
         return;
       }
@@ -438,6 +496,123 @@ export default function DashboardPage() {
     ],
   );
 
+  const handleEnableAI = async () => {
+    const currentPrice = prices[symbol];
+
+    if (!currentPrice || currentPrice <= 0) {
+      pushNotification("Waiting for a valid market price.");
+      return;
+    }
+
+    setAiSaving(true);
+
+    try {
+      // Save the enabled state in Supabase first
+      await saveAISetting(true);
+
+      setAiEnabled(true);
+      previousAiPriceRef.current[symbol] = currentPrice;
+      lastAiTradeAtRef.current = Date.now();
+
+      const position = portfolio[symbol];
+
+      if (position && position.shares > 0) {
+        setAiStatus(`AI enabled. Monitoring your ${symbol} position.`);
+        return;
+      }
+
+      if (balance <= 100) {
+        setAiStatus("AI enabled, but your balance must exceed $100 to buy.");
+        pushNotification("Balance must be more than $100 to buy.");
+        return;
+      }
+
+      if (balance < currentPrice) {
+        setAiStatus("AI enabled, but insufficient funds for this share.");
+        return;
+      }
+
+      placeOrder({
+        side: "BUY",
+        symbol,
+        shares: 1,
+      });
+
+      setAiStatus(`AI started. Bought 1 share of ${symbol}.`);
+    } catch (error) {
+      console.error("Failed to enable AI:", error);
+      pushNotification("Could not save AI settings. Please try again.");
+    } finally {
+      setAiSaving(false);
+    }
+  };
+
+  // ---------------- rule-based AI-style paper-trading assistant ----------------
+  // This demo watches the currently selected symbol only. It uses simulated
+  // prices from this page and sends orders through the existing paper-trading
+  // placeOrder function. It never places real-money or brokerage orders.
+  useEffect(() => {
+    if (!aiEnabled) {
+      setAiStatus("Automation is disabled");
+      return;
+    }
+
+    const currentPrice = prices[symbol];
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) return;
+
+    const previousPrice = previousAiPriceRef.current[symbol];
+    previousAiPriceRef.current[symbol] = currentPrice;
+
+    // Wait for a second price observation before evaluating a signal.
+    if (!previousPrice || previousPrice <= 0) {
+      setAiStatus(`Monitoring ${symbol} for a simulated signal...`);
+      return;
+    }
+
+    // Prevent the demo strategy from placing orders too frequently.
+    const cooldownMs = 30_000;
+    if (Date.now() - lastAiTradeAtRef.current < cooldownMs) {
+      setAiStatus(`Monitoring ${symbol} · 30-second trade cooldown`);
+      return;
+    }
+
+    const position = portfolio[symbol];
+
+    if (position && position.shares > 0 && position.avgPrice > 0) {
+      const unrealizedPercent =
+        ((currentPrice - position.avgPrice) / position.avgPrice) * 100;
+
+      // Illustrative exits: take profit at +2% or stop the simulated trade at -1%.
+      if (unrealizedPercent >= 2 || unrealizedPercent <= -1) {
+        lastAiTradeAtRef.current = Date.now();
+        placeOrder({
+          side: "SELL",
+          symbol,
+          shares: position.shares,
+        });
+        setAiStatus(
+          unrealizedPercent >= 2
+            ? `Paper take-profit signal: selling ${symbol}`
+            : `Paper risk-limit signal: selling ${symbol}`,
+        );
+        return;
+      }
+    } else {
+      const movementPercent =
+        ((currentPrice - previousPrice) / previousPrice) * 100;
+
+      // The demo buys one virtual share after a positive simulated price move.
+      if (movementPercent >= 0.5 && balance > 100 && balance >= currentPrice) {
+        lastAiTradeAtRef.current = Date.now();
+        placeOrder({ side: "BUY", symbol, shares: 1 });
+        setAiStatus(`Paper buy signal: buying 1 share of ${symbol}`);
+        return;
+      }
+    }
+
+    setAiStatus(`Monitoring ${symbol} · no trade signal`);
+  }, [aiEnabled, symbol, prices, portfolio, balance, placeOrder]);
+
   // keep symbol valid when category changes
   useEffect(() => {
     const first = CATEGORIES[category]?.list[0]?.id;
@@ -520,9 +695,7 @@ export default function DashboardPage() {
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 My Portfolio
               </h1>
-              <div className="text-xs text-gray-400">
-                Trade with confidence - this is a live account.
-              </div>
+              <div className="text-xs text-gray-400">Live Account </div>
             </div>
           </div>
 
@@ -672,8 +845,8 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="text-[11px] text-gray-500 mt-2">
-                Chart reflects real market data from TradingView. Your balance,
-                holdings, and order prices.
+                TradingView displays real market data. Your balance, holdings,
+                and order prices.
               </div>
             </div>
 
@@ -759,6 +932,118 @@ export default function DashboardPage() {
 
           {/* right sidebar */}
           <aside className="lg:col-span-4 space-y-6">
+            {/* AI-style paper-trading automation */}
+            <div className="bg-gradient-to-br from-violet-500/10 via-white/5 to-cyan-500/10 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-violet-400/20">
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 rounded-xl bg-violet-500/20 border border-violet-400/20 flex items-center justify-center">
+                    <Bot className="h-6 w-6 text-violet-300" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">
+                      AI Auto-Trading
+                    </h2>
+                    <p className="text-xs text-gray-400">
+                      Expert AI trading assistant
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                    aiEnabled
+                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                      : "bg-gray-500/15 text-gray-300 border border-white/10"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      aiEnabled ? "bg-emerald-400 animate-pulse" : "bg-gray-400"
+                    }`}
+                  />
+                  {aiEnabled ? "ENABLED" : "DISABLED"}
+                </span>
+              </div>
+
+              <div className="rounded-xl bg-black/20 border border-white/10 p-3 mb-4">
+                <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                  <Activity className="h-4 w-4" />
+                  Strategy status
+                </div>
+                <p className="text-sm text-gray-200">{aiStatus}</p>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                  <span className="text-xs text-gray-400">Watching</span>
+                  <span className="text-sm font-semibold text-white">
+                    {symbol}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-gray-400">
+                    Current market price
+                  </span>
+                  <span className="text-sm font-semibold text-emerald-300">
+                    {formatMoney(prices[symbol] ?? 0)}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={async () => {
+                  if (aiEnabled) {
+                    setAiSaving(true);
+
+                    try {
+                      await saveAISetting(false);
+                      setAiEnabled(false);
+                      setAiStatus("Automation is disabled");
+                      pushNotification("AI automation disabled.");
+                    } catch (error) {
+                      console.error("Failed to disable AI:", error);
+                      pushNotification("Could not update AI settings.");
+                    } finally {
+                      setAiSaving(false);
+                    }
+                  } else {
+                    await handleEnableAI();
+                  }
+                }}
+                disabled={aiSaving}
+                className={`w-full ${
+                  aiEnabled
+                    ? "bg-rose-500 hover:bg-rose-600 text-white"
+                    : "bg-violet-600 hover:bg-violet-700 text-white"
+                }`}
+              >
+                {aiEnabled ? (
+                  <>
+                    <Power className="h-4 w-4 mr-2" />
+                    Disable Automation
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Enable Automation
+                  </>
+                )}
+              </Button>
+
+              <div className="mt-4 space-y-2 text-xs text-gray-400">
+                <p className="font-medium text-gray-300">Demo strategy rules</p>
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-400">•</span>
+                  Buys 1 share of the price rise of 0.5%
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-400">•</span>
+                  Sells the selected holding at +2% profit or -1% loss.
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-400">•</span>
+                  Waits at least 30 seconds between automated orders.
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -841,9 +1126,6 @@ export default function DashboardPage() {
                     {cat.label}
                   </div>
                 ))}
-              </div>
-              <div className="text-xs text-gray-400 mt-4 text-center">
-                Practice across thousands of simulated instruments
               </div>
             </div>
           </aside>
