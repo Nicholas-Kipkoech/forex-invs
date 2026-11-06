@@ -1028,7 +1028,9 @@ export default function DashboardPage() {
               </Button>
 
               <div className="mt-4 space-y-2 text-xs text-gray-400">
-                <p className="font-medium text-gray-300">Demo strategy rules</p>
+                <p className="font-medium text-gray-300">
+                  Trading strategy rules
+                </p>
                 <div className="flex items-start gap-2">
                   <span className="text-emerald-400">•</span>
                   Buys 1 share of the price rise of 0.5%
