@@ -1007,7 +1007,7 @@ export default function DashboardPage() {
                     await handleEnableAI();
                   }
                 }}
-                disabled={aiSaving}
+                disabled={aiSaving || balance <= 900}
                 className={`w-full ${
                   aiEnabled
                     ? "bg-rose-500 hover:bg-rose-600 text-white"
