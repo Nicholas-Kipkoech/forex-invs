@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DRW trading group - Meta Trader",
+  title: "Stocks Trader - AI Automated trading system",
   description: "Trade with confidence",
 };
 
