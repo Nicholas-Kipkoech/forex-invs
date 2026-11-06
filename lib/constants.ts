@@ -248,8 +248,8 @@ export const CATEGORIES: Record<string, MarketCategory> = {
 export const DEFAULT_CATEGORY = "stocks";
 export const DEFAULT_SYMBOL = "AAPL";
 
-export const START_BALANCE = 100000;
-export const ADD_FUNDS_AMOUNT = 5000;
+export const START_BALANCE = 0;
+export const ADD_FUNDS_AMOUNT = 100;
 
 export const PRICE_UPDATE_INTERVAL = 2500; // ms
 export const MAX_NOTIFICATIONS = 4;
