@@ -521,9 +521,9 @@ export default function DashboardPage() {
         return;
       }
 
-      if (balance <= 100) {
-        setAiStatus("AI enabled, but your balance must exceed $100 to buy.");
-        pushNotification("Balance must be more than $100 to buy.");
+      if (balance <= 2500) {
+        setAiStatus("AI enabled, but your balance must exceed $2500 to trade.");
+        pushNotification("Balance must be more than $2500 to trade.");
         return;
       }
 
@@ -1007,7 +1007,7 @@ export default function DashboardPage() {
                     await handleEnableAI();
                   }
                 }}
-                disabled={aiSaving || balance <= 900}
+                disabled={aiSaving}
                 className={`w-full ${
                   aiEnabled
                     ? "bg-rose-500 hover:bg-rose-600 text-white"
