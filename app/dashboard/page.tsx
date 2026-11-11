@@ -383,9 +383,9 @@ export default function DashboardPage() {
       }
 
       // Require the balance to be strictly greater than $100 before any trade.
-      if (balance <= 100) {
+      if (balance <= 2500) {
         pushNotification(
-          "Your balance must be more than $100 before placing trades.",
+          "Your balance must be more than $2500 before placing trades.",
         );
         return;
       }
